@@ -1,0 +1,92 @@
+import type { Profile } from '@/entities/profile/types'
+
+function ds(month: number, day: number): string {
+  return `2026-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+export const MOCK_PROFILES: Record<string, Profile> = {
+  '1': {
+    id: '1',
+    name: 'Иван Петров',
+    email: 'ivan@example.com',
+    role: 'user',
+    avatar: null,
+    goal: 'Стать победителем ВсОШ по математике в 2027 году',
+    stats: { totalHours: 78, totalSessions: 29, streak: 7, achievementCount: 4 },
+    sessions: [
+      { id: 's101', title: 'Комбинаторика', subject: 'Математика', date: ds(1, 5), hours: 3 },
+      { id: 's102', title: 'Теория чисел', subject: 'Математика', date: ds(1, 8), hours: 2 },
+      { id: 's103', title: 'Алгоритмы сортировки', subject: 'Информатика', date: ds(1, 12), hours: 4 },
+      { id: 's104', title: 'Механика: законы Ньютона', subject: 'Физика', date: ds(1, 15), hours: 2 },
+      { id: 's105', title: 'Геометрия', subject: 'Математика', date: ds(1, 20), hours: 3 },
+      { id: 's106', title: 'Динамическое программирование', subject: 'Информатика', date: ds(1, 25), hours: 5 },
+      { id: 's107', title: 'Графы', subject: 'Информатика', date: ds(2, 2), hours: 4 },
+      { id: 's108', title: 'Тригонометрия', subject: 'Математика', date: ds(2, 7), hours: 3 },
+      { id: 's109', title: 'Термодинамика', subject: 'Физика', date: ds(2, 10), hours: 2 },
+      { id: 's110', title: 'Неравенства', subject: 'Математика', date: ds(2, 14), hours: 2 },
+      { id: 's111', title: 'Структуры данных', subject: 'Информатика', date: ds(2, 18), hours: 3 },
+      { id: 's112', title: 'Оптика', subject: 'Физика', date: ds(2, 22), hours: 2 },
+      { id: 's113', title: 'Теория вероятностей', subject: 'Математика', date: ds(2, 26), hours: 4 },
+      { id: 's114', title: 'Кратчайшие пути', subject: 'Информатика', date: ds(3, 3), hours: 3 },
+      { id: 's115', title: 'Электродинамика', subject: 'Физика', date: ds(3, 8), hours: 2 },
+      { id: 's116', title: 'Полиномы', subject: 'Математика', date: ds(3, 12), hours: 2 },
+      { id: 's117', title: 'Алгоритмы на строках', subject: 'Информатика', date: ds(3, 17), hours: 5 },
+      { id: 's118', title: 'Статика', subject: 'Физика', date: ds(3, 22), hours: 3 },
+      { id: 's119', title: 'Комплексные числа', subject: 'Математика', date: ds(3, 27), hours: 2 },
+      { id: 's120', title: 'Двоичный поиск', subject: 'Информатика', date: ds(4, 2), hours: 2 },
+      { id: 's121', title: 'Электромагнетизм', subject: 'Физика', date: ds(4, 7), hours: 3 },
+      { id: 's122', title: 'Производная и интеграл', subject: 'Математика', date: ds(4, 10), hours: 4 },
+      { id: 's123', title: 'Дерево отрезков', subject: 'Информатика', date: ds(4, 15), hours: 6 },
+      { id: 's124', title: 'Колебания и волны', subject: 'Физика', date: ds(4, 20), hours: 2 },
+      { id: 's125', title: 'Метод координат', subject: 'Математика', date: ds(4, 24), hours: 3 },
+      { id: 's126', title: 'Разбор региональной олимпиады', subject: 'Математика', date: ds(4, 28), hours: 4 },
+      { id: 's127', title: 'Комбинаторные задачи', subject: 'Математика', date: ds(5, 1), hours: 2 },
+      { id: 's128', title: 'Поиск в ширину', subject: 'Информатика', date: ds(5, 2), hours: 3 },
+      { id: 's129', title: 'Тренировочная сессия', subject: 'Физика', date: ds(5, 3), hours: 2 },
+    ],
+    achievements: [
+      { id: 'a101', title: 'Победитель регионального этапа', description: 'Первое место по математике', place: 1, olympiadName: 'ВсОШ 2026' },
+      { id: 'a102', title: 'Призёр муниципального этапа', description: 'Второе место по физике', place: 2, olympiadName: 'ВсОШ 2026' },
+      { id: 'a103', title: 'Диплом II степени', description: 'Второе место на городской олимпиаде', place: 2, olympiadName: 'Городская олимпиада 2026' },
+      { id: 'a104', title: 'Призёр олимпиады МФТИ', description: 'Третье место по математике', place: 3, olympiadName: 'МФТИ Олимп 2025' },
+    ],
+  },
+  '100': {
+    id: '100',
+    name: 'Алина Смирнова',
+    email: 'alina@example.com',
+    role: 'admin',
+    avatar: null,
+    goal: 'Помочь 100 олимпиадникам достичь заключительного этапа',
+    stats: { totalHours: 45, totalSessions: 15, streak: 14, achievementCount: 2 },
+    sessions: [
+      { id: 'sa1', title: 'Консультация по алгебре', subject: 'Математика', date: ds(1, 10), hours: 2 },
+      { id: 'sa2', title: 'Занятие по геометрии', subject: 'Математика', date: ds(2, 5), hours: 3 },
+      { id: 'sa3', title: 'Разбор задач физики', subject: 'Физика', date: ds(3, 15), hours: 2 },
+      { id: 'sa4', title: 'Введение в алгоритмы', subject: 'Информатика', date: ds(4, 12), hours: 4 },
+      { id: 'sa5', title: 'Семинар по комбинаторике', subject: 'Математика', date: ds(5, 1), hours: 3 },
+    ],
+    achievements: [
+      { id: 'aa1', title: 'Победитель олимпиады "Курчатов"', description: 'Первое место по физике', place: 1, olympiadName: 'Курчатов 2025' },
+      { id: 'aa2', title: 'Победитель ВсОШ', description: 'Первое место по математике, заключительный этап', place: 1, olympiadName: 'ВсОШ 2024' },
+    ],
+  },
+  '101': {
+    id: '101',
+    name: 'Борис Козлов',
+    email: 'boris@example.com',
+    role: 'teacher',
+    avatar: null,
+    goal: 'Вырастить победителей всероссийских олимпиад',
+    stats: { totalHours: 36, totalSessions: 12, streak: 5, achievementCount: 1 },
+    sessions: [
+      { id: 'sb1', title: 'Электродинамика — тренировка', subject: 'Физика', date: ds(1, 8), hours: 3 },
+      { id: 'sb2', title: 'Механика: задачи повышенной сложности', subject: 'Физика', date: ds(2, 12), hours: 4 },
+      { id: 'sb3', title: 'Оптика и волны', subject: 'Физика', date: ds(3, 20), hours: 2 },
+      { id: 'sb4', title: 'Термодинамика: цикл Карно', subject: 'Физика', date: ds(4, 5), hours: 3 },
+    ],
+    achievements: [
+      { id: 'ab1', title: 'Победитель олимпиады "Ломоносов"', description: 'Первое место по физике', place: 1, olympiadName: 'Ломоносов 2025' },
+    ],
+  },
+}
