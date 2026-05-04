@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create *)",
+      "Bash(npx create-vite@latest . --template react-ts)",
+      "Bash(npx --yes create-vite@latest . --template react-ts --overwrite)",
+      "Bash(npm install *)",
+      "Bash(npx tailwindcss *)",
+      "Bash(./node_modules/.bin/tailwindcss init *)",
+      "Bash(node_modules/.bin/tailwindcss init *)",
+      "Bash(mkdir -p src/app src/pages src/widgets src/features src/entities src/shared/ui src/shared/lib src/shared/hooks src/shared/schemas src/shared/constants src/test e2e)",
+      "Bash(touch src/app/index.ts src/pages/index.ts src/widgets/index.ts src/features/index.ts src/entities/index.ts src/shared/ui/index.ts src/shared/lib/index.ts src/shared/hooks/index.ts src/shared/schemas/index.ts src/shared/constants/index.ts e2e/.gitkeep)",
+      "Bash(npm run *)",
+      "Bash(cat)",
+      "Bash(npx msw *)",
+      "Bash(node -e \"const e = require\\('eslint'\\); console.log\\(e.Linter.version || 'unknown'\\)\")",
+      "Bash(node_modules/.bin/eslint --version)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\kalta\\\\Olympiad Tracker\" -Recurse)",
+      "Bash(Select-Object -Property FullName)",
+      "Bash(Sort-Object FullName)",
+      "Bash(node -e \"require\\('./node_modules/react-big-calendar/lib/addons/dragAndDrop/index.js'\\)\")"
+    ]
+  }
+}
