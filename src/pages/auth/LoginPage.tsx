@@ -37,13 +37,13 @@ export function LoginPage() {
 
   return (
     <div className="mx-auto mt-16 w-full max-w-sm">
-      <h1 className="mb-6 text-center text-2xl font-bold text-gray-900 dark:text-white">
+      <h1 className="mb-6 text-center text-2xl font-bold text-gray-900">
         Вход
       </h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="mb-1 block text-sm font-medium text-gray-700">
             Email
           </label>
           <input
@@ -51,11 +51,11 @@ export function LoginPage() {
             type="email"
             autoComplete="email"
             className={cn(
-              'w-full rounded-lg border px-3 py-2 text-sm outline-none transition',
-              'focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white',
+              'w-full rounded-md border px-3 py-2 text-sm outline-none transition bg-white text-gray-900',
+              'focus:ring-2 focus:ring-indigo-500',
               errors.email
                 ? 'border-red-400 focus:ring-red-400'
-                : 'border-gray-300 dark:border-gray-600',
+                : 'border-gray-300',
             )}
           />
           {errors.email && (
@@ -64,7 +64,7 @@ export function LoginPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="mb-1 block text-sm font-medium text-gray-700">
             Пароль
           </label>
           <input
@@ -72,11 +72,11 @@ export function LoginPage() {
             type="password"
             autoComplete="current-password"
             className={cn(
-              'w-full rounded-lg border px-3 py-2 text-sm outline-none transition',
-              'focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white',
+              'w-full rounded-md border px-3 py-2 text-sm outline-none transition bg-white text-gray-900',
+              'focus:ring-2 focus:ring-indigo-500',
               errors.password
                 ? 'border-red-400 focus:ring-red-400'
-                : 'border-gray-300 dark:border-gray-600',
+                : 'border-gray-300',
             )}
           />
           {errors.password && (
@@ -87,15 +87,15 @@ export function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
+          className="mt-2 rounded-md bg-indigo-600 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
         >
           {isSubmitting ? 'Вход...' : 'Войти'}
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+      <p className="mt-4 text-center text-sm text-gray-500">
         Нет аккаунта?{' '}
-        <Link to={ROUTES.REGISTER} className="text-indigo-600 hover:underline dark:text-indigo-400">
+        <Link to={ROUTES.REGISTER} className="text-indigo-600 hover:underline">
           Зарегистрироваться
         </Link>
       </p>

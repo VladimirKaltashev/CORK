@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { Button, Heading, Label } from '@primer/react'
 import { useAuthStore } from '@/entities/auth'
 import { useProfileStore, type LocalProfile } from '@/entities/profile'
 import { useAchievementsStore } from '@/entities/achievements/store'
@@ -40,7 +41,7 @@ export function ProfilePage() {
       })
     }
     loadAchievements(profileId)
-  }, [profileId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [profileId])
 
   const liveProfile: LocalProfile | null =
     profileStore.profiles[profileId] ??
@@ -59,7 +60,11 @@ export function ProfilePage() {
   }
 
   if (!profileId || !liveProfile) {
-    return <div className="p-8 text-center text-gray-500">Профиль не найден</div>
+    return (
+      <div className="p-4 text-center">
+        <span className="text-gray-500">Профиль не найден</span>
+      </div>
+    )
   }
 
   const role = isOwn ? (authUser?.role ?? 'user') : 'user'
@@ -72,10 +77,9 @@ export function ProfilePage() {
   })()
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 py-6 px-4">
-      {/* Profile card */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+    <div className="mx-auto max-w-2xl py-4 px-3 flex flex-col gap-4">
+      <div className="border border-gray-300 rounded-md bg-white p-4">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3">
           <AvatarUpload
             avatar={liveProfile.avatar}
             name={liveProfile.name}
@@ -84,62 +88,47 @@ export function ProfilePage() {
             editable={isOwn}
           />
           <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{liveProfile.name}</h1>
+            <Heading as="h2" className="text-2xl font-bold text-gray-900">{liveProfile.name}</Heading>
             {liveProfile.bio && (
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{liveProfile.bio}</p>
+              <p className="mt-1 text-sm text-gray-500">{liveProfile.bio}</p>
             )}
-            <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
-              <span className="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
-                {ROLE_LABELS[role] ?? role}
-              </span>
-              <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                С {registeredFormatted}
-              </span>
+            <div className="mt-2 flex flex-wrap gap-1 justify-center sm:justify-start">
+              <Label>{ROLE_LABELS[role] ?? role}</Label>
+              <Label variant="secondary">С {registeredFormatted}</Label>
             </div>
-            <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-              ID: {profileId}
-            </p>
+            <p className="mt-2 text-xs text-gray-400">ID: {profileId}</p>
           </div>
           {isOwn && (
-            <button
-              onClick={() => setShowEdit(true)}
-              className="shrink-0 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-            >
-              Редактировать
-            </button>
+            <Button onClick={() => setShowEdit(true)}>Редактировать</Button>
           )}
         </div>
       </div>
 
-      {/* Achievements */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <Heading as="h3" className="text-xl font-semibold text-gray-900">
             Достижения
             {achievements.length > 0 && (
-              <span className="ml-1.5 text-sm font-normal text-gray-400">({achievements.length})</span>
+              <span className="text-sm font-normal text-gray-400 ml-1">({achievements.length})</span>
             )}
-          </h2>
+          </Heading>
           {isOwn && (
-            <button
-              onClick={() => setShowAddAch(true)}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-            >
-              + Добавить
-            </button>
+            <Button variant="primary" onClick={() => setShowAddAch(true)}>+ Добавить</Button>
           )}
         </div>
 
         {achLoading ? (
-          <div className="py-10 text-center text-sm text-gray-400">Загрузка...</div>
+          <div className="py-5 text-center">
+            <span className="text-sm text-gray-500">Загрузка...</span>
+          </div>
         ) : achievements.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-gray-300 py-12 text-center dark:border-gray-600">
-            <p className="text-sm text-gray-400 dark:text-gray-500">
+          <div className="border border-dashed border-gray-300 rounded-md py-6 text-center">
+            <span className="text-sm text-gray-500">
               {isOwn ? 'Нет достижений. Добавьте первое!' : 'Достижений пока нет'}
-            </p>
+            </span>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-2">
             {achievements.map((ach) => (
               <AchievementCard key={ach.id} achievement={ach} />
             ))}

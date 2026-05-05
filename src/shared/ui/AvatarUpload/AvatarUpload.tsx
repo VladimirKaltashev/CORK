@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { Button } from '@primer/react'
 
 interface AvatarUploadProps {
   avatar: string | null
@@ -8,7 +9,8 @@ interface AvatarUploadProps {
   editable?: boolean
 }
 
-const SIZE_CLASSES = { sm: 'h-12 w-12 text-lg', md: 'h-20 w-20 text-3xl', lg: 'h-24 w-24 text-4xl' }
+const SIZE_PX = { sm: 48, md: 80, lg: 96 }
+const FONT_SIZE = { sm: '1.125rem', md: '1.875rem', lg: '2.25rem' }
 
 export function AvatarUpload({ avatar, name, onChange, size = 'md', editable = true }: AvatarUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -30,29 +32,42 @@ export function AvatarUpload({ avatar, name, onChange, size = 'md', editable = t
     .join('')
     .toUpperCase() || '?'
 
+  const px = SIZE_PX[size]
+
   return (
     <div className="relative inline-block">
       <div
-        className={`${SIZE_CLASSES[size]} overflow-hidden rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center font-bold text-indigo-600 dark:text-indigo-300 select-none ${editable ? 'cursor-pointer' : ''}`}
+        className="rounded-full overflow-hidden flex items-center justify-center font-bold select-none"
+        style={{
+          width: px,
+          height: px,
+          backgroundColor: '#eaeef2',
+          fontSize: FONT_SIZE[size],
+          color: '#57606a',
+          cursor: editable ? 'pointer' : 'default',
+          border: '1px solid #d0d7de',
+        }}
         onClick={() => editable && inputRef.current?.click()}
         title={editable ? 'Изменить аватар' : undefined}
       >
         {avatar ? (
-          <img src={avatar} alt={name} className="h-full w-full object-cover" />
+          <img src={avatar} alt={name} className="w-full h-full object-cover" />
         ) : (
           <span>{initials}</span>
         )}
       </div>
       {editable && (
         <>
-          <button
+          <Button
             type="button"
+            size="small"
             onClick={() => inputRef.current?.click()}
-            className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white shadow hover:bg-indigo-700"
             title="Загрузить фото"
+            className="absolute bottom-0 right-0 rounded-full p-0 flex items-center justify-center"
+            style={{ width: 24, height: 24, minWidth: 'unset' }}
           >
-            <span className="text-xs leading-none">✎</span>
-          </button>
+            ✎
+          </Button>
           <input
             ref={inputRef}
             type="file"

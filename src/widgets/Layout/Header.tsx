@@ -37,11 +37,11 @@ export function Header() {
   const workingSubject = timerSubject ?? userStatus.subject
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <NavLink
           to="/"
-          className="text-lg font-bold text-indigo-600 dark:text-indigo-400"
+          className="text-lg font-bold text-indigo-600"
         >
           Olympiad Tracker
         </NavLink>
@@ -56,8 +56,8 @@ export function Header() {
                 className={({ isActive }) =>
                   `text-sm font-medium transition-colors ${
                     isActive
-                      ? 'text-indigo-600 dark:text-indigo-400'
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                      ? 'text-indigo-600'
+                      : 'text-gray-600 hover:text-gray-900'
                   }`
                 }
               >
@@ -69,7 +69,7 @@ export function Header() {
             <div className="flex items-center gap-3">
               {user && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">{user.name}</span>
+                  <span className="text-sm text-gray-500">{user.name}</span>
                   {/* Status indicator */}
                   <div className="relative">
                     {isWorking ? (
@@ -86,7 +86,7 @@ export function Header() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
               >
                 Выйти
               </button>
@@ -95,7 +95,7 @@ export function Header() {
             <div className="flex items-center gap-2">
               <NavLink
                 to="/login"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900"
               >
                 Войти
               </NavLink>
@@ -112,7 +112,7 @@ export function Header() {
         {/* Mobile burger */}
         <button
           type="button"
-          className="flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 sm:hidden dark:text-gray-300 dark:hover:bg-gray-800"
+          className="flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 sm:hidden"
           aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
           onClick={() => setMenuOpen((v) => !v)}
         >
@@ -122,7 +122,7 @@ export function Header() {
 
       {/* Mobile nav */}
       {menuOpen && (
-        <nav className="flex flex-col border-t border-gray-200 bg-white px-4 py-3 sm:hidden dark:border-gray-700 dark:bg-gray-900">
+        <nav className="flex flex-col border-t border-gray-200 bg-white px-4 py-3 sm:hidden">
           {token &&
             NAV_LINKS.map(({ to, label }) => (
               <NavLink
@@ -131,9 +131,7 @@ export function Header() {
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
                   `block py-2 text-sm font-medium ${
-                    isActive
-                      ? 'text-indigo-600 dark:text-indigo-400'
-                      : 'text-gray-600 dark:text-gray-300'
+                    isActive ? 'text-indigo-600' : 'text-gray-600'
                   }`
                 }
               >
@@ -166,14 +164,14 @@ export function Header() {
               <NavLink
                 to="/login"
                 onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-gray-600 dark:text-gray-300"
+                className="text-sm font-medium text-gray-600"
               >
                 Войти
               </NavLink>
               <NavLink
                 to="/register"
                 onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-indigo-600 dark:text-indigo-400"
+                className="text-sm font-medium text-indigo-600"
               >
                 Регистрация
               </NavLink>
