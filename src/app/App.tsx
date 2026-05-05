@@ -1,24 +1,12 @@
-import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ThemeProvider } from '@primer/react'
 import { Layout } from '@/widgets/Layout'
 import { ProtectedRoute, PublicRoute } from '@/app/router'
-import { HomePage } from '@/pages/HomePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { ProfilePage } from '@/pages/ProfilePage'
-
-const PlannerPage = lazy(() => import('@/pages/PlannerPage').then((m) => ({ default: m.PlannerPage })))
-const TimerPage = lazy(() => import('@/pages/TimerPage').then((m) => ({ default: m.TimerPage })))
-
-function PageLoader() {
-  return (
-    <div className="flex h-64 items-center justify-center">
-      <div className="text-sm text-gray-400">Загрузка...</div>
-    </div>
-  )
-}
+import { FeedPage } from '@/pages/FeedPage'
 
 export function App() {
   return (
@@ -32,31 +20,13 @@ export function App() {
             </Route>
 
             <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<HomePage />} />
+              <Route path="/" element={<Navigate to="/feed" replace />} />
+              <Route path="/feed" element={<FeedPage />} />
               <Route path="/profile/me" element={<ProfilePage />} />
               <Route path="/profile/:id" element={<ProfilePage />} />
-              <Route
-                path="/planner"
-                element={
-                  <Suspense fallback={<PageLoader />}>
-                    <PlannerPage />
-                  </Suspense>
-                }
-              />
             </Route>
 
             <Route path="*" element={<NotFoundPage />} />
-          </Route>
-
-          <Route element={<ProtectedRoute />}>
-            <Route
-              path="/timer"
-              element={
-                <Suspense fallback={<div className="flex h-screen items-center justify-center text-gray-400">Загрузка...</div>}>
-                  <TimerPage />
-                </Suspense>
-              }
-            />
           </Route>
         </Routes>
       </BrowserRouter>
