@@ -1,147 +1,158 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
-// @ts-ignore
-import CalendarHeatmap from 'react-calendar-heatmap'
-import 'react-calendar-heatmap/dist/styles.css' // Обязательный импорт стилей
+import { useParams } from 'react-router-dom'
 import { useAuthStore } from '@/entities/auth'
+import { useProfileStore, type LocalProfile } from '@/entities/profile'
+import { useAchievementsStore } from '@/entities/achievements/store'
+import { AvatarUpload } from '@/shared/ui/AvatarUpload'
+import { EditProfileModal } from '@/features/profile/EditProfileModal'
+import { AddAchievementModal } from '@/features/profile/AddAchievementModal'
+import { AchievementCard } from '@/features/profile/AchievementCard'
 
-// Типы для хитмапа
-type HeatmapValue = {
-  date: string
-  count: number
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'Администратор',
+  moderator: 'Модератор',
+  teacher: 'Учитель',
+  user: 'Пользователь',
 }
 
 export function ProfilePage() {
-  const { user } = useAuthStore()
-  const [profile, setProfile] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const { id } = useParams<{ id: string }>()
+  const { user: authUser } = useAuthStore()
 
-  const fetchProfile = () => {
-    if (!user?.id) return
-    setLoading(true)
-    axios.get(`http://127.0.0.1:8000/api/profile/${user.id}`)
-      .then(r => setProfile(r.data))
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }
+  // 'me' means own profile
+  const profileId = id === 'me' || !id ? authUser?.id ?? '' : id
+  const isOwn = profileId === authUser?.id
+
+  const profileStore = useProfileStore()
+  const { achievements, isLoading: achLoading, loadAchievements } = useAchievementsStore()
+
+  const [showEdit, setShowEdit] = useState(false)
+  const [showAddAch, setShowAddAch] = useState(false)
+
+  // Ensure profile exists in store
+  const profile: LocalProfile | null = (() => {
+    if (!profileId) return null
+    const existing = profileStore.profiles[profileId]
+    if (existing) return existing
+    if (isOwn && authUser) {
+      const fresh: LocalProfile = { id: profileId, name: authUser.name, bio: '', avatar: null, registeredAt: new Date().toISOString() }
+      // Defer state mutation outside render
+      return fresh
+    }
+    return null
+  })()
 
   useEffect(() => {
-    fetchProfile()
-  }, [user])
-
-  if (loading) return <div className="p-8 text-center">Загрузка...</div>
-  if (!profile) return <div className="p-8 text-center text-red-500">Ошибка загрузки</div>
-
-  // Трансформация данных для react-calendar-heatmap
-  // Библиотека требует формат [{ date: '2023-01-01', count: 5 }]
-  const heatmapData: HeatmapValue[] = (profile.sessions || []).map((s: any) => {
-    const dateStr = s.date ? s.date.split('T')[0] : new Date().toISOString().split('T')[0]
-    // Можно считать по количеству сессий (count: 1) или по часам (count: hours)
-    // Для "GitHub style" лучше считать количество действий (сессий) в день
-    return {
-      date: dateStr,
-      count: 1 
+    if (!profileId) return
+    // Initialize own profile if not in store
+    if (isOwn && authUser && !profileStore.profiles[profileId]) {
+      profileStore.setProfile({ id: profileId, name: authUser.name, bio: '', avatar: null, registeredAt: new Date().toISOString() })
     }
-  })
+    loadAchievements(profileId)
+  }, [profileId])  // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Настройка цветов как на GitHub
-  const classForValue = (value: HeatmapValue | null) => {
-    if (!value || value.count === 0) return 'color-empty'
-    if (value.count >= 4) return 'color-scale-4'
-    if (value.count >= 3) return 'color-scale-3'
-    if (value.count >= 2) return 'color-scale-2'
-    return 'color-scale-1'
+  const handleSaveProfile = (data: Pick<LocalProfile, 'name' | 'bio' | 'avatar'>) => {
+    if (!profileId) return
+    profileStore.updateProfile(profileId, data)
   }
 
+  const handleAvatarChange = (base64: string) => {
+    if (!profileId || !isOwn) return
+    profileStore.updateProfile(profileId, { avatar: base64 })
+  }
+
+  // Use live store value after effect runs
+  const liveProfile = profileStore.profiles[profileId] ?? profile
+
+  if (!profileId || !liveProfile) {
+    return <div className="p-8 text-center text-gray-500">Профиль не найден</div>
+  }
+
+  const role = isOwn ? (authUser?.role ?? 'user') : 'user'
+  const registeredFormatted = (() => {
+    try {
+      return new Date(liveProfile.registeredAt).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' })
+    } catch { return '—' }
+  })()
+
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-100 dark:border-gray-700">
-        
-        {/* Шапка профиля */}
-        <div className="flex justify-between items-start mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-3xl font-bold text-indigo-600">
-              {profile.name?.[0] || '?'}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{profile.name}</h1>
-              <p className="text-gray-500 dark:text-gray-400">{profile.email}</p>
-              <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
-                {profile.role}
-              </div>
-            </div>
-          </div>
-          <button onClick={fetchProfile} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-            Обновить данные
-          </button>
-        </div>
-
-        {/* Статистика */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <StatCard label="Всего сессий" value={profile.stats?.totalSessions || 0} />
-          <StatCard label="Часов подготовки" value={profile.stats?.totalHours || 0} />
-          <StatCard label="Достижений" value={profile.stats?.achievements || 0} />
-        </div>
-
-        {/* Цель */}
-        <div className="mb-8 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-700">
-          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Текущая цель</h3>
-          <p className="text-lg font-medium text-gray-900 dark:text-white">{profile.goal || 'Не указана'}</p>
-        </div>
-
-        {/* GitHub-style Heatmap */}
-        <div className="mt-8">
-          <div className="flex justify-between items-end mb-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Активность</h3>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <span>Less</span>
-              <div className="flex gap-1">
-                <div className="w-3 h-3 bg-[#ebedf0] dark:bg-[#161b22] rounded-sm"></div>
-                <div className="w-3 h-3 bg-[#9be9a8] dark:bg-[#0e4429] rounded-sm"></div>
-                <div className="w-3 h-3 bg-[#40c463] dark:bg-[#006d32] rounded-sm"></div>
-                <div className="w-3 h-3 bg-[#30a14e] dark:bg-[#26a641] rounded-sm"></div>
-                <div className="w-3 h-3 bg-[#216e39] dark:bg:[#39d353] rounded-sm"></div>
-              </div>
-              <span>More</span>
+    <div className="mx-auto max-w-2xl space-y-6 py-6 px-4">
+      {/* Profile card */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+          <AvatarUpload
+            avatar={liveProfile.avatar}
+            name={liveProfile.name}
+            onChange={handleAvatarChange}
+            size="lg"
+            editable={isOwn}
+          />
+          <div className="flex-1 text-center sm:text-left">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{liveProfile.name}</h1>
+            {liveProfile.bio && (
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{liveProfile.bio}</p>
+            )}
+            <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
+              <span className="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                {ROLE_LABELS[role] ?? role}
+              </span>
+              <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                Зарегистрирован {registeredFormatted}
+              </span>
             </div>
           </div>
-
-          <div className="w-full overflow-x-auto pb-2">
-            <CalendarHeatmap
-              startDate={new Date(new Date().setFullYear(new Date().getFullYear() - 1))}
-              endDate={new Date()}
-              values={heatmapData}
-              classForValue={classForValue}
-              tooltipDataAttrs={(value: HeatmapValue | null) => {
-                if (!value || !value.date) return {}
-                const dateObj = new Date(value.date)
-                const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' }
-                return {
-                  'data-tip': `${value.count} сессий • ${dateObj.toLocaleDateString('ru-RU', options)}`
-                }
-              }}
-              showWeekdayLabels={true}
-              gutterSize={4}
-            />
-          </div>
-          
-          {/* Легенда подсказки (опционально, если tooltip не работает без доп. либы) */}
-          <p className="text-center text-xs text-gray-400 mt-2">
-            Наведите на квадратик, чтобы увидеть детали
-          </p>
+          {isOwn && (
+            <button
+              onClick={() => setShowEdit(true)}
+              className="shrink-0 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              Редактировать
+            </button>
+          )}
         </div>
-
       </div>
-    </div>
-  )
-}
 
-// Компонент карточки статистики для чистоты кода
-function StatCard({ label, value }: { label: string, value: number | string }) {
-  return (
-    <div className="bg-white dark:bg-gray-700/30 p-4 rounded-xl border border-gray-100 dark:border-gray-700 text-center">
-      <div className="text-3xl font-black text-gray-900 dark:text-white mb-1">{value}</div>
-      <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</div>
+      {/* Achievements section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Достижения {achievements.length > 0 && <span className="text-sm font-normal text-gray-400">({achievements.length})</span>}
+          </h2>
+          {isOwn && (
+            <button
+              onClick={() => setShowAddAch(true)}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              + Добавить
+            </button>
+          )}
+        </div>
+
+        {achLoading ? (
+          <div className="py-10 text-center text-sm text-gray-400">Загрузка...</div>
+        ) : achievements.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-gray-300 py-12 text-center dark:border-gray-600">
+            <p className="text-sm text-gray-400 dark:text-gray-500">
+              {isOwn ? 'У вас пока нет достижений. Добавьте первое!' : 'Достижений пока нет'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {achievements.map((ach) => (
+              <AchievementCard key={ach.id} achievement={ach} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {showEdit && liveProfile && (
+        <EditProfileModal
+          profile={liveProfile}
+          onSave={handleSaveProfile}
+          onClose={() => setShowEdit(false)}
+        />
+      )}
+      {showAddAch && <AddAchievementModal onClose={() => setShowAddAch(false)} />}
     </div>
   )
 }

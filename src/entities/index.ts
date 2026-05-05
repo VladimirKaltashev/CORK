@@ -5,7 +5,7 @@ export type { FeedItem, Session, Achievement, Post, Comment, FilterType } from '
 export { useGroupStore } from './group'
 export type { Group } from './group'
 export { useProfileStore } from './profile'
-export type { Profile, ProfileStats, SearchUser } from './profile'
+export type { LocalProfile, SearchUser } from './profile'
 
 export * from './dashboard/store';
 export * from './achievements/store';

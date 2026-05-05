@@ -1,2 +1,5 @@
 export { ProfileCard } from './ProfileCard'
 export { EditProfileForm } from './EditProfileForm'
+export { EditProfileModal } from './EditProfileModal'
+export { AddAchievementModal } from './AddAchievementModal'
+export { AchievementCard } from './AchievementCard'

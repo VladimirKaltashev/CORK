@@ -1,32 +1,38 @@
 import { create } from 'zustand'
-import { api } from '@/shared/lib/api'
-import type { Profile } from './types'
-import type { UpdateProfileData } from '@/shared/schemas/profile'
+import { persist } from 'zustand/middleware'
 
-interface ProfileStore {
-  profiles: Record<string, Profile>
-  isLoading: boolean
-  fetchProfile: (id: string) => Promise<void>
-  updateMyProfile: (data: UpdateProfileData) => Promise<void>
+export interface LocalProfile {
+  id: string
+  name: string
+  bio: string
+  avatar: string | null
+  registeredAt: string
 }
 
-export const useProfileStore = create<ProfileStore>((set) => ({
-  profiles: {},
-  isLoading: false,
+interface ProfileLocalState {
+  profiles: Record<string, LocalProfile>
+  setProfile: (profile: LocalProfile) => void
+  updateProfile: (id: string, data: Partial<Omit<LocalProfile, 'id' | 'registeredAt'>>) => void
+  getProfile: (id: string) => LocalProfile | undefined
+}
 
-  fetchProfile: async (id) => {
-    set({ isLoading: true })
-    try {
-      const res = await api.get<Profile>(`/profile/${id}`)
-      set((s) => ({ profiles: { ...s.profiles, [id]: res.data }, isLoading: false }))
-    } catch {
-      set({ isLoading: false })
-    }
-  },
+export const useProfileStore = create<ProfileLocalState>()(
+  persist(
+    (set, get) => ({
+      profiles: {},
 
-  updateMyProfile: async (data) => {
-    const res = await api.patch<Profile>('/profile/me', data)
-    const updated = res.data
-    set((s) => ({ profiles: { ...s.profiles, [updated.id]: updated } }))
-  },
-}))
+      setProfile: (profile) =>
+        set((s) => ({ profiles: { ...s.profiles, [profile.id]: profile } })),
+
+      updateProfile: (id, data) =>
+        set((s) => {
+          const existing = s.profiles[id]
+          if (!existing) return s
+          return { profiles: { ...s.profiles, [id]: { ...existing, ...data } } }
+        }),
+
+      getProfile: (id) => get().profiles[id],
+    }),
+    { name: 'profile-storage' }
+  )
+)

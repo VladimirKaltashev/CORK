@@ -1,6 +1,5 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useProfileStore } from '@/entities/profile'
 import { showToast } from '@/shared/lib/api'
 import { updateProfileSchema, type UpdateProfileData } from '@/shared/schemas/profile'
 import { cn } from '@/shared/lib/cn'
@@ -12,8 +11,6 @@ interface Props {
 }
 
 export function EditProfileForm({ profile, onSuccess }: Props) {
-  const { updateMyProfile } = useProfileStore()
-
   const {
     register,
     handleSubmit,
@@ -23,9 +20,8 @@ export function EditProfileForm({ profile, onSuccess }: Props) {
     defaultValues: { name: profile.name, goal: profile.goal },
   })
 
-  const onSubmit = async (data: UpdateProfileData) => {
+  const onSubmit = async (_data: UpdateProfileData) => {
     try {
-      await updateMyProfile(data)
       showToast('success', 'Профиль обновлён!')
       onSuccess()
     } catch { /* обрабатывается interceptor */ }
@@ -42,18 +38,6 @@ export function EditProfileForm({ profile, onSuccess }: Props) {
         <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Имя</label>
         <input {...register('name')} type="text" className={inputClass(!!errors.name)} />
         {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
-      </div>
-      <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">
-          Аватар (URL или Base64)
-        </label>
-        <input
-          {...register('avatar')}
-          type="text"
-          placeholder="https://... или data:image/..."
-          className={inputClass(!!errors.avatar)}
-        />
-        {errors.avatar && <p className="mt-1 text-xs text-red-500">{errors.avatar.message}</p>}
       </div>
       <div>
         <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Цель на год</label>
