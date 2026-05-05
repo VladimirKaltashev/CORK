@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import type { GlobalFeedEvent, LeaderboardEntry, Task, TaskComment, StudySession, UserStudyStatus, Subject, TaskPriority, Checkpoint, Achievement, AchievementCategory } from '@/shared/types'
+import type { GlobalFeedEvent, LeaderboardEntry, Task, TaskComment, StudySession, UserStudyStatus, Subject, TaskPriority, Checkpoint, Achievement, AchievementCategory, AchievementStatus, ProofType } from '@/shared/types'
 
 // ── In-Memory DB ──
 const getDb = () => {
@@ -30,9 +30,40 @@ const getDb = () => {
   const profAch = db.profileAchievements as Achievement[]
   if (profAch.length === 0) {
     profAch.push(
-      { id: 'a1', userId: '1', category: 'olympiad' as AchievementCategory, title: 'Победитель ВсОШ по математике', year: 2024, createdAt: new Date(2024, 10, 15).toISOString() },
-      { id: 'a2', userId: '1', category: 'it' as AchievementCategory, title: 'Победитель хакатона HackRU', year: 2024, createdAt: new Date(2024, 8, 20).toISOString() },
-      { id: 'a3', userId: '2', category: 'sport' as AchievementCategory, title: 'КМС по шахматам', year: 2023, createdAt: new Date(2023, 5, 10).toISOString() },
+      {
+        id: 'a1', userId: '1',
+        category: 'olympiad' as AchievementCategory,
+        title: 'Победитель ВсОШ по математике',
+        description: 'Занял 1 место в региональном этапе Всероссийской олимпиады школьников по математике',
+        year: 2024,
+        proofType: 'none' as ProofType,
+        status: 'verified' as AchievementStatus,
+        meta: {},
+        createdAt: new Date(2024, 10, 15).toISOString(),
+      },
+      {
+        id: 'a2', userId: '1',
+        category: 'it' as AchievementCategory,
+        title: 'Победитель хакатона HackRU',
+        description: 'Занял 1 место командой на хакатоне HackRU 2024, разработали AI-сервис за 48 часов',
+        year: 2024,
+        proofType: 'url' as ProofType,
+        proofValue: 'https://example.com/hackru-winners',
+        status: 'pending' as AchievementStatus,
+        meta: {},
+        createdAt: new Date(2024, 8, 20).toISOString(),
+      },
+      {
+        id: 'a3', userId: '2',
+        category: 'sport' as AchievementCategory,
+        title: 'КМС по шахматам',
+        description: 'Получил звание кандидата в мастера спорта по шахматам',
+        year: 2023,
+        proofType: 'none' as ProofType,
+        status: 'verified' as AchievementStatus,
+        meta: {},
+        createdAt: new Date(2023, 5, 10).toISOString(),
+      },
     )
   }
 
@@ -337,17 +368,32 @@ export const handlers = [
   http.post('http://127.0.0.1:8000/achievements', async ({ request }) => {
     const db = getDb()
     const userId = getUserId(request)
-    const body = await request.json() as Omit<Achievement, 'id' | 'userId' | 'createdAt'>
+    const body = await request.json() as Record<string, unknown>
     const newAch: Achievement = {
       id: crypto.randomUUID(),
       userId,
-      category: body.category,
-      title: body.title,
-      year: body.year,
-      proofImage: body.proofImage,
+      category: body.category as AchievementCategory,
+      title: String(body.title ?? ''),
+      description: String(body.description ?? ''),
+      year: Number(body.year),
+      proofType: (body.proofType ?? 'none') as ProofType,
+      proofValue: body.proofValue ? String(body.proofValue) : undefined,
+      status: 'pending',
+      meta: (body.meta as Record<string, unknown>) ?? {},
       createdAt: new Date().toISOString(),
     };
     (db.profileAchievements as Achievement[]).push(newAch)
     return new HttpResponse(JSON.stringify(newAch), { status: 201 })
+  }),
+
+  // ── Profile Achievements: PATCH /achievements/:id/status ──
+  http.patch('http://127.0.0.1:8000/achievements/:id/status', async ({ params, request }) => {
+    const db = getDb()
+    const body = await request.json() as { status: AchievementStatus; rejectionReason?: string }
+    const achievements = db.profileAchievements as Achievement[]
+    const idx = achievements.findIndex((a) => a.id === params.id)
+    if (idx === -1) return new HttpResponse(null, { status: 404 })
+    achievements[idx] = { ...achievements[idx], status: body.status, rejectionReason: body.rejectionReason }
+    return HttpResponse.json(achievements[idx])
   }),
 ]

@@ -1,17 +1,19 @@
 import { useRef, useState } from 'react'
-import { Button, FormControl, Select, TextInput } from '@primer/react'
+import { Button, FormControl, Select, TextInput, Textarea } from '@primer/react'
 import { useAchievementsStore } from '@/entities/achievements/store'
 import { api } from '@/shared/lib/api'
 import { showToast } from '@/shared/lib/toast'
-import type { Achievement, AchievementCategory } from '@/shared/types'
+import type { Achievement, AchievementCategory, ProofType } from '@/shared/types'
 
-const CATEGORIES: { value: AchievementCategory; label: string }[] = [
-  { value: 'olympiad', label: 'Олимпиады' },
-  { value: 'academic', label: 'Успеваемость' },
-  { value: 'it',       label: 'IT' },
-  { value: 'creative', label: 'Творчество' },
-  { value: 'sport',    label: 'Спорт' },
-  { value: 'other',    label: 'Интересное' },
+const CATEGORIES: { value: AchievementCategory; icon: string; label: string }[] = [
+  { value: 'olympiad', icon: '🎓', label: 'Олимпиады' },
+  { value: 'academic', icon: '📚', label: 'Успеваемость' },
+  { value: 'it',       icon: '💻', label: 'IT' },
+  { value: 'creative', icon: '🎨', label: 'Творчество' },
+  { value: 'sport',    icon: '⚽', label: 'Спорт' },
+  { value: 'movies',   icon: '🎬', label: 'Фильмы' },
+  { value: 'games',    icon: '🎮', label: 'Игры' },
+  { value: 'other',    icon: '✨', label: 'Интересное' },
 ]
 
 const currentYear = new Date().getFullYear()
@@ -26,8 +28,10 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
 
   const [category, setCategory] = useState<AchievementCategory>('olympiad')
   const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [year, setYear] = useState(String(currentYear))
-  const [proofImage, setProofImage] = useState<string | undefined>()
+  const [proofType, setProofType] = useState<ProofType>('none')
+  const [proofValue, setProofValue] = useState<string | undefined>()
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
 
@@ -35,6 +39,8 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
     const errs: Record<string, string> = {}
     if (!title.trim()) errs.title = 'Обязательное поле'
     else if (title.length > 100) errs.title = 'Максимум 100 символов'
+    if (!description.trim()) errs.description = 'Обязательное поле'
+    else if (description.length > 500) errs.description = 'Максимум 500 символов'
     const y = parseInt(year, 10)
     if (!year || isNaN(y)) errs.year = 'Введите год'
     else if (y < 2000) errs.year = 'Год не раньше 2000'
@@ -48,9 +54,14 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
     if (!file) return
     const reader = new FileReader()
     reader.onload = () => {
-      if (typeof reader.result === 'string') setProofImage(reader.result)
+      if (typeof reader.result === 'string') setProofValue(reader.result)
     }
     reader.readAsDataURL(file)
+  }
+
+  const handleProofTypeChange = (pt: ProofType) => {
+    setProofType(pt)
+    setProofValue(undefined)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,7 +69,8 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
     if (!validate()) return
     setSubmitting(true)
     try {
-      const payload = { category, title: title.trim(), year: parseInt(year, 10), proofImage }
+      const fields = { category, title: title.trim(), description: description.trim(), year: parseInt(year, 10), proofType, proofValue }
+      const payload = { ...fields, meta: fields }
       const res = await api.post<Achievement>('/achievements', payload)
       addAchievement(res.data)
       showToast('success', 'Достижение добавлено!')
@@ -71,12 +83,9 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3" onClick={onClose}>
       <div
-        className="w-full max-w-md bg-white rounded-md border border-gray-300 p-4"
+        className="w-full max-w-md bg-white rounded-md border border-gray-300 p-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Добавить достижение</h2>
@@ -85,12 +94,9 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
 
             <FormControl>
               <FormControl.Label>Категория</FormControl.Label>
-              <Select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as AchievementCategory)}
-              >
+              <Select value={category} onChange={(e) => setCategory(e.target.value as AchievementCategory)}>
                 {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
+                  <option key={c.value} value={c.value}>{c.icon} {c.label}</option>
                 ))}
               </Select>
             </FormControl>
@@ -106,7 +112,20 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
               {errors.title && <FormControl.Validation variant="error">{errors.title}</FormControl.Validation>}
             </FormControl>
 
-            <FormControl>
+            <FormControl required>
+              <FormControl.Label>Описание</FormControl.Label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                maxLength={500}
+                placeholder="Подробнее о достижении..."
+                className="w-full"
+              />
+              {errors.description && <FormControl.Validation variant="error">{errors.description}</FormControl.Validation>}
+            </FormControl>
+
+            <FormControl required>
               <FormControl.Label>Год достижения</FormControl.Label>
               <TextInput
                 block
@@ -120,27 +139,50 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
               {errors.year && <FormControl.Validation variant="error">{errors.year}</FormControl.Validation>}
             </FormControl>
 
-            <FormControl>
-              <FormControl.Label>
-                Подтверждение{' '}
-                <span className="font-normal text-gray-400 text-xs">(фото, необязательно)</span>
-              </FormControl.Label>
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-1">Тип доказательства</p>
+              <div className="flex flex-col gap-1">
+                {(['photo', 'url', 'none'] as ProofType[]).map((pt) => (
+                  <label key={pt} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                    <input
+                      type="radio"
+                      name="proofType"
+                      value={pt}
+                      checked={proofType === pt}
+                      onChange={() => handleProofTypeChange(pt)}
+                    />
+                    {pt === 'photo' ? 'Фото' : pt === 'url' ? 'Ссылка' : 'Нет доказательства'}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {proofType === 'photo' && (
               <div className="flex flex-col gap-2">
                 <div className="self-start">
                   <Button type="button" onClick={() => fileInputRef.current?.click()}>
-                    {proofImage ? 'Изменить фото' : 'Загрузить фото'}
+                    {proofValue ? 'Изменить фото' : 'Загрузить фото'}
                   </Button>
                 </div>
-                {proofImage && (
-                  <img
-                    src={proofImage}
-                    alt="preview"
-                    className="h-24 w-auto rounded object-cover"
-                  />
+                {proofValue && (
+                  <img src={proofValue} alt="preview" className="h-24 w-auto rounded object-cover" />
                 )}
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
               </div>
-            </FormControl>
+            )}
+
+            {proofType === 'url' && (
+              <FormControl>
+                <FormControl.Label>URL доказательства</FormControl.Label>
+                <TextInput
+                  block
+                  type="url"
+                  value={proofValue ?? ''}
+                  onChange={(e) => setProofValue(e.target.value)}
+                  placeholder="https://..."
+                />
+              </FormControl>
+            )}
 
             <div className="flex gap-2 pt-1">
               <Button type="button" onClick={onClose} className="flex-1">Отмена</Button>
