@@ -19,7 +19,6 @@ export function ProfilePage() {
   const { id } = useParams<{ id: string }>()
   const { user: authUser } = useAuthStore()
 
-  // 'me' means own profile
   const profileId = id === 'me' || !id ? authUser?.id ?? '' : id
   const isOwn = profileId === authUser?.id
 
@@ -29,27 +28,25 @@ export function ProfilePage() {
   const [showEdit, setShowEdit] = useState(false)
   const [showAddAch, setShowAddAch] = useState(false)
 
-  // Ensure profile exists in store
-  const profile: LocalProfile | null = (() => {
-    if (!profileId) return null
-    const existing = profileStore.profiles[profileId]
-    if (existing) return existing
-    if (isOwn && authUser) {
-      const fresh: LocalProfile = { id: profileId, name: authUser.name, bio: '', avatar: null, registeredAt: new Date().toISOString() }
-      // Defer state mutation outside render
-      return fresh
-    }
-    return null
-  })()
-
   useEffect(() => {
     if (!profileId) return
-    // Initialize own profile if not in store
     if (isOwn && authUser && !profileStore.profiles[profileId]) {
-      profileStore.setProfile({ id: profileId, name: authUser.name, bio: '', avatar: null, registeredAt: new Date().toISOString() })
+      profileStore.setProfile({
+        id: profileId,
+        name: authUser.name,
+        bio: '',
+        avatar: null,
+        registeredAt: new Date().toISOString(),
+      })
     }
     loadAchievements(profileId)
-  }, [profileId])  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [profileId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const liveProfile: LocalProfile | null =
+    profileStore.profiles[profileId] ??
+    (isOwn && authUser
+      ? { id: profileId, name: authUser.name, bio: '', avatar: null, registeredAt: new Date().toISOString() }
+      : null)
 
   const handleSaveProfile = (data: Pick<LocalProfile, 'name' | 'bio' | 'avatar'>) => {
     if (!profileId) return
@@ -61,9 +58,6 @@ export function ProfilePage() {
     profileStore.updateProfile(profileId, { avatar: base64 })
   }
 
-  // Use live store value after effect runs
-  const liveProfile = profileStore.profiles[profileId] ?? profile
-
   if (!profileId || !liveProfile) {
     return <div className="p-8 text-center text-gray-500">Профиль не найден</div>
   }
@@ -71,7 +65,9 @@ export function ProfilePage() {
   const role = isOwn ? (authUser?.role ?? 'user') : 'user'
   const registeredFormatted = (() => {
     try {
-      return new Date(liveProfile.registeredAt).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' })
+      return new Date(liveProfile.registeredAt).toLocaleDateString('ru-RU', {
+        year: 'numeric', month: 'long', day: 'numeric',
+      })
     } catch { return '—' }
   })()
 
@@ -97,9 +93,12 @@ export function ProfilePage() {
                 {ROLE_LABELS[role] ?? role}
               </span>
               <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                Зарегистрирован {registeredFormatted}
+                С {registeredFormatted}
               </span>
             </div>
+            <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+              ID: {profileId}
+            </p>
           </div>
           {isOwn && (
             <button
@@ -112,11 +111,14 @@ export function ProfilePage() {
         </div>
       </div>
 
-      {/* Achievements section */}
+      {/* Achievements */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Достижения {achievements.length > 0 && <span className="text-sm font-normal text-gray-400">({achievements.length})</span>}
+            Достижения
+            {achievements.length > 0 && (
+              <span className="ml-1.5 text-sm font-normal text-gray-400">({achievements.length})</span>
+            )}
           </h2>
           {isOwn && (
             <button
@@ -133,7 +135,7 @@ export function ProfilePage() {
         ) : achievements.length === 0 ? (
           <div className="rounded-xl border border-dashed border-gray-300 py-12 text-center dark:border-gray-600">
             <p className="text-sm text-gray-400 dark:text-gray-500">
-              {isOwn ? 'У вас пока нет достижений. Добавьте первое!' : 'Достижений пока нет'}
+              {isOwn ? 'Нет достижений. Добавьте первое!' : 'Достижений пока нет'}
             </p>
           </div>
         ) : (
@@ -145,7 +147,7 @@ export function ProfilePage() {
         )}
       </div>
 
-      {showEdit && liveProfile && (
+      {showEdit && (
         <EditProfileModal
           profile={liveProfile}
           onSave={handleSaveProfile}

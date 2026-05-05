@@ -30,9 +30,9 @@ const getDb = () => {
   const profAch = db.profileAchievements as Achievement[]
   if (profAch.length === 0) {
     profAch.push(
-      { id: 'a1', userId: '1', category: 'education' as AchievementCategory, title: 'Победитель ВсОШ по математике', description: 'Занял 1 место на региональном этапе Всероссийской олимпиады школьников', date: '2024-11-15', proofUrl: 'https://example.com/certificate1', createdAt: new Date(2024, 10, 15).toISOString() },
-      { id: 'a2', userId: '1', category: 'it' as AchievementCategory, title: 'Победитель хакатона HackRU', description: 'Разработал веб-приложение для автоматизации учёбы в команде из 3 человек', date: '2024-09-20', createdAt: new Date(2024, 8, 20).toISOString() },
-      { id: 'a3', userId: '2', category: 'sport' as AchievementCategory, title: 'КМС по шахматам', description: 'Выполнил норматив кандидата в мастера спорта на турнире', date: '2024-06-10', createdAt: new Date(2024, 5, 10).toISOString() },
+      { id: 'a1', userId: '1', category: 'olympiad' as AchievementCategory, title: 'Победитель ВсОШ по математике', year: 2024, createdAt: new Date(2024, 10, 15).toISOString() },
+      { id: 'a2', userId: '1', category: 'it' as AchievementCategory, title: 'Победитель хакатона HackRU', year: 2024, createdAt: new Date(2024, 8, 20).toISOString() },
+      { id: 'a3', userId: '2', category: 'sport' as AchievementCategory, title: 'КМС по шахматам', year: 2023, createdAt: new Date(2023, 5, 10).toISOString() },
     )
   }
 
@@ -343,9 +343,8 @@ export const handlers = [
       userId,
       category: body.category,
       title: body.title,
-      description: body.description,
-      date: body.date,
-      proofUrl: body.proofUrl,
+      year: body.year,
+      proofImage: body.proofImage,
       createdAt: new Date().toISOString(),
     };
     (db.profileAchievements as Achievement[]).push(newAch)

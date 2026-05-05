@@ -89,16 +89,15 @@ export interface ExtendedUserProfile {
   };
 }
 
-export type AchievementCategory = 'education' | 'sport' | 'it' | 'creative' | 'life'
+export type AchievementCategory = 'olympiad' | 'academic' | 'it' | 'creative' | 'sport' | 'other'
 
 export interface Achievement {
   id: string
   userId: string
   category: AchievementCategory
   title: string
-  description: string
-  date: string
-  proofUrl?: string
+  year: number
+  proofImage?: string
   createdAt: string
 }
 
