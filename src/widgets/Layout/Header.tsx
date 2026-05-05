@@ -1,29 +1,16 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/entities/auth'
-import { useStatusStore } from '@/entities/status'
-import { useTimerStore } from '@/entities/timer'
 import { showToast } from '@/shared/lib/api'
 
-const SUBJECT_LABELS: Record<string, string> = {
-  math: 'Математика',
-  physics: 'Физика',
-  informatics: 'Информатика',
-  chemistry: 'Химия',
-  biology: 'Биология',
-}
-
 const NAV_LINKS = [
-  { to: '/', label: 'Главная' },
-  { to: '/planner', label: 'Планировщик' },
+  { to: '/feed', label: 'Лента' },
   { to: '/profile/me', label: 'Профиль' },
 ] as const
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { token, user, logout } = useAuthStore()
-  const { status: userStatus } = useStatusStore()
-  const { subject: timerSubject } = useTimerStore()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -33,16 +20,10 @@ export function Header() {
     setMenuOpen(false)
   }
 
-  const isWorking = userStatus.status === 'working'
-  const workingSubject = timerSubject ?? userStatus.subject
-
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <NavLink
-          to="/"
-          className="text-lg font-bold text-indigo-600"
-        >
+        <NavLink to="/feed" className="text-lg font-bold text-gray-900">
           Olympiad Tracker
         </NavLink>
 
@@ -55,9 +36,7 @@ export function Header() {
                 to={to}
                 className={({ isActive }) =>
                   `text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'text-indigo-600'
-                      : 'text-gray-600 hover:text-gray-900'
+                    isActive ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
                   }`
                 }
               >
@@ -68,20 +47,7 @@ export function Header() {
           {token ? (
             <div className="flex items-center gap-3">
               {user && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-500">{user.name}</span>
-                  {/* Status indicator */}
-                  <div className="relative">
-                    {isWorking ? (
-                      <div
-                        className="h-3 w-3 cursor-default rounded-full bg-red-500"
-                        title={workingSubject ? `Сейчас занимается: ${SUBJECT_LABELS[workingSubject]}` : 'Занят'}
-                      />
-                    ) : (
-                      <div className="h-3 w-3 rounded-full bg-green-500" title="Онлайн" />
-                    )}
-                  </div>
-                </div>
+                <span className="text-sm text-gray-500">{user.name}</span>
               )}
               <button
                 type="button"
@@ -140,21 +106,12 @@ export function Header() {
             ))}
 
           {token ? (
-            <div className="flex items-center gap-2 py-2">
-              {user && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-500">{user.name}</span>
-                  {isWorking ? (
-                    <div className="h-2.5 w-2.5 rounded-full bg-red-500" title={workingSubject ? `Сейчас занимается: ${SUBJECT_LABELS[workingSubject]}` : 'Занят'} />
-                  ) : (
-                    <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
-                  )}
-                </div>
-              )}
+            <div className="flex items-center justify-between py-2">
+              {user && <span className="text-sm text-gray-500">{user.name}</span>}
               <button
                 type="button"
                 onClick={handleLogout}
-                className="ml-auto text-sm font-medium text-red-500"
+                className="text-sm font-medium text-red-500"
               >
                 Выйти
               </button>

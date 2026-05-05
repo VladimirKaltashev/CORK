@@ -19,7 +19,12 @@
       "Bash(Select-Object -Property FullName)",
       "Bash(Sort-Object FullName)",
       "Bash(node -e \"require\\('./node_modules/react-big-calendar/lib/addons/dragAndDrop/index.js'\\)\")",
-      "Bash(node -e \"const p = require\\('./node_modules/@primer/react/package.json'\\); console.log\\(p.version\\)\")"
+      "Bash(node -e \"const p = require\\('./node_modules/@primer/react/package.json'\\); console.log\\(p.version\\)\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\kalta\\\\Olympiad Tracker\\\\src\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(del \"src\\\\pages\\\\HomePage.tsx\")",
+      "Bash(del \"src\\\\shared\\\\lib\\\\heatmap.ts\")",
+      "Bash(del \"src\\\\features\\\\profile\\\\ProfileCard.tsx\")"
     ]
   }
 }
