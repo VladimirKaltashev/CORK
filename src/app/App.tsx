@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { ThemeProvider, BaseStyles } from '@primer/react'
+import { ThemeProvider } from '@primer/react'
 import { Layout } from '@/widgets/Layout'
 import { ProtectedRoute, PublicRoute } from '@/app/router'
 import { HomePage } from '@/pages/HomePage'
@@ -22,46 +22,44 @@ function PageLoader() {
 
 export function App() {
   return (
-    <ThemeProvider colorMode="auto">
-      <BaseStyles>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route element={<PublicRoute />}>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-              </Route>
-
-              <Route element={<ProtectedRoute />}>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/profile/me" element={<ProfilePage />} />
-                <Route path="/profile/:id" element={<ProfilePage />} />
-                <Route
-                  path="/planner"
-                  element={
-                    <Suspense fallback={<PageLoader />}>
-                      <PlannerPage />
-                    </Suspense>
-                  }
-                />
-              </Route>
-
-              <Route path="*" element={<NotFoundPage />} />
+    <ThemeProvider colorMode="day">
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route element={<PublicRoute />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
             </Route>
 
             <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/profile/me" element={<ProfilePage />} />
+              <Route path="/profile/:id" element={<ProfilePage />} />
               <Route
-                path="/timer"
+                path="/planner"
                 element={
-                  <Suspense fallback={<div className="flex h-screen items-center justify-center text-gray-400">Загрузка...</div>}>
-                    <TimerPage />
+                  <Suspense fallback={<PageLoader />}>
+                    <PlannerPage />
                   </Suspense>
                 }
               />
             </Route>
-          </Routes>
-        </BrowserRouter>
-      </BaseStyles>
+
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+
+          <Route element={<ProtectedRoute />}>
+            <Route
+              path="/timer"
+              element={
+                <Suspense fallback={<div className="flex h-screen items-center justify-center text-gray-400">Загрузка...</div>}>
+                  <TimerPage />
+                </Suspense>
+              }
+            />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
   )
 }

@@ -18,7 +18,8 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\kalta\\\\Olympiad Tracker\" -Recurse)",
       "Bash(Select-Object -Property FullName)",
       "Bash(Sort-Object FullName)",
-      "Bash(node -e \"require\\('./node_modules/react-big-calendar/lib/addons/dragAndDrop/index.js'\\)\")"
+      "Bash(node -e \"require\\('./node_modules/react-big-calendar/lib/addons/dragAndDrop/index.js'\\)\")",
+      "Bash(node -e \"const p = require\\('./node_modules/@primer/react/package.json'\\); console.log\\(p.version\\)\")"
     ]
   }
 }
