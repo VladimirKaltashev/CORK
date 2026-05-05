@@ -1,10 +1,18 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+export interface ProfileContacts {
+  telegram?: string
+  github?: string
+  email?: string
+  custom?: string
+}
+
 export interface LocalProfile {
   id: string
   name: string
-  bio: string
+  bio?: string
+  contacts?: ProfileContacts
   avatar: string | null
   registeredAt: string
 }

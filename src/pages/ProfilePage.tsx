@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Button, Heading, Label } from '@primer/react'
+import { Button } from '@primer/react'
 import { useAuthStore } from '@/entities/auth'
 import { useProfileStore, type LocalProfile } from '@/entities/profile'
 import { useAchievementsStore } from '@/entities/achievements/store'
@@ -9,11 +9,18 @@ import { EditProfileModal } from '@/features/profile/EditProfileModal'
 import { AddAchievementModal } from '@/features/profile/AddAchievementModal'
 import { AchievementCard } from '@/features/profile/AchievementCard'
 
-const ROLE_LABELS: Record<string, string> = {
-  admin: 'Администратор',
-  moderator: 'Модератор',
-  teacher: 'Учитель',
-  user: 'Пользователь',
+function ContactLink({ href, label, children }: { href: string; label?: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={label}
+      className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+    >
+      {children}
+    </a>
+  )
 }
 
 export function ProfilePage() {
@@ -24,7 +31,8 @@ export function ProfilePage() {
   const isOwn = profileId === authUser?.id
 
   const profileStore = useProfileStore()
-  const { achievements, isLoading: achLoading, loadAchievements } = useAchievementsStore()
+  const { achievements: allAchievements, isLoading: achLoading, loadAchievements } = useAchievementsStore()
+  const achievements = isOwn ? allAchievements : allAchievements.filter((a) => a.status === 'verified')
 
   const [showEdit, setShowEdit] = useState(false)
   const [showAddAch, setShowAddAch] = useState(false)
@@ -35,21 +43,20 @@ export function ProfilePage() {
       profileStore.setProfile({
         id: profileId,
         name: authUser.name,
-        bio: '',
         avatar: null,
         registeredAt: new Date().toISOString(),
       })
     }
     loadAchievements(profileId)
-  }, [profileId])
+  }, [profileId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const liveProfile: LocalProfile | null =
     profileStore.profiles[profileId] ??
     (isOwn && authUser
-      ? { id: profileId, name: authUser.name, bio: '', avatar: null, registeredAt: new Date().toISOString() }
+      ? { id: profileId, name: authUser.name, avatar: null, registeredAt: new Date().toISOString() }
       : null)
 
-  const handleSaveProfile = (data: Pick<LocalProfile, 'name' | 'bio' | 'avatar'>) => {
+  const handleSaveProfile = (data: Pick<LocalProfile, 'name' | 'bio' | 'avatar' | 'contacts'>) => {
     if (!profileId) return
     profileStore.updateProfile(profileId, data)
   }
@@ -61,13 +68,10 @@ export function ProfilePage() {
 
   if (!profileId || !liveProfile) {
     return (
-      <div className="p-4 text-center">
-        <span className="text-gray-500">Профиль не найден</span>
-      </div>
+      <div className="p-4 text-center text-gray-500">Профиль не найден</div>
     )
   }
 
-  const role = isOwn ? (authUser?.role ?? 'user') : 'user'
   const registeredFormatted = (() => {
     try {
       return new Date(liveProfile.registeredAt).toLocaleDateString('ru-RU', {
@@ -76,51 +80,101 @@ export function ProfilePage() {
     } catch { return '—' }
   })()
 
+  const contacts = liveProfile.contacts
+  const hasContacts = contacts && Object.values(contacts).some(Boolean)
+
   return (
     <div className="mx-auto max-w-2xl py-4 px-3 flex flex-col gap-4">
+
+      {/* Header card */}
       <div className="border border-gray-300 rounded-md bg-white p-4">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3">
-          <AvatarUpload
-            avatar={liveProfile.avatar}
-            name={liveProfile.name}
-            onChange={handleAvatarChange}
-            size="lg"
-            editable={isOwn}
-          />
-          <div className="flex-1 text-center sm:text-left">
-            <Heading as="h2" className="text-2xl font-bold text-gray-900">{liveProfile.name}</Heading>
-            {liveProfile.bio && (
-              <p className="mt-1 text-sm text-gray-500">{liveProfile.bio}</p>
-            )}
-            <div className="mt-2 flex flex-wrap gap-1 justify-center sm:justify-start">
-              <Label>{ROLE_LABELS[role] ?? role}</Label>
-              <Label variant="secondary">С {registeredFormatted}</Label>
-            </div>
-            <p className="mt-2 text-xs text-gray-400">ID: {profileId}</p>
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <AvatarUpload
+              avatar={liveProfile.avatar}
+              name={liveProfile.name}
+              onChange={handleAvatarChange}
+              size="lg"
+              editable={isOwn}
+            />
           </div>
-          {isOwn && (
-            <Button onClick={() => setShowEdit(true)}>Редактировать</Button>
-          )}
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <h1 className="text-2xl font-bold text-gray-900 leading-tight">{liveProfile.name}</h1>
+              {isOwn && (
+                <Button onClick={() => setShowEdit(true)} className="flex-shrink-0">
+                  Редактировать
+                </Button>
+              )}
+            </div>
+            <p className="text-sm text-gray-500 mt-1">На сайте с {registeredFormatted}</p>
+            <p className="text-xs text-gray-400 mt-0.5">ID: {profileId}</p>
+
+            {hasContacts && (
+              <div className="flex flex-wrap gap-3 mt-2">
+                {contacts?.telegram && (
+                  <ContactLink
+                    href={`https://t.me/${contacts.telegram.replace(/^@/, '')}`}
+                    label="Telegram"
+                  >
+                    <span className="font-medium">TG</span>
+                    <span>{contacts.telegram.startsWith('@') ? contacts.telegram : `@${contacts.telegram}`}</span>
+                  </ContactLink>
+                )}
+                {contacts?.github && (
+                  <ContactLink href={`https://github.com/${contacts.github}`} label="GitHub">
+                    <span className="font-medium">GH</span>
+                    <span>{contacts.github}</span>
+                  </ContactLink>
+                )}
+                {contacts?.email && (
+                  <ContactLink href={`mailto:${contacts.email}`} label="Email">
+                    <span>✉</span>
+                    <span>{contacts.email}</span>
+                  </ContactLink>
+                )}
+                {contacts?.custom && (
+                  <ContactLink href={contacts.custom} label="Контакт">
+                    <span>🔗</span>
+                    <span className="truncate max-w-[160px]">{contacts.custom}</span>
+                  </ContactLink>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* Bio block */}
+      {liveProfile.bio ? (
+        <div className="border border-gray-300 rounded-md bg-white p-4">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">О себе</h2>
+          <p className="text-sm text-gray-800 whitespace-pre-wrap">{liveProfile.bio}</p>
+        </div>
+      ) : isOwn ? (
+        <div className="border border-dashed border-gray-300 rounded-md py-4 px-4 flex items-center justify-between">
+          <span className="text-sm text-gray-400">Расскажите о себе</span>
+          <Button size="small" onClick={() => setShowEdit(true)}>Добавить описание</Button>
+        </div>
+      ) : null}
+
+      {/* Achievements */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <Heading as="h3" className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-gray-900">
             Достижения
             {achievements.length > 0 && (
               <span className="text-sm font-normal text-gray-400 ml-1">({achievements.length})</span>
             )}
-          </Heading>
+          </h2>
           {isOwn && (
             <Button variant="primary" onClick={() => setShowAddAch(true)}>+ Добавить</Button>
           )}
         </div>
 
         {achLoading ? (
-          <div className="py-5 text-center">
-            <span className="text-sm text-gray-500">Загрузка...</span>
-          </div>
+          <div className="py-5 text-center text-sm text-gray-500">Загрузка...</div>
         ) : achievements.length === 0 ? (
           <div className="border border-dashed border-gray-300 rounded-md py-6 text-center">
             <span className="text-sm text-gray-500">

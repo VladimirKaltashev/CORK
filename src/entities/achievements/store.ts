@@ -1,33 +1,43 @@
 import { create } from 'zustand'
-import type { Achievement, VerifiedAchievement } from '@/shared/types'
+import type { Achievement, AchievementStatus } from '@/shared/types'
 import { api } from '@/shared/lib/api'
 import { showToast } from '@/shared/lib/toast'
 
+const storageKey = (userId: string) => `achievements-${userId}`
+
+const readStorage = (userId: string): Achievement[] => {
+  try { return JSON.parse(localStorage.getItem(storageKey(userId)) ?? '[]') } catch { return [] }
+}
+
+const writeStorage = (userId: string, items: Achievement[]) => {
+  localStorage.setItem(storageKey(userId), JSON.stringify(items))
+}
+
 interface AchievementsState {
-  // profile achievements (new)
   achievements: Achievement[]
   isLoading: boolean
   loadAchievements: (userId: string) => Promise<void>
   addAchievement: (achievement: Achievement) => void
-  // verified achievements (legacy, kept for backward compat)
-  verifiedAchievements: VerifiedAchievement[]
-  isLoadingVerified: boolean
-  loadUserAchievements: (userId: string) => Promise<void>
-  verifyAchievement: (achievementId: string, verified: boolean) => Promise<boolean>
+  updateAchievementStatus: (id: string, status: AchievementStatus, rejectionReason?: string) => Promise<void>
   reset: () => void
 }
 
 export const useAchievementsStore = create<AchievementsState>((set) => ({
   achievements: [],
   isLoading: false,
-  verifiedAchievements: [],
-  isLoadingVerified: false,
 
   loadAchievements: async (userId) => {
+    const cached = readStorage(userId)
+    if (cached.length > 0) {
+      set({ achievements: cached })
+      return
+    }
     set({ isLoading: true })
     try {
-      const response = await api.get<{ achievements: Achievement[] }>(`/achievements/user/${userId}`)
-      set({ achievements: response.data.achievements })
+      const res = await api.get<{ achievements: Achievement[] }>(`/achievements/user/${userId}`)
+      const items = res.data.achievements
+      set({ achievements: items })
+      writeStorage(userId, items)
     } catch {
       showToast('error', 'Не удалось загрузить достижения')
     } finally {
@@ -36,44 +46,29 @@ export const useAchievementsStore = create<AchievementsState>((set) => ({
   },
 
   addAchievement: (achievement) => {
-    set((s) => ({ achievements: [achievement, ...s.achievements] }))
+    set((s) => {
+      const updated = [achievement, ...s.achievements]
+      writeStorage(achievement.userId, updated)
+      return { achievements: updated }
+    })
   },
 
-  loadUserAchievements: async (userId) => {
-    set({ isLoadingVerified: true })
+  updateAchievementStatus: async (id, status, rejectionReason) => {
     try {
-      const response = await api.get<{ achievements: VerifiedAchievement[] }>(`/user/${userId}/achievements`)
-      set({ verifiedAchievements: response.data.achievements })
+      await api.patch(`/achievements/${id}/status`, { status, rejectionReason })
+      set((s) => {
+        const updated = s.achievements.map((a) =>
+          a.id === id ? { ...a, status, rejectionReason } : a
+        )
+        const ach = updated.find((a) => a.id === id)
+        if (ach) writeStorage(ach.userId, updated)
+        return { achievements: updated }
+      })
+      showToast('success', status === 'verified' ? 'Достижение подтверждено' : 'Достижение отклонено')
     } catch {
-      showToast('error', 'Не удалось загрузить достижения')
-    } finally {
-      set({ isLoadingVerified: false })
+      showToast('error', 'Не удалось обновить статус')
     }
   },
 
-  verifyAchievement: async (achievementId, verified) => {
-    try {
-      const response = await api.post<{ success: boolean; achievement: { id: string; verified: string } }>(
-        `/api/achievements/${achievementId}/verify`,
-        { verified }
-      )
-      if (response.data.success) {
-        set((state) => ({
-          verifiedAchievements: state.verifiedAchievements.map((ach) =>
-            ach.id === achievementId
-              ? { ...ach, verified: verified ? ('verified' as const) : ('rejected' as const) }
-              : ach
-          ),
-        }))
-        showToast('success', verified ? 'Достижение верифицировано' : 'Достижение отклонено')
-        return true
-      }
-      return false
-    } catch {
-      showToast('error', 'Ошибка верификации')
-      return false
-    }
-  },
-
-  reset: () => set({ achievements: [], isLoading: false, verifiedAchievements: [], isLoadingVerified: false }),
+  reset: () => set({ achievements: [], isLoading: false }),
 }))

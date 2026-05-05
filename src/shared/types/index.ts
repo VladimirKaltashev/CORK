@@ -89,15 +89,22 @@ export interface ExtendedUserProfile {
   };
 }
 
-export type AchievementCategory = 'olympiad' | 'academic' | 'it' | 'creative' | 'sport' | 'other'
+export type AchievementCategory = 'olympiad' | 'academic' | 'it' | 'creative' | 'sport' | 'movies' | 'games' | 'other'
+export type AchievementStatus = 'pending' | 'verified' | 'rejected'
+export type ProofType = 'photo' | 'url' | 'none'
 
 export interface Achievement {
   id: string
   userId: string
   category: AchievementCategory
   title: string
+  description: string
   year: number
-  proofImage?: string
+  proofType: ProofType
+  proofValue?: string
+  status: AchievementStatus
+  rejectionReason?: string
+  meta: Record<string, unknown>
   createdAt: string
 }
 
