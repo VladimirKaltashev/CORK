@@ -89,6 +89,19 @@ export interface ExtendedUserProfile {
   };
 }
 
+export type AchievementCategory = 'education' | 'sport' | 'it' | 'creative' | 'life'
+
+export interface Achievement {
+  id: string
+  userId: string
+  category: AchievementCategory
+  title: string
+  description: string
+  date: string
+  proofUrl?: string
+  createdAt: string
+}
+
 export type TaskPriority = 'high' | 'medium' | 'low'
 
 export interface TaskComment {

@@ -1,2 +1,3 @@
 export { useProfileStore } from './store'
-export type { Profile, ProfileStats, SearchUser } from './types'
+export type { LocalProfile } from './store'
+export type { SearchUser } from './types'

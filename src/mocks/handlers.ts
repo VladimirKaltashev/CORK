@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import type { GlobalFeedEvent, LeaderboardEntry, Task, TaskComment, StudySession, UserStudyStatus, Subject, TaskPriority, Checkpoint } from '@/shared/types'
+import type { GlobalFeedEvent, LeaderboardEntry, Task, TaskComment, StudySession, UserStudyStatus, Subject, TaskPriority, Checkpoint, Achievement, AchievementCategory } from '@/shared/types'
 
 // ── In-Memory DB ──
 const getDb = () => {
@@ -17,6 +17,7 @@ const getDb = () => {
       plannerSessions: [] as StudySession[],
       taskComments: {} as Record<string, TaskComment[]>,
       userStatuses: {} as Record<string, UserStudyStatus>,
+      profileAchievements: [] as Achievement[],
     }
   }
   const db = (window as unknown as Record<string, unknown>).__APP_DB__ as Record<string, unknown>
@@ -24,6 +25,16 @@ const getDb = () => {
   if (!db.plannerSessions) db.plannerSessions = []
   if (!db.taskComments) db.taskComments = {}
   if (!db.userStatuses) db.userStatuses = {}
+  if (!db.profileAchievements) db.profileAchievements = []
+
+  const profAch = db.profileAchievements as Achievement[]
+  if (profAch.length === 0) {
+    profAch.push(
+      { id: 'a1', userId: '1', category: 'education' as AchievementCategory, title: 'Победитель ВсОШ по математике', description: 'Занял 1 место на региональном этапе Всероссийской олимпиады школьников', date: '2024-11-15', proofUrl: 'https://example.com/certificate1', createdAt: new Date(2024, 10, 15).toISOString() },
+      { id: 'a2', userId: '1', category: 'it' as AchievementCategory, title: 'Победитель хакатона HackRU', description: 'Разработал веб-приложение для автоматизации учёбы в команде из 3 человек', date: '2024-09-20', createdAt: new Date(2024, 8, 20).toISOString() },
+      { id: 'a3', userId: '2', category: 'sport' as AchievementCategory, title: 'КМС по шахматам', description: 'Выполнил норматив кандидата в мастера спорта на турнире', date: '2024-06-10', createdAt: new Date(2024, 5, 10).toISOString() },
+    )
+  }
 
   // Seed default tasks once
   const tasks = db.tasks as Task[]
@@ -196,7 +207,7 @@ export const handlers = [
   }),
 
   // ── Planner: GET tasks ──
-  http.get('/planner/tasks', ({ request }) => {
+  http.get('http://127.0.0.1:8000/planner/tasks', ({ request }) => {
     const db = getDb()
     const userId = getUserId(request)
     const tasks = (db.tasks as Task[]).filter((t) => t.userId === userId || t.userId === '1')
@@ -204,7 +215,7 @@ export const handlers = [
   }),
 
   // ── Planner: POST task ──
-  http.post('/planner/tasks', async ({ request }) => {
+  http.post('http://127.0.0.1:8000/planner/tasks', async ({ request }) => {
     const db = getDb()
     const userId = getUserId(request)
     const body = await request.json() as Omit<Task, 'id' | 'userId' | 'createdAt' | 'commentsCount'>
@@ -227,7 +238,7 @@ export const handlers = [
   }),
 
   // ── Planner: PATCH task ──
-  http.patch('/planner/tasks/:id', async ({ params, request }) => {
+  http.patch('http://127.0.0.1:8000/planner/tasks/:id', async ({ params, request }) => {
     const db = getDb()
     const body = await request.json() as Partial<Task>
     const tasks = db.tasks as Task[]
@@ -238,14 +249,14 @@ export const handlers = [
   }),
 
   // ── Planner: GET task comments ──
-  http.get('/planner/tasks/:id/comments', ({ params }) => {
+  http.get('http://127.0.0.1:8000/planner/tasks/:id/comments', ({ params }) => {
     const db = getDb()
     const comments = (db.taskComments as Record<string, TaskComment[]>)[String(params.id)] ?? []
     return HttpResponse.json({ comments })
   }),
 
   // ── Planner: POST task comment ──
-  http.post('/planner/tasks/:id/comments', async ({ params, request }) => {
+  http.post('http://127.0.0.1:8000/planner/tasks/:id/comments', async ({ params, request }) => {
     const db = getDb()
     const userId = getUserId(request)
     const body = await request.json() as { text: string }
@@ -270,7 +281,7 @@ export const handlers = [
   }),
 
   // ── Planner: POST session (complete timer) ──
-  http.post('/planner/sessions', async ({ request }) => {
+  http.post('http://127.0.0.1:8000/planner/sessions', async ({ request }) => {
     const db = getDb()
     const userId = getUserId(request)
     const body = await request.json() as Omit<StudySession, 'id' | 'userId'>
@@ -288,7 +299,7 @@ export const handlers = [
   }),
 
   // ── Planner: GET sessions ──
-  http.get('/planner/sessions', ({ request }) => {
+  http.get('http://127.0.0.1:8000/planner/sessions', ({ request }) => {
     const db = getDb()
     const userId = getUserId(request)
     const sessions = (db.plannerSessions as StudySession[]).filter((s) => s.userId === userId || s.userId === '1')
@@ -296,7 +307,7 @@ export const handlers = [
   }),
 
   // ── User status: GET ──
-  http.get('/user/:id/status', ({ params }) => {
+  http.get('http://127.0.0.1:8000/user/:id/status', ({ params }) => {
     const db = getDb()
     const statuses = db.userStatuses as Record<string, UserStudyStatus>
     const status: UserStudyStatus = statuses[String(params.id)] ?? { status: 'online' }
@@ -304,12 +315,40 @@ export const handlers = [
   }),
 
   // ── User status: POST (update own status) ──
-  http.post('/user/status', async ({ request }) => {
+  http.post('http://127.0.0.1:8000/user/status', async ({ request }) => {
     const db = getDb()
     const userId = getUserId(request)
     const body = await request.json() as UserStudyStatus
     const statuses = db.userStatuses as Record<string, UserStudyStatus>
     statuses[userId] = body
     return HttpResponse.json(body)
+  }),
+
+  // ── Profile Achievements: GET /achievements/user/:userId ──
+  http.get('http://127.0.0.1:8000/achievements/user/:userId', ({ params }) => {
+    const db = getDb()
+    const userId = String(params.userId)
+    const all = db.profileAchievements as Achievement[]
+    const result = all.filter((a) => a.userId === userId)
+    return HttpResponse.json({ achievements: result })
+  }),
+
+  // ── Profile Achievements: POST /achievements ──
+  http.post('http://127.0.0.1:8000/achievements', async ({ request }) => {
+    const db = getDb()
+    const userId = getUserId(request)
+    const body = await request.json() as Omit<Achievement, 'id' | 'userId' | 'createdAt'>
+    const newAch: Achievement = {
+      id: crypto.randomUUID(),
+      userId,
+      category: body.category,
+      title: body.title,
+      description: body.description,
+      date: body.date,
+      proofUrl: body.proofUrl,
+      createdAt: new Date().toISOString(),
+    };
+    (db.profileAchievements as Achievement[]).push(newAch)
+    return new HttpResponse(JSON.stringify(newAch), { status: 201 })
   }),
 ]
