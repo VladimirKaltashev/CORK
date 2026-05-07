@@ -43,6 +43,18 @@ export function Header() {
                 {label}
               </NavLink>
             ))}
+          {token && user?.role === 'admin' && (
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                `text-sm font-medium transition-colors ${
+                  isActive ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
+                }`
+              }
+            >
+              Модерация
+            </NavLink>
+          )}
 
           {token ? (
             <div className="flex items-center gap-3">
@@ -104,6 +116,17 @@ export function Header() {
                 {label}
               </NavLink>
             ))}
+          {token && user?.role === 'admin' && (
+            <NavLink
+              to="/admin"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600' : 'text-gray-600'}`
+              }
+            >
+              Модерация
+            </NavLink>
+          )}
 
           {token ? (
             <div className="flex items-center justify-between py-2">

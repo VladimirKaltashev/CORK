@@ -1,23 +1,24 @@
 import { create } from 'zustand'
-import type { Achievement, AchievementStatus } from '@/shared/types'
-import { api } from '@/shared/lib/api'
+import type { Achievement, AchievementCategory, AchievementStatus, ProofType } from '@/shared/types'
+import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
 
-const storageKey = (userId: string) => `achievements-${userId}`
-
-const readStorage = (userId: string): Achievement[] => {
-  try { return JSON.parse(localStorage.getItem(storageKey(userId)) ?? '[]') } catch { return [] }
-}
-
-const writeStorage = (userId: string, items: Achievement[]) => {
-  localStorage.setItem(storageKey(userId), JSON.stringify(items))
+interface NewAchievementData {
+  userId: string
+  category: AchievementCategory
+  title: string
+  description: string
+  year: number
+  proofType: ProofType
+  proofValue?: string
+  meta: Record<string, unknown>
 }
 
 interface AchievementsState {
   achievements: Achievement[]
   isLoading: boolean
   loadAchievements: (userId: string) => Promise<void>
-  addAchievement: (achievement: Achievement) => void
+  addAchievement: (data: NewAchievementData) => Promise<void>
   updateAchievementStatus: (id: string, status: AchievementStatus, rejectionReason?: string) => Promise<void>
   reset: () => void
 }
@@ -27,17 +28,29 @@ export const useAchievementsStore = create<AchievementsState>((set) => ({
   isLoading: false,
 
   loadAchievements: async (userId) => {
-    const cached = readStorage(userId)
-    if (cached.length > 0) {
-      set({ achievements: cached })
-      return
-    }
     set({ isLoading: true })
     try {
-      const res = await api.get<{ achievements: Achievement[] }>(`/achievements/user/${userId}`)
-      const items = res.data.achievements
+      const { data, error } = await supabase
+        .from('achievements')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      const items: Achievement[] = (data ?? []).map((row) => ({
+        id: row.id,
+        userId: row.user_id,
+        category: row.category,
+        title: row.title,
+        description: row.description,
+        year: row.year,
+        proofType: row.proof_type,
+        proofValue: row.proof_value ?? undefined,
+        status: row.status,
+        rejectionReason: row.rejection_reason ?? undefined,
+        meta: row.meta ?? {},
+        createdAt: row.created_at,
+      }))
       set({ achievements: items })
-      writeStorage(userId, items)
     } catch {
       showToast('error', 'Не удалось загрузить достижения')
     } finally {
@@ -45,25 +58,52 @@ export const useAchievementsStore = create<AchievementsState>((set) => ({
     }
   },
 
-  addAchievement: (achievement) => {
-    set((s) => {
-      const updated = [achievement, ...s.achievements]
-      writeStorage(achievement.userId, updated)
-      return { achievements: updated }
-    })
+  addAchievement: async (data) => {
+    const { data: inserted, error } = await supabase
+      .from('achievements')
+      .insert({
+        user_id: data.userId,
+        category: data.category,
+        title: data.title,
+        description: data.description,
+        year: data.year,
+        proof_type: data.proofType,
+        proof_value: data.proofValue ?? null,
+        status: 'pending',
+        meta: data.meta,
+      })
+      .select()
+      .single()
+    if (error) throw error
+    const achievement: Achievement = {
+      id: inserted.id,
+      userId: inserted.user_id,
+      category: inserted.category,
+      title: inserted.title,
+      description: inserted.description,
+      year: inserted.year,
+      proofType: inserted.proof_type,
+      proofValue: inserted.proof_value ?? undefined,
+      status: inserted.status,
+      rejectionReason: inserted.rejection_reason ?? undefined,
+      meta: inserted.meta ?? {},
+      createdAt: inserted.created_at,
+    }
+    set((s) => ({ achievements: [achievement, ...s.achievements] }))
   },
 
   updateAchievementStatus: async (id, status, rejectionReason) => {
     try {
-      await api.patch(`/achievements/${id}/status`, { status, rejectionReason })
-      set((s) => {
-        const updated = s.achievements.map((a) =>
+      const { error } = await supabase
+        .from('achievements')
+        .update({ status, rejection_reason: rejectionReason ?? null })
+        .eq('id', id)
+      if (error) throw error
+      set((s) => ({
+        achievements: s.achievements.map((a) =>
           a.id === id ? { ...a, status, rejectionReason } : a
-        )
-        const ach = updated.find((a) => a.id === id)
-        if (ach) writeStorage(ach.userId, updated)
-        return { achievements: updated }
-      })
+        ),
+      }))
       showToast('success', status === 'verified' ? 'Достижение подтверждено' : 'Достижение отклонено')
     } catch {
       showToast('error', 'Не удалось обновить статус')

@@ -24,7 +24,8 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(del \"src\\\\pages\\\\HomePage.tsx\")",
       "Bash(del \"src\\\\shared\\\\lib\\\\heatmap.ts\")",
-      "Bash(del \"src\\\\features\\\\profile\\\\ProfileCard.tsx\")"
+      "Bash(del \"src\\\\features\\\\profile\\\\ProfileCard.tsx\")",
+      "Bash(dir *)"
     ]
   }
 }

@@ -39,22 +39,11 @@ export function ProfilePage() {
 
   useEffect(() => {
     if (!profileId) return
-    if (isOwn && authUser && !profileStore.profiles[profileId]) {
-      profileStore.setProfile({
-        id: profileId,
-        name: authUser.name,
-        avatar: null,
-        registeredAt: new Date().toISOString(),
-      })
-    }
+    profileStore.loadProfile(profileId)
     loadAchievements(profileId)
   }, [profileId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const liveProfile: LocalProfile | null =
-    profileStore.profiles[profileId] ??
-    (isOwn && authUser
-      ? { id: profileId, name: authUser.name, avatar: null, registeredAt: new Date().toISOString() }
-      : null)
+  const liveProfile: LocalProfile | null = profileStore.profiles[profileId] ?? null
 
   const handleSaveProfile = (data: Pick<LocalProfile, 'name' | 'bio' | 'avatar' | 'contacts'>) => {
     if (!profileId) return
@@ -66,7 +55,13 @@ export function ProfilePage() {
     profileStore.updateProfile(profileId, { avatar: base64 })
   }
 
-  if (!profileId || !liveProfile) {
+  if (!profileId || profileStore.isLoading) {
+    return (
+      <div className="p-4 text-center text-gray-500">Загрузка...</div>
+    )
+  }
+
+  if (!liveProfile) {
     return (
       <div className="p-4 text-center text-gray-500">Профиль не найден</div>
     )

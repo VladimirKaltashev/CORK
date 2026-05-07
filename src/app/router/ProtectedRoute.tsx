@@ -8,8 +8,13 @@ interface Props {
 }
 
 export function ProtectedRoute({ requiredRole }: Props) {
-  const { token, user } = useAuthStore()
+  const { token, user, isLoading } = useAuthStore()
 
+  if (isLoading) return (
+    <div className="flex h-screen items-center justify-center text-sm text-gray-400">
+      Загрузка...
+    </div>
+  )
   if (!token) return <Navigate to={ROUTES.LOGIN} replace />
   if (requiredRole && user?.role !== requiredRole) return <Navigate to={ROUTES.HOME} replace />
 
