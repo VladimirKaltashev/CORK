@@ -7,6 +7,7 @@ import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { FeedPage } from '@/pages/FeedPage'
+import { AdminPage } from '@/pages/AdminPage'
 
 export function App() {
   return (
@@ -24,6 +25,10 @@ export function App() {
               <Route path="/feed" element={<FeedPage />} />
               <Route path="/profile/me" element={<ProfilePage />} />
               <Route path="/profile/:id" element={<ProfilePage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredRole="admin" />}>
+              <Route path="/admin" element={<AdminPage />} />
             </Route>
 
             <Route path="*" element={<NotFoundPage />} />

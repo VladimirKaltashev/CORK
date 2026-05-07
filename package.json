@@ -19,6 +19,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@primer/react": "^38.21.1",
+    "@supabase/supabase-js": "^2.105.3",
     "axios": "^1.16.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

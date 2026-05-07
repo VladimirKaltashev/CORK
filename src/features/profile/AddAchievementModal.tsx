@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react'
 import { Button, FormControl, Select, TextInput, Textarea } from '@primer/react'
 import { useAchievementsStore } from '@/entities/achievements/store'
-import { api } from '@/shared/lib/api'
+import { useAuthStore } from '@/entities/auth'
 import { showToast } from '@/shared/lib/toast'
-import type { Achievement, AchievementCategory, ProofType } from '@/shared/types'
+import type { AchievementCategory, ProofType } from '@/shared/types'
 
 const CATEGORIES: { value: AchievementCategory; icon: string; label: string }[] = [
   { value: 'olympiad', icon: '🎓', label: 'Олимпиады' },
@@ -24,6 +24,7 @@ interface AddAchievementModalProps {
 
 export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
   const { addAchievement } = useAchievementsStore()
+  const { user } = useAuthStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [category, setCategory] = useState<AchievementCategory>('olympiad')
@@ -66,13 +67,19 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!validate()) return
+    if (!validate() || !user) return
     setSubmitting(true)
     try {
-      const fields = { category, title: title.trim(), description: description.trim(), year: parseInt(year, 10), proofType, proofValue }
-      const payload = { ...fields, meta: fields }
-      const res = await api.post<Achievement>('/achievements', payload)
-      addAchievement(res.data)
+      await addAchievement({
+        userId: user.id,
+        category,
+        title: title.trim(),
+        description: description.trim(),
+        year: parseInt(year, 10),
+        proofType,
+        proofValue,
+        meta: {},
+      })
       showToast('success', 'Достижение добавлено!')
       onClose()
     } catch {

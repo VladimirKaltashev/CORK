@@ -10,5 +10,6 @@ export const ROUTES = {
   PROFILE: '/profile/:id',
   PLANNER: '/planner',
   TIMER: '/timer',
+  ADMIN: '/admin',
   NOT_FOUND: '*',
 } as const
