@@ -26,7 +26,8 @@
       "Bash(del \"src\\\\shared\\\\lib\\\\heatmap.ts\")",
       "Bash(del \"src\\\\features\\\\profile\\\\ProfileCard.tsx\")",
       "Bash(dir *)",
-      "Bash(Remove-Item *)"
+      "Bash(Remove-Item *)",
+      "PowerShell(New-Item *)"
     ]
   }
 }
