@@ -7,7 +7,78 @@ import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
 import { useAuthStore } from '@/entities/auth'
 import { useFriendsStore } from '@/entities/friends'
+import { useDebounce } from '@/shared/hooks'
 import type { AchievementCategory, ProofType } from '@/shared/types'
+
+interface UserResult {
+  id: string
+  name: string
+  avatar: string | null
+}
+
+function FriendButton({ targetId }: { targetId: string }) {
+  const { getRelationship, sendRequest, acceptRequest, removeRecord } = useFriendsStore()
+  const [busy, setBusy] = useState(false)
+  const rel = getRelationship(targetId)
+
+  if (!rel) {
+    return (
+      <button
+        type="button"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true)
+          try { await sendRequest(targetId) }
+          catch { /* shown by store */ }
+          finally { setBusy(false) }
+        }}
+        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+      >
+        {busy ? '...' : 'Добавить'}
+      </button>
+    )
+  }
+
+  if (rel.direction === 'outgoing' && rel.record.status === 'pending') {
+    return <span className="text-xs text-gray-400">Запрос отправлен</span>
+  }
+
+  if (rel.direction === 'incoming' && rel.record.status === 'pending') {
+    return (
+      <button
+        type="button"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true)
+          try { await acceptRequest(rel.record.id) }
+          finally { setBusy(false) }
+        }}
+        className="text-sm px-3 py-1 rounded-md bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+      >
+        {busy ? '...' : 'Принять'}
+      </button>
+    )
+  }
+
+  if (rel.record.status === 'accepted') {
+    return (
+      <button
+        type="button"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true)
+          try { await removeRecord(rel.record.id) }
+          finally { setBusy(false) }
+        }}
+        className="text-sm px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+      >
+        {busy ? '...' : 'Удалить'}
+      </button>
+    )
+  }
+
+  return null
+}
 
 const PAGE_SIZE = 10
 
@@ -154,6 +225,10 @@ export function FeedPage() {
   const [liking, setLiking] = useState<Set<string>>(new Set())
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [feedMode, setFeedMode] = useState<FeedMode>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<UserResult[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const debouncedSearch = useDebounce(searchQuery, 300)
 
   const getFriendIds = (): string[] | undefined =>
     feedMode === 'friends' ? friendsStore.acceptedFriendIds() : undefined
@@ -174,6 +249,25 @@ export function FeedPage() {
   useEffect(() => {
     fetchInitial(category, feedMode)
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!debouncedSearch.trim() || !user) {
+      setSearchResults([])
+      return
+    }
+    setIsSearching(true)
+    supabase
+      .from('profiles')
+      .select('id, name, avatar')
+      .ilike('name', `%${debouncedSearch.trim()}%`)
+      .neq('id', user.id)
+      .limit(20)
+      .then(({ data, error }) => {
+        if (error) { showToast('error', 'Ошибка поиска') }
+        else { setSearchResults((data ?? []).map((p) => ({ id: p.id, name: p.name, avatar: p.avatar ?? null }))) }
+        setIsSearching(false)
+      })
+  }, [debouncedSearch, user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFilterChange = (cat: CategoryFilter) => {
     if (cat === category) return
@@ -266,6 +360,42 @@ export function FeedPage() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* User search */}
+      <div className="mb-5">
+        <input
+          type="text"
+          placeholder="Найти пользователей..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        />
+        {searchQuery.trim() && (
+          <div className="mt-2 flex flex-col gap-2">
+            {isSearching && (
+              <div className="py-2 text-center text-sm text-gray-500">Поиск...</div>
+            )}
+            {!isSearching && searchResults.length === 0 && (
+              <div className="py-2 text-center text-sm text-gray-500">Никого не найдено</div>
+            )}
+            {searchResults.map((u) => (
+              <div key={u.id} className="flex items-center justify-between gap-3 border border-gray-300 rounded-md bg-white p-3">
+                <Link to={`/profile/${u.id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity">
+                  {u.avatar ? (
+                    <img src={u.avatar} alt={u.name} className="w-8 h-8 rounded-full object-cover ring-1 ring-gray-200 flex-shrink-0" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                      {getInitials(u.name)}
+                    </div>
+                  )}
+                  <span className="text-sm font-medium text-gray-900 truncate">{u.name}</span>
+                </Link>
+                <FriendButton targetId={u.id} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Category filters */}
