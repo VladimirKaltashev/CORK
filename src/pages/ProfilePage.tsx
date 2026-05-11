@@ -4,6 +4,7 @@ import { Button } from '@primer/react'
 import { useAuthStore } from '@/entities/auth'
 import { useProfileStore, type LocalProfile } from '@/entities/profile'
 import { useAchievementsStore } from '@/entities/achievements/store'
+import { useFriendsStore } from '@/entities/friends'
 import { AvatarUpload } from '@/shared/ui/AvatarUpload'
 import { EditProfileModal } from '@/features/profile/EditProfileModal'
 import { AddAchievementModal } from '@/features/profile/AddAchievementModal'
@@ -33,9 +34,11 @@ export function ProfilePage() {
   const profileStore = useProfileStore()
   const { achievements: allAchievements, isLoading: achLoading, loadAchievements } = useAchievementsStore()
   const achievements = isOwn ? allAchievements : allAchievements.filter((a) => a.status === 'verified')
+  const { getRelationship, sendRequest, acceptRequest, removeRecord } = useFriendsStore()
 
   const [showEdit, setShowEdit] = useState(false)
   const [showAddAch, setShowAddAch] = useState(false)
+  const [friendBusy, setFriendBusy] = useState(false)
 
   useEffect(() => {
     if (!profileId) return
@@ -97,11 +100,46 @@ export function ProfilePage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <h1 className="text-2xl font-bold text-gray-900 leading-tight">{liveProfile.name}</h1>
-              {isOwn && (
-                <Button onClick={() => setShowEdit(true)} className="flex-shrink-0">
-                  Редактировать
-                </Button>
-              )}
+              <div className="flex gap-2 flex-shrink-0">
+                {isOwn ? (
+                  <Button onClick={() => setShowEdit(true)}>Редактировать</Button>
+                ) : (() => {
+                  const rel = getRelationship(profileId)
+                  if (!rel) return (
+                    <Button disabled={friendBusy} onClick={async () => {
+                      setFriendBusy(true)
+                      try { await sendRequest(profileId) }
+                      catch { /* shown by store */ }
+                      finally { setFriendBusy(false) }
+                    }}>
+                      {friendBusy ? '...' : 'Добавить в друзья'}
+                    </Button>
+                  )
+                  if (rel.direction === 'outgoing' && rel.record.status === 'pending')
+                    return <span className="text-sm text-gray-400 self-center">Запрос отправлен</span>
+                  if (rel.direction === 'incoming' && rel.record.status === 'pending')
+                    return (
+                      <Button variant="primary" disabled={friendBusy} onClick={async () => {
+                        setFriendBusy(true)
+                        try { await acceptRequest(rel.record.id) }
+                        finally { setFriendBusy(false) }
+                      }}>
+                        {friendBusy ? '...' : 'Принять заявку'}
+                      </Button>
+                    )
+                  if (rel.record.status === 'accepted')
+                    return (
+                      <Button variant="danger" disabled={friendBusy} onClick={async () => {
+                        setFriendBusy(true)
+                        try { await removeRecord(rel.record.id) }
+                        finally { setFriendBusy(false) }
+                      }}>
+                        {friendBusy ? '...' : 'Удалить из друзей'}
+                      </Button>
+                    )
+                  return null
+                })()}
+              </div>
             </div>
             <p className="text-sm text-gray-500 mt-1">На сайте с {registeredFormatted}</p>
             <p className="text-xs text-gray-400 mt-0.5">ID: {profileId}</p>

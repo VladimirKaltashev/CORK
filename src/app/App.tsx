@@ -8,6 +8,9 @@ import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { FeedPage } from '@/pages/FeedPage'
 import { AdminPage } from '@/pages/AdminPage'
+import { SearchPage } from '@/pages/SearchPage'
+import { FriendsPage } from '@/pages/FriendsPage'
+import { FriendRequestsPage } from '@/pages/FriendRequestsPage'
 
 export function App() {
   return (
@@ -25,6 +28,9 @@ export function App() {
               <Route path="/feed" element={<FeedPage />} />
               <Route path="/profile/me" element={<ProfilePage />} />
               <Route path="/profile/:id" element={<ProfilePage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/friends" element={<FriendsPage />} />
+              <Route path="/friend-requests" element={<FriendRequestsPage />} />
             </Route>
 
             <Route element={<ProtectedRoute requiredRole="admin" />}>
