@@ -6,6 +6,7 @@ import { ru } from 'date-fns/locale'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
 import { useAuthStore } from '@/entities/auth'
+import { useFriendsStore } from '@/entities/friends'
 import type { AchievementCategory, ProofType } from '@/shared/types'
 
 const PAGE_SIZE = 10
@@ -74,7 +75,12 @@ async function loadPage(
   offset: number,
   userId: string | undefined,
   category: CategoryFilter,
+  friendIds?: string[],
 ): Promise<{ items: FeedItem[]; hasMore: boolean }> {
+  if (friendIds !== undefined && friendIds.length === 0) {
+    return { items: [], hasMore: false }
+  }
+
   let query = supabase
     .from('achievements')
     .select('*')
@@ -82,6 +88,10 @@ async function loadPage(
 
   if (category !== 'all') {
     query = query.eq('category', category)
+  }
+
+  if (friendIds && friendIds.length > 0) {
+    query = query.in('user_id', friendIds)
   }
 
   const { data: achData, error } = await query
@@ -131,8 +141,11 @@ async function loadPage(
   }
 }
 
+type FeedMode = 'all' | 'friends'
+
 export function FeedPage() {
   const { user } = useAuthStore()
+  const friendsStore = useFriendsStore()
   const [items, setItems] = useState<FeedItem[]>([])
   const [offset, setOffset] = useState(0)
   const [hasMore, setHasMore] = useState(true)
@@ -140,10 +153,15 @@ export function FeedPage() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [liking, setLiking] = useState<Set<string>>(new Set())
   const [category, setCategory] = useState<CategoryFilter>('all')
+  const [feedMode, setFeedMode] = useState<FeedMode>('all')
 
-  const fetchInitial = (cat: CategoryFilter) => {
+  const getFriendIds = (): string[] | undefined =>
+    feedMode === 'friends' ? friendsStore.acceptedFriendIds() : undefined
+
+  const fetchInitial = (cat: CategoryFilter, mode: FeedMode) => {
+    const fIds = mode === 'friends' ? friendsStore.acceptedFriendIds() : undefined
     setIsLoading(true)
-    loadPage(0, user?.id, cat)
+    loadPage(0, user?.id, cat, fIds)
       .then(({ items: loaded, hasMore: more }) => {
         setItems(loaded)
         setOffset(loaded.length)
@@ -154,7 +172,7 @@ export function FeedPage() {
   }
 
   useEffect(() => {
-    fetchInitial(category)
+    fetchInitial(category, feedMode)
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFilterChange = (cat: CategoryFilter) => {
@@ -163,13 +181,22 @@ export function FeedPage() {
     setItems([])
     setOffset(0)
     setHasMore(true)
-    fetchInitial(cat)
+    fetchInitial(cat, feedMode)
+  }
+
+  const handleModeChange = (mode: FeedMode) => {
+    if (mode === feedMode) return
+    setFeedMode(mode)
+    setItems([])
+    setOffset(0)
+    setHasMore(true)
+    fetchInitial(category, mode)
   }
 
   const handleLoadMore = async () => {
     setLoadingMore(true)
     try {
-      const { items: more, hasMore: moreExists } = await loadPage(offset, user?.id, category)
+      const { items: more, hasMore: moreExists } = await loadPage(offset, user?.id, category, getFriendIds())
       setItems((prev) => [...prev, ...more])
       setOffset((prev) => prev + more.length)
       setHasMore(moreExists)
@@ -221,7 +248,25 @@ export function FeedPage() {
 
   return (
     <div className="mx-auto max-w-2xl py-6 px-3">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">Лента достижений</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-gray-900">Лента достижений</h1>
+        <div className="flex rounded-md border border-gray-300 overflow-hidden text-sm">
+          {(['all', 'friends'] as FeedMode[]).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => handleModeChange(mode)}
+              className={`px-3 py-1.5 transition-colors ${
+                feedMode === mode
+                  ? 'bg-indigo-600 text-white font-semibold'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {mode === 'all' ? 'Все' : 'Друзья'}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Category filters */}
       <div className="flex flex-wrap gap-2 mb-5">
@@ -245,7 +290,11 @@ export function FeedPage() {
         <div className="py-10 text-center text-sm text-gray-500">Загрузка...</div>
       ) : items.length === 0 ? (
         <div className="border border-dashed border-gray-300 rounded-md py-10 text-center">
-          <span className="text-sm text-gray-500">Достижений пока нет</span>
+          <span className="text-sm text-gray-500">
+            {feedMode === 'friends'
+              ? 'У вас пока нет друзей с достижениями'
+              : 'Достижений пока нет'}
+          </span>
         </div>
       ) : (
         <div className="flex flex-col gap-3">

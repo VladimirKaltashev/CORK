@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/entities/auth'
+import { useFriendsStore } from '@/entities/friends'
 import { showToast } from '@/shared/lib/api'
 
 const NAV_LINKS = [
   { to: '/feed', label: 'Лента' },
+  { to: '/search', label: 'Поиск' },
   { to: '/profile/me', label: 'Профиль' },
 ] as const
 
@@ -12,6 +14,12 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { token, user, logout } = useAuthStore()
   const navigate = useNavigate()
+  const { loadFriendships, pendingIncomingCount } = useFriendsStore()
+  const pendingCount = token && user ? pendingIncomingCount() : 0
+
+  useEffect(() => {
+    if (token && user) loadFriendships(user.id)
+  }, [token, user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLogout = () => {
     logout()
@@ -43,6 +51,31 @@ export function Header() {
                 {label}
               </NavLink>
             ))}
+          {token && (
+            <>
+              <NavLink
+                to="/friends"
+                className={({ isActive }) =>
+                  `text-sm font-medium transition-colors ${isActive ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'}`
+                }
+              >
+                Друзья
+              </NavLink>
+              <NavLink
+                to="/friend-requests"
+                className={({ isActive }) =>
+                  `relative text-sm font-medium transition-colors ${isActive ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'}`
+                }
+              >
+                Заявки
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1.5 -right-3 inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                    {pendingCount}
+                  </span>
+                )}
+              </NavLink>
+            </>
+          )}
           {token && user?.role === 'admin' && (
             <NavLink
               to="/admin"
@@ -116,6 +149,33 @@ export function Header() {
                 {label}
               </NavLink>
             ))}
+          {token && (
+            <>
+              <NavLink
+                to="/friends"
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600' : 'text-gray-600'}`
+                }
+              >
+                Друзья
+              </NavLink>
+              <NavLink
+                to="/friend-requests"
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-2 py-2 text-sm font-medium ${isActive ? 'text-indigo-600' : 'text-gray-600'}`
+                }
+              >
+                Заявки
+                {pendingCount > 0 && (
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                    {pendingCount}
+                  </span>
+                )}
+              </NavLink>
+            </>
+          )}
           {token && user?.role === 'admin' && (
             <NavLink
               to="/admin"
