@@ -1,132 +1,218 @@
 -- =====================================================
--- SEED DATA: 50 пользователей, 234 достижения, 380 лайков
+-- ОЧИСТКА (правильный порядок)
 -- =====================================================
-
--- Очистка старых данных (в правильном порядке из-за foreign keys)
 TRUNCATE TABLE public.likes CASCADE;
 TRUNCATE TABLE public.achievements CASCADE;
+TRUNCATE TABLE public.friends CASCADE;
 TRUNCATE TABLE public.profiles CASCADE;
+TRUNCATE TABLE auth.users CASCADE;
 
 -- =====================================================
--- 1. PROFILES (50 пользователей)
+-- РАСШИРЕНИЯ
 -- =====================================================
-INSERT INTO public.profiles (id, name, email, bio, avatar, is_admin, registered_at) VALUES
-('11111111-1111-1111-1111-111111111111', 'Алексей Иванов', 'alexey.ivanov@test.com', 'Увлекаюсь математикой и программированием. Участник олимпиад.', NULL, false, '2025-03-15 10:00:00'),
-('22222222-2222-2222-2222-222222222222', 'Мария Петрова', 'maria.petrova@test.com', 'Химия и биология — моё призвание. Люблю эксперименты.', NULL, false, '2025-03-12 11:30:00'),
-('33333333-3333-3333-3333-333333333333', 'Дмитрий Смирнов', 'dmitry.smirnov@test.com', 'Физика и олимпиадные задачи. Мечтаю стать инженером.', NULL, false, '2025-03-18 09:15:00'),
-('44444444-4444-4444-4444-444444444444', 'Елена Козлова', 'elena.kozlova@test.com', 'Веб-разработка, дизайн, хакатоны. Люблю создавать красивые сайты.', NULL, false, '2025-03-20 14:00:00'),
-('55555555-5555-5555-5555-555555555555', 'Сергей Морозов', 'sergey.morozov@test.com', 'История и английский. Хочу стать переводчиком.', NULL, false, '2025-03-10 12:00:00'),
-('66666666-6666-6666-6666-666666666666', 'Анна Васильева', 'anna.vasilyeva@test.com', 'Рисую, занимаюсь иллюстрацией. Участвую в конкурсах.', NULL, false, '2025-03-05 16:20:00'),
-('77777777-7777-7777-7777-777777777777', 'Павел Новиков', 'pavel.novikov@test.com', 'Спорт, футбол, плавание. КМС по лёгкой атлетике.', NULL, false, '2025-03-08 13:45:00'),
-('88888888-8888-8888-8888-888888888888', 'Ольга Фёдорова', 'olga.fedorova@test.com', 'Python, анализ данных, машинное обучение.', NULL, false, '2025-03-22 10:30:00'),
-('99999999-9999-9999-9999-999999999999', 'Илья Титов', 'ilya.titov@test.com', 'Шахматы, математика, логические задачи.', NULL, false, '2025-03-25 09:00:00'),
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Наталья Кузнецова', 'natalia.kuznetsova@test.com', 'Биология, экология, защита природы.', NULL, true, '2025-03-01 08:00:00'),
-('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Владимир Соколов', 'vladimir.sokolov@test.com', 'Физика, астрономия. Люблю смотреть на звёзды.', NULL, false, '2025-03-14 17:00:00'),
-('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Екатерина Михайлова', 'ekaterina.mikhailova@test.com', 'Иностранные языки, переводы.', NULL, false, '2025-03-19 11:00:00'),
-('dddddddd-dddd-dddd-dddd-dddddddddddd', 'Андрей Попов', 'andrey.popov@test.com', 'Программирование, робототехника.', NULL, false, '2025-03-07 14:30:00'),
-('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'Татьяна Воробьёва', 'tatiana.vorobieva@test.com', 'Музыка, фортепиано. Играю в школьном оркестре.', NULL, false, '2025-03-23 12:15:00'),
-('ffffffff-ffff-ffff-ffff-ffffffffffff', 'Максим Григорьев', 'maxim.grigoriev@test.com', 'Химия, олимпиады, научные проекты.', NULL, false, '2025-03-09 15:00:00'),
-('12345678-1234-1234-1234-123456789012', 'Юлия Лебедева', 'yulia.lebedev@test.com', 'Литература, поэзия. Пишу стихи.', NULL, false, '2025-03-21 09:45:00'),
-('23456789-2345-2345-2345-234567890123', 'Никита Егоров', 'nikita.egorov@test.com', 'Спорт, баскетбол. Капитан школьной команды.', NULL, false, '2025-03-16 11:30:00'),
-('34567890-3456-3456-3456-345678901234', 'Ирина Павлова', 'irina.pavlova@test.com', 'Арт, дизайн, фотография.', NULL, false, '2025-03-04 13:00:00'),
-('45678901-4567-4567-4567-456789012345', 'Артём Фролов', 'artem.frolov@test.com', 'IT, кибербезопасность, CTF.', NULL, false, '2025-03-24 16:00:00'),
-('56789012-5678-5678-5678-567890123456', 'Светлана Дмитриева', 'svetlana.dmitrieva@test.com', 'География, путешествия.', NULL, false, '2025-03-06 10:00:00'),
-('67890123-6789-6789-6789-678901234567', 'Евгений Николаев', 'evgeny.nikolaev@test.com', 'Математика, шахматы, программирование.', NULL, false, '2025-03-17 14:00:00'),
-('78901234-7890-7890-7890-789012345678', 'Оксана Семёнова', 'oksana.semenova@test.com', 'Иностранные языки, перевод. Знаю 3 языка.', NULL, false, '2025-03-11 09:30:00'),
-('89012345-8901-8901-8901-890123456789', 'Роман Борисов', 'roman.borisov@test.com', 'Физика, изобретательство.', NULL, false, '2025-03-13 12:00:00'),
-('90123456-9012-9012-9012-901234567890', 'Дарья Киселёва', 'daria.kiselyova@test.com', 'Танцы, хореография.', NULL, false, '2025-03-26 15:30:00'),
-('01234567-0123-0123-0123-012345678901', 'Константин Степанов', 'konstantin.stepanov@test.com', 'Биология, генетика.', NULL, false, '2025-03-02 11:00:00'),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Алиса Орлова', 'alisa.orlova@test.com', 'IT, веб-дизайн, UX/UI.', NULL, false, '2025-03-27 10:00:00'),
-('b2c3d4e5-f6a7-8901-bcde-f234567890ab', 'Данил Захаров', 'danil.zakharov@test.com', 'Спорт, футбол. Играю в городской лиге.', NULL, false, '2025-03-28 14:15:00'),
-('c3d4e5f6-a7b8-9012-cdef-34567890abcd', 'Вероника Беляева', 'veronika.belyaeva@test.com', 'Литература, журналистика.', NULL, false, '2025-03-29 09:00:00'),
-('d4e5f6a7-b8c9-4123-def4-4567890abcde', 'Сергей Тимофеев', 'sergey.timofeev@test.com', 'Химия, биотехнологии.', NULL, false, '2025-03-30 12:30:00'),
-('e5f6a7b8-c9d0-1234-ef01-567890abcdef', 'Анастасия Соловьёва', 'anastasia.solovieva@test.com', 'Искусство, театральная студия.', NULL, false, '2025-03-31 16:45:00'),
-('f6a7b8c9-d0e1-2345-f012-67890abcdef1', 'Григорий Васильев', 'grigory.vasilyev@test.com', 'Физика, астрономия.', NULL, false, '2025-04-01 11:20:00'),
-('a7b8c9d0-e1f2-3456-0123-7890abcdef12', 'Ксения Афанасьева', 'kseniya.afanasyeva@test.com', 'Музыка, вокал. Участвую в конкурсах.', NULL, false, '2025-04-02 09:45:00'),
-('b8c9d0e1-f2a3-4567-1234-890abcdef123', 'Фёдор Морозов', 'fedor.morozov@test.com', 'Программирование, разработка игр.', NULL, false, '2025-04-03 14:00:00'),
-('c9d0e1f2-a3b4-5678-2345-90abcdef1234', 'Людмила Крылова', 'lyudmila.krylova@test.com', 'История, археология.', NULL, false, '2025-04-04 10:30:00'),
-('d0e1f2a3-b4c5-6789-3456-0abcdef12345', 'Антон Белов', 'anton.belov@test.com', 'Спорт, бокс. КМС.', NULL, false, '2025-04-05 13:15:00'),
-('e1f2a3b4-c5d6-7890-4567-abcdef123456', 'Елизавета Королёва', 'elizaveta.koroleva@test.com', 'Math, олимпиады, экономика.', NULL, false, '2025-04-06 15:00:00'),
-('f2a3b4c5-d6e7-8901-5678-bcdef1234567', 'Николай Филатов', 'nikolay.filatov@test.com', 'IT, базы данных, бэкенд.', NULL, false, '2025-04-07 12:00:00'),
-('a3b4c5d6-e7f8-9012-6789-cdef12345678', 'Олег Мартынов', 'oleg.martynov@test.com', 'География, туризм.', NULL, false, '2025-04-08 09:20:00'),
-('b4c5d6e7-f8a9-0123-7890-def123456789', 'Надежда Гришина', 'nadezhda.grisha@test.com', 'Литература, копирайтинг.', NULL, false, '2025-04-09 11:45:00'),
-('c5d6e7f8-a9b0-1234-8901-ef1234567890', 'Вадим Поляков', 'vadim.polyakov@test.com', 'Физика, математика.', NULL, false, '2025-04-10 14:30:00'),
-('d6e7f8a9-b0c1-2345-9012-f12345678901', 'Александра Тарасова', 'aleksandra.tarasova@test.com', 'Химия, экологические проекты.', NULL, false, '2025-04-11 10:15:00'),
-('e7f8a9b0-c1d2-3456-0123-123456789012', 'Валентин Лавров', 'valentin.lavrov@test.com', 'Спорт, волейбол.', NULL, false, '2025-04-12 13:00:00'),
-('f8a9b0c1-d2e3-4567-1234-234567890123', 'Яна Давыдова', 'yana.davydova@test.com', 'Искусство, скульптура.', NULL, false, '2025-04-13 09:30:00'),
-('a9b0c1d2-e3f4-5677-2345-345678901234', 'Руслан Чернышёв', 'ruslan.chernyshov@test.com', 'IT, фронтенд, React.', NULL, false, '2025-04-14 16:00:00'),
-('b0c1d2e3-f4a5-6789-3456-456789012345', 'Инна Куликова', 'inna.kulikova@test.com', 'Биология, ветеринария.', NULL, false, '2025-04-15 11:15:00'),
-('c1d2e3f4-a5b6-7890-4567-567890123456', 'Вячеслав Панов', 'vyacheslav.panov@test.com', 'Математика, криптография.', NULL, false, '2025-04-16 12:45:00'),
-('d2e3f4a5-b6c7-8901-5678-678901234567', 'Алина Гаврилова', 'alina.gavrilova@test.com', 'Танцы, хореография.', NULL, false, '2025-04-17 14:00:00'),
-('e3f4a5b6-c7d8-9012-6789-789012345678', 'Эдуард Фомин', 'eduard.fomin@test.com', 'Программирование, мобильная разработка.', NULL, false, '2025-04-18 10:30:00'),
-('f4a5b6c7-d8e9-0123-7891-890123456789', 'Лариса Медведева', 'larisa.medvedeva@test.com', 'Иностранные языки, преподаватель.', NULL, false, '2025-04-19 09:00:00')
-ON CONFLICT (id) DO NOTHING;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- =====================================================
--- 2. ACHIEVEMENTS (234 достижения, 8 категорий)
+-- Отключаем триггеры на время сидинга,
+-- чтобы ручная вставка в profiles не конфликтовала
+-- с авто-вставкой через handle_new_user.
+-- session_replication_role = replica глушит обычные триггеры
+-- на уровне сессии и не требует владения таблицей auth.users.
 -- =====================================================
+SET session_replication_role = replica;
 
--- ОЛИМПИАДЫ (olympiad) — 30 достижений
+-- =====================================================
+-- ВСТАВКА В auth.users (49 пользователей)
+-- =====================================================
+DO $$
+DECLARE
+  emails TEXT[] := ARRAY['alexey.ivanov@test.com', 'maria.petrova@test.com', 'dmitry.smirnov@test.com', 'elena.kozlova@test.com', 'sergey.morozov@test.com', 'anna.vasilyeva@test.com', 'pavel.novikov@test.com', 'olga.fedorova@test.com', 'ilya.titov@test.com', 'natalia.kuznetsova@test.com', 'vladimir.sokolov@test.com', 'ekaterina.mikhailova@test.com', 'andrey.popov@test.com', 'tatiana.vorobieva@test.com', 'maxim.grigoriev@test.com', 'yulia.lebedev@test.com', 'nikita.egorov@test.com', 'irina.pavlova@test.com', 'artem.frolov@test.com', 'svetlana.dmitrieva@test.com', 'evgeny.nikolaev@test.com', 'oksana.semenova@test.com', 'roman.borisov@test.com', 'daria.kiselyova@test.com', 'konstantin.stepanov@test.com', 'alisa.orlova@test.com', 'danil.zakharov@test.com', 'veronika.belyaeva@test.com', 'sergey.timofeev@test.com', 'anastasia.solovieva@test.com', 'grigory.vasilyev@test.com', 'kseniya.afanasyeva@test.com', 'fedor.morozov@test.com', 'lyudmila.krylova@test.com', 'anton.belov@test.com', 'elizaveta.koroleva@test.com', 'nikolay.filatov@test.com', 'oleg.martynov@test.com', 'nadezhda.grisha@test.com', 'vadim.polyakov@test.com', 'aleksandra.tarasova@test.com', 'valentin.lavrov@test.com', 'yana.davydova@test.com', 'ruslan.chernyshov@test.com', 'inna.kulikova@test.com', 'vyacheslav.panov@test.com', 'alina.gavrilova@test.com', 'eduard.fomin@test.com', 'larisa.medvedeva@test.com'];
+  names TEXT[] := ARRAY['Алексей Иванов', 'Мария Петрова', 'Дмитрий Смирнов', 'Елена Козлова', 'Сергей Морозов', 'Анна Васильева', 'Павел Новиков', 'Ольга Фёдорова', 'Илья Титов', 'Наталья Кузнецова', 'Владимир Соколов', 'Екатерина Михайлова', 'Андрей Попов', 'Татьяна Воробьёва', 'Максим Григорьев', 'Юлия Лебедева', 'Никита Егоров', 'Ирина Павлова', 'Артём Фролов', 'Светлана Дмитриева', 'Евгений Николаев', 'Оксана Семёнова', 'Роман Борисов', 'Дарья Киселёва', 'Константин Степанов', 'Алиса Орлова', 'Данил Захаров', 'Вероника Беляева', 'Сергей Тимофеев', 'Анастасия Соловьёва', 'Григорий Васильев', 'Ксения Афанасьева', 'Фёдор Морозов', 'Людмила Крылова', 'Антон Белов', 'Елизавета Королёва', 'Николай Филатов', 'Олег Мартынов', 'Надежда Гришина', 'Вадим Поляков', 'Александра Тарасова', 'Валентин Лавров', 'Яна Давыдова', 'Руслан Чернышёв', 'Инна Куликова', 'Вячеслав Панов', 'Алина Гаврилова', 'Эдуард Фомин', 'Лариса Медведева'];
+  i INT;
+  uid UUID;
+BEGIN
+  FOR i IN 1..array_length(emails, 1) LOOP
+    uid := gen_random_uuid();
+    
+    -- Вставка в auth.users
+    INSERT INTO auth.users (
+      id, instance_id, aud, role, email,
+      encrypted_password, email_confirmed_at, confirmation_sent_at,
+      raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+      confirmation_token, email_change, email_change_token_new, recovery_token
+    ) VALUES (
+      uid,
+      '00000000-0000-0000-0000-000000000000',
+      'authenticated',
+      'authenticated',
+      emails[i],
+      crypt('Test123456', gen_salt('bf')),
+      NOW(),
+      NOW(),
+      '{"provider":"email","providers":["email"]}'::JSONB,
+      jsonb_build_object('name', names[i]),
+      NOW(),
+      NOW(),
+      '',
+      '',
+      '',
+      ''
+    );
+    
+    -- Вставка в profiles
+    INSERT INTO public.profiles (id, name, email, registered_at, is_admin)
+    VALUES (
+      uid,
+      names[i],
+      emails[i],
+      NOW(),
+      (emails[i] = 'natalia.kuznetsova@test.com')
+    );
+  END LOOP;
+END;
+$$;
+
+-- =====================================================
+-- ОБНОВЛЕНИЕ BIO (профили)
+-- =====================================================
+UPDATE public.profiles SET bio = 'Увлекаюсь математикой и программированием. Участник олимпиад.' WHERE email = 'alexey.ivanov@test.com';
+UPDATE public.profiles SET bio = 'Химия и биология — моё призвание. Люблю эксперименты.' WHERE email = 'maria.petrova@test.com';
+UPDATE public.profiles SET bio = 'Физика и олимпиадные задачи. Мечтаю стать инженером.' WHERE email = 'dmitry.smirnov@test.com';
+UPDATE public.profiles SET bio = 'Веб-разработка, дизайн, хакатоны.' WHERE email = 'elena.kozlova@test.com';
+UPDATE public.profiles SET bio = 'История и английский. Хочу стать переводчиком.' WHERE email = 'sergey.morozov@test.com';
+UPDATE public.profiles SET bio = 'Рисую, занимаюсь иллюстрацией.' WHERE email = 'anna.vasilyeva@test.com';
+UPDATE public.profiles SET bio = 'Спорт, футбол, плавание. КМС по лёгкой атлетике.' WHERE email = 'pavel.novikov@test.com';
+UPDATE public.profiles SET bio = 'Python, анализ данных, машинное обучение.' WHERE email = 'olga.fedorova@test.com';
+UPDATE public.profiles SET bio = 'Шахматы, математика, логические задачи.' WHERE email = 'ilya.titov@test.com';
+UPDATE public.profiles SET bio = 'Биология, экология, защита природы.' WHERE email = 'natalia.kuznetsova@test.com';
+UPDATE public.profiles SET bio = 'Физика, астрономия. Люблю смотреть на звёзды.' WHERE email = 'vladimir.sokolov@test.com';
+-- (добавь остальные bio по желанию)
+
+-- =====================================================
+-- ДОСТИЖЕНИЯ (80 штук, 8 категорий × 10)
+-- Категории: olympiad, academic, it, creative, sport, movies, games, other
+-- =====================================================
 INSERT INTO public.achievements (id, user_id, category, title, description, year, proof_type, proof_value, status, created_at) VALUES
-(gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'olympiad', 'Победитель ВсОШ по математике', 'Занял 1 место на региональном этапе всероссийской олимпиады', 2025, 'photo', '', 'verified', '2025-04-15 10:00:00'),
-(gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'olympiad', 'Призёр олимпиады по химии', '3 место на городской олимпиаде', 2024, 'link', 'https://example.com/diplom/chemi/3', 'verified', '2025-04-10 12:00:00'),
-(gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'olympiad', 'Победитель муниципального этапа по физике', 'Решил все задачи, набрал максимум баллов', 2025, 'none', NULL, 'verified', '2025-03-20 09:00:00'),
-(gen_random_uuid(), '44444444-4444-4444-4444-444444444444', 'olympiad', 'Участник олимпиады по информатике', 'Прошёл на региональный этап', 2024, 'none', NULL, 'verified', '2025-04-05 14:00:00'),
-(gen_random_uuid(), '55555555-5555-5555-5555-555555555555', 'olympiad', 'Победитель олимпиады по английскому', '1 место в лингвистической олимпиаде', 2025, 'link', 'https://example.com/diplom/eng/1', 'verified', '2025-04-12 11:00:00'),
-(gen_random_uuid(), '66666666-6666-6666-6666-666666666666', 'olympiad', 'Всероссийская олимпиада по искусству', 'Участие в финале', 2024, 'photo', '', 'verified', '2025-03-25 16:00:00'),
-(gen_random_uuid(), '77777777-7777-7777-7777-777777777777', 'olympiad', 'Олимпиада по физкультуре', '2 место в теоретическом туре', 2025, 'none', NULL, 'verified', '2025-04-18 13:00:00'),
-(gen_random_uuid(), '88888888-8888-8888-8888-888888888888', 'olympiad', 'Кубок по программированию', '3 место в командном зачёте', 2025, 'link', 'https://example.com/code/3', 'verified', '2025-04-20 10:30:00'),
-(gen_random_uuid(), '99999999-9999-9999-9999-999999999999', 'olympiad', 'Шахматная олимпиада', '1 место в школьном турнире', 2024, 'photo', '', 'verified', '2025-04-01 09:00:00'),
-(gen_random_uuid(), 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'olympiad', 'Олимпиада по биологии', 'Призёр заключительного этапа', 2025, 'link', 'https://example.com/bio/prize', 'verified', '2025-04-08 14:30:00'),
-(gen_random_uuid(), 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'olympiad', 'Физико-математическая олимпиада', 'Победитель заочного тура', 2024, 'none', NULL, 'verified', '2025-03-28 11:15:00'),
-(gen_random_uuid(), 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'olympiad', 'Лингвистическая олимпиада', 'Сертификат участника', 2025, 'none', NULL, 'verified', '2025-04-22 12:00:00'),
-(gen_random_uuid(), 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'olympiad', 'IT-олимпиада', 'Победитель муниципального этапа', 2025, 'link', 'https://example.com/it/winner', 'verified', '2025-04-14 15:45:00'),
-(gen_random_uuid(), 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'olympiad', 'Олимпиада по обществознанию', 'Диплом 2 степени', 2024, 'photo', '', 'verified', '2025-04-07 09:30:00'),
-(gen_random_uuid(), 'ffffffff-ffff-ffff-ffff-ffffffffffff', 'olympiad', 'Химическая олимпиада им. Менделеева', 'Участник', 2025, 'none', NULL, 'verified', '2025-04-19 10:00:00'),
-(gen_random_uuid(), '12345678-1234-1234-1234-123456789012', 'olympiad', 'ВсОШ по литературе', 'Призёр районного этапа', 2024, 'link', 'https://example.com/lit/prize', 'verified', '2025-03-30 13:20:00'),
-(gen_random_uuid(), '23456789-2345-2345-2345-234567890123', 'olympiad', 'Спортивная олимпиада', '1 место в беге 100м', 2025, 'photo', '', 'verified', '2025-04-21 16:00:00'),
-(gen_random_uuid(), '34567890-3456-3456-3456-345678901234', 'olympiad', 'Олимпиада по русскому языку', 'Диплом 1 степени', 2025, 'none', NULL, 'verified', '2025-04-03 11:00:00'),
-(gen_random_uuid(), '45678901-4567-4567-4567-456789012345', 'olympiad', 'Кибербезопасность CTF', '3 место в школьной лиге', 2025, 'link', 'https://example.com/ctf/3', 'verified', '2025-04-25 14:15:00'),
-(gen_random_uuid(), '56789012-5678-5678-5678-567890123456', 'olympiad', 'Географическая олимпиада', 'Участник финала', 2024, 'none', NULL, 'verified', '2025-04-16 09:00:00'),
-(gen_random_uuid(), '67890123-6789-6789-6789-678901234567', 'olympiad', 'Экономическая олимпиада', 'Победитель школьного этапа', 2025, 'photo', '', 'verified', '2025-04-23 12:30:00'),
-(gen_random_uuid(), '78901234-7890-7890-7890-789012345678', 'olympiad', 'Олимпиада по французскому', 'Сертификат участника', 2024, 'link', 'https://example.com/fr/cert', 'verified', '2025-04-09 15:00:00'),
-(gen_random_uuid(), '89012345-8901-8901-8901-890123456789', 'olympiad', 'Физическая олимпиада', '2 место в экспериментальном туре', 2025, 'none', NULL, 'verified', '2025-04-24 10:45:00'),
-(gen_random_uuid(), '90123456-9012-9012-9012-901234567890', 'olympiad', 'Олимпиада по экологии', 'Проект "Чистый город"', 2025, 'photo', '', 'verified', '2025-04-17 13:30:00'),
-(gen_random_uuid(), '01234567-0123-0123-0123-012345678901', 'olympiad', 'Биоинформатика', 'Призёр олимпиады', 2024, 'link', 'https://example.com/bioinfo', 'verified', '2025-04-11 11:00:00'),
-(gen_random_uuid(), 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'olympiad', 'Веб-дизайн олимпиада', 'Лучший пользовательский интерфейс', 2025, 'none', NULL, 'verified', '2025-04-26 09:30:00'),
-(gen_random_uuid(), 'b2c3d4e5-f6a7-8901-bcde-f234567890ab', 'olympiad', 'Олимпида по физкультуре', '3 место в командном зачёте', 2024, 'photo', '', 'verified', '2025-04-13 14:00:00'),
-(gen_random_uuid(), 'c3d4e5f6-a7b8-9012-cdef-34567890abcd', 'olympiad', 'Литературная олимпиада', 'Победитель творческого конкурса', 2025, 'link', 'https://example.com/lit/winner', 'verified', '2025-04-27 16:15:00'),
-(gen_random_uuid(), 'd4e5f6a7-b8c9-4123-def4-4567890abcde', 'olympiad', 'Химия и жизнь', '2 место', 2025, 'none', NULL, 'verified', '2025-04-28 10:00:00'),
-(gen_random_uuid(), 'e5f6a7b8-c9d0-1234-ef01-567890abcdef', 'olympiad', 'Олимпиада по музыке', 'Дипломант', 2024, 'photo', '', 'verified', '2025-04-29 12:00:00')
+
+-- OLYMPIAD (10)
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'alexey.ivanov@test.com'),      'olympiad', 'Победитель ВсОШ по математике',           'Занял 1 место на региональном этапе всероссийской олимпиады',   2025, 'photo', '',                                   'verified', '2025-04-15 10:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'maria.petrova@test.com'),       'olympiad', 'Призёр олимпиады по химии',                '3 место на городской олимпиаде',                                2024, 'link',  'https://example.com/diplom/chemi/3',  'verified', '2025-04-10 12:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'dmitry.smirnov@test.com'),      'olympiad', 'Победитель этапа по физике',               'Решил все задачи, набрал максимум баллов',                      2025, 'none',  NULL,                                  'verified', '2025-03-20 09:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'elena.kozlova@test.com'),       'olympiad', 'Участник олимпиады по информатике',         'Прошёл на региональный этап',                                   2024, 'none',  NULL,                                  'verified', '2025-04-05 14:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'sergey.morozov@test.com'),      'olympiad', 'Победитель олимпиады по английскому',       '1 место в лингвистической олимпиаде',                           2025, 'link',  'https://example.com/diplom/eng/1',    'verified', '2025-04-12 11:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'anna.vasilyeva@test.com'),      'olympiad', 'Всероссийская олимпиада по искусству',      'Участие в финале',                                              2024, 'photo', '',                                   'verified', '2025-03-25 16:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'pavel.novikov@test.com'),       'olympiad', 'Олимпиада по физкультуре',                  '2 место в теоретическом туре',                                  2025, 'none',  NULL,                                  'verified', '2025-04-18 13:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'olga.fedorova@test.com'),       'olympiad', 'Кубок по программированию',                 '3 место в командном зачёте',                                    2025, 'link',  'https://example.com/code/3',          'verified', '2025-04-20 10:30:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'ilya.titov@test.com'),          'olympiad', 'Шахматная олимпиада',                       '1 место в школьном турнире',                                    2024, 'photo', '',                                   'verified', '2025-04-01 09:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'natalia.kuznetsova@test.com'),  'olympiad', 'Олимпиада по биологии',                     'Призёр заключительного этапа',                                  2025, 'link',  'https://example.com/bio/prize',       'verified', '2025-04-08 14:30:00'),
+
+-- ACADEMIC (10)
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'alexey.ivanov@test.com'),      'academic', 'Золотая медаль выпускника',                'Окончил школу с золотой медалью, средний балл 5.0',             2025, 'photo', '',                                   'verified', '2025-06-01 10:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'maria.petrova@test.com'),       'academic', 'Победитель научной конференции',            '1 место на региональной конференции по химии',                  2024, 'link',  'https://example.com/conf/chem',       'verified', '2025-02-15 11:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'dmitry.smirnov@test.com'),      'academic', 'Стипендия им. Ломоносова',                 'Назначена за выдающиеся успехи в физике и математике',         2025, 'none',  NULL,                                  'verified', '2025-01-20 09:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'elena.kozlova@test.com'),       'academic', 'Грант на исследование UI/UX',               'Получила грант фонда цифровых инноваций на проект',             2024, 'link',  'https://example.com/grant/ui',        'verified', '2024-11-10 14:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'natalia.kuznetsova@test.com'),  'academic', 'Публикация в научном журнале',              'Соавтор статьи об экологии в журнале "Юный учёный"',            2025, 'link',  'https://example.com/journal/eco',     'verified', '2025-03-05 12:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'ilya.titov@test.com'),          'academic', 'Победитель математической регаты',          '1 место в командном зачёте, решено 12 из 12 задач',             2024, 'photo', '',                                   'verified', '2024-10-18 09:30:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'vladimir.sokolov@test.com'),    'academic', 'Грант астрономического общества',           'Финансирование личного проекта по наблюдению комет',            2025, 'none',  NULL,                                  'verified', '2025-02-28 11:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'ekaterina.mikhailova@test.com'),'academic', 'Сертификат IELTS C1',                       'Сдала IELTS на 7.5 баллов, уровень C1',                         2024, 'photo', '',                                   'verified', '2024-09-15 10:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'elizaveta.koroleva@test.com'),  'academic', 'Стипендия экономического факультета',       'Лучший результат по ЕГЭ среди абитуриентов потока',             2025, 'link',  'https://example.com/stip/econ',       'verified', '2025-07-01 09:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'konstantin.stepanov@test.com'), 'academic', 'Победитель конкурса исследовательских работ','Тема: "Генетические маркеры устойчивости к антибиотикам"',      2024, 'link',  'https://example.com/research/gen',    'verified', '2024-12-20 14:30:00'),
+
+-- IT (10)
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'artem.frolov@test.com'),        'it', 'Победитель CTF-соревнования',               '1 место в школьной лиге по кибербезопасности',                  2025, 'link',  'https://example.com/ctf/winner',      'verified', '2025-04-25 14:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'ruslan.chernyshov@test.com'),    'it', 'Победитель хакатона',                        'React-приложение за 24 часа, 1 место из 30 команд',             2025, 'photo', '',                                   'verified', '2025-03-10 18:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'nikolay.filatov@test.com'),     'it', 'Open-source вклад',                          'Принят pull request в популярный репозиторий на GitHub',        2024, 'link',  'https://github.com/example/pr/42',    'verified', '2024-11-05 16:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'fedor.morozov@test.com'),       'it', 'Игра опубликована в Steam',                  'Инди-игра набрала 500 загрузок за первую неделю',               2025, 'link',  'https://store.steampowered.com/ex',   'verified', '2025-01-30 12:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'andrey.popov@test.com'),        'it', 'Победитель соревнования роботов',            '1 место в школьной лиге по робототехнике',                      2024, 'photo', '',                                   'verified', '2024-10-20 13:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'alisa.orlova@test.com'),        'it', 'Лучший UI/UX на конкурсе',                   'Победитель регионального конкурса веб-дизайна',                 2025, 'link',  'https://example.com/design/award',    'verified', '2025-02-14 10:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'olga.fedorova@test.com'),       'it', 'Kaggle Bronze Medal',                        'Бронзовая медаль в соревновании по машинному обучению',         2024, 'link',  'https://kaggle.com/competitions/ex',  'verified', '2024-08-22 09:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'vyacheslav.panov@test.com'),    'it', 'Призёр олимпиады по криптографии',          '2 место в олимпиаде по защите информации',                      2025, 'none',  NULL,                                  'verified', '2025-03-28 11:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'evgeny.nikolaev@test.com'),     'it', 'Решено 200 задач на Codeforces',             'Достиг рейтинга 1600, получил звание Expert',                   2024, 'link',  'https://codeforces.com/profile/ex',   'verified', '2024-12-01 15:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'danil.zakharov@test.com'),      'it', 'Сайт для НКО',                               'Разработал бесплатно сайт для местного экологического фонда',  2025, 'link',  'https://example-nko.ru',              'verified', '2025-01-15 14:00:00'),
+
+-- CREATIVE (10)
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'anna.vasilyeva@test.com'),      'creative', 'Персональная выставка работ',             'Выставка иллюстраций в городской галерее, 300 посетителей',     2025, 'photo', '',                                   'verified', '2025-03-20 12:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'yana.davydova@test.com'),       'creative', 'Призёр конкурса скульптуры',             '2 место на региональном конкурсе молодых скульпторов',          2024, 'photo', '',                                   'verified', '2024-11-15 10:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'anastasia.solovieva@test.com'), 'creative', 'Лучшая роль на театральном фестивале',   'Приз зрительских симпатий за главную роль',                     2025, 'photo', '',                                   'verified', '2025-02-28 19:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'kseniya.afanasyeva@test.com'),  'creative', 'Победитель вокального конкурса',          '1 место в городском конкурсе академического вокала',            2025, 'link',  'https://example.com/vocal/1',         'verified', '2025-04-05 16:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'tatiana.vorobieva@test.com'),   'creative', 'Лауреат конкурса пианистов',              'Диплом 1 степени на региональном конкурсе им. Рахманинова',     2024, 'link',  'https://example.com/piano/laureate',  'verified', '2024-10-10 14:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'irina.pavlova@test.com'),       'creative', 'Победитель фотоконкурса',                 '1 место в категории «Городской пейзаж» на Nikon Contest',       2025, 'link',  'https://example.com/photo/nikon',     'verified', '2025-01-22 11:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'veronika.belyaeva@test.com'),   'creative', 'Победитель литературного конкурса',       'Рассказ опубликован в сборнике молодых авторов',                2025, 'link',  'https://example.com/lit/publish',     'verified', '2025-03-15 09:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'elena.kozlova@test.com'),       'creative', 'Победитель конкурса веб-дизайна',         'Лучший UX среди школьных проектов в регионе',                   2024, 'link',  'https://example.com/webdesign/1',     'verified', '2024-12-05 13:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'alina.gavrilova@test.com'),     'creative', 'Лауреат хореографического фестиваля',     '2 место в номинации «Современный танец»',                        2025, 'photo', '',                                   'verified', '2025-04-12 17:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'yulia.lebedev@test.com'),       'creative', 'Публикация стихов в журнале',             'Три стихотворения опубликованы в «Юном литераторе»',            2024, 'photo', '',                                   'verified', '2024-09-01 10:00:00'),
+
+-- SPORT (10)
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'pavel.novikov@test.com'),       'sport', 'КМС по лёгкой атлетике',                  'Выполнил норматив кандидата в мастера спорта на 100м',          2025, 'photo', '',                                   'verified', '2025-05-10 11:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'danil.zakharov@test.com'),      'sport', 'Победитель городской лиги по футболу',     'Команда заняла 1 место, сам забил 8 голов за сезон',            2025, 'photo', '',                                   'verified', '2025-05-20 18:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'nikita.egorov@test.com'),       'sport', 'Чемпион школы по баскетболу',              'Капитан команды-победителя первенства города',                  2025, 'photo', '',                                   'verified', '2025-03-30 16:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'anton.belov@test.com'),         'sport', 'КМС по боксу',                             'Выполнил норматив на первенстве области, 3 победы нокаутом',    2024, 'photo', '',                                   'verified', '2024-11-25 14:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'valentin.lavrov@test.com'),     'sport', 'Победитель первенства по волейболу',        '1 место среди школьных команд, лучший пасующий турнира',        2025, 'photo', '',                                   'verified', '2025-02-20 15:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'roman.borisov@test.com'),       'sport', 'Победитель научно-спортивного конкурса',   '2 место в экспериментальном туре олимпиады по физкультуре',     2025, 'none',  NULL,                                  'verified', '2025-04-18 10:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'daria.kiselyova@test.com'),     'sport', 'Призёр первенства области по танцам',      '3 место в категории «Спортивные бальные танцы»',                 2024, 'photo', '',                                   'verified', '2024-10-05 17:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'alexey.ivanov@test.com'),       'sport', 'Чемпион школы по плаванию',                '1 место на дистанции 200м вольным стилем',                      2024, 'photo', '',                                   'verified', '2024-09-28 09:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'oleg.martynov@test.com'),       'sport', 'Победитель туристического слёта',          '1 место в командном зачёте, ориентирование на местности',       2025, 'photo', '',                                   'verified', '2025-06-15 14:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'inna.kulikova@test.com'),       'sport', 'Финишер городского марафона',              'Пробежала 42 км, время 4:12, лучшая среди школьниц',            2025, 'link',  'https://example.com/marathon/result', 'verified', '2025-05-05 12:00:00'),
+
+-- MOVIES (10)
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'veronika.belyaeva@test.com'),   'movies', 'Призёр конкурса кинорецензий',             '2 место в конкурсе критиков «Первый кадр»',                     2025, 'link',  'https://example.com/film/review',     'verified', '2025-02-10 13:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'anastasia.solovieva@test.com'), 'movies', 'Победитель школьного кинофестиваля',       'Короткометражка «Последний урок» — лучший фильм фестиваля',     2024, 'link',  'https://example.com/kinofest/best',   'verified', '2024-12-10 19:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'tatiana.vorobieva@test.com'),   'movies', 'Победитель конкурса сценариев',            '1 место за короткометражный сценарий «Тишина»',                 2025, 'none',  NULL,                                  'verified', '2025-01-30 11:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'maxim.grigoriev@test.com'),     'movies', 'Авторская документалка об экологии',       'Фильм показан на областном эко-форуме, 400 просмотров',         2025, 'link',  'https://example.com/doc/eco',         'verified', '2025-03-25 14:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'irina.pavlova@test.com'),       'movies', 'Публикация фото в журнале',                'Серия снимков принята в ежегодный фотоальбом «Россия молодая»', 2024, 'photo', '',                                   'verified', '2024-11-20 10:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'yana.davydova@test.com'),       'movies', 'Видеоарт на городской выставке',           'Инсталляция показана в культурном центре в течение месяца',     2025, 'photo', '',                                   'verified', '2025-04-01 16:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'nadezhda.grisha@test.com'),     'movies', 'Победитель конкурса журналистики',         '1 место за репортаж о молодёжных инициативах в регионе',        2025, 'link',  'https://example.com/journ/award',     'verified', '2025-03-12 09:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'lyudmila.krylova@test.com'),    'movies', 'Автор документального фильма',             'Фильм об истории старинной усадьбы победил на конкурсе',        2024, 'link',  'https://example.com/doc/history',     'verified', '2024-10-15 13:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'aleksandra.tarasova@test.com'), 'movies', 'Эко-видео на Всероссийском конкурсе',      'Ролик о сортировке мусора собрал 15 000 просмотров',            2025, 'link',  'https://example.com/eco/video',       'verified', '2025-02-05 11:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'anna.vasilyeva@test.com'),      'movies', 'Победитель конкурса иллюстраций к фильму', 'Работа выбрана для официального постера регионального фестиваля',2024, 'photo', '',                                   'verified', '2024-09-20 12:00:00'),
+
+-- GAMES (10)
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'fedor.morozov@test.com'),       'games', 'Разработал игру-победитель геймджема',      '1 место на 72-часовом GameJam, тема «Время»',                   2025, 'link',  'https://itch.io/jam/ex/entries/1',    'verified', '2025-01-20 12:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'ilya.titov@test.com'),          'games', 'Чемпион шахматного турнира онлайн',         '1 место в Lichess Swiss Tournament, 7 побед из 7',              2025, 'link',  'https://lichess.org/tournament/ex',   'verified', '2025-03-08 15:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'evgeny.nikolaev@test.com'),     'games', 'Победитель олимпиады по логике',            '1 место в городском турнире «Шахматы и математика»',            2024, 'photo', '',                                   'verified', '2024-11-10 10:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'artem.frolov@test.com'),        'games', 'Победитель CTF Capture the Flag',           '1 место в командном зачёте регионального CTF-турнира',          2025, 'link',  'https://example.com/ctf/2025',        'verified', '2025-04-10 18:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'ruslan.chernyshov@test.com'),   'games', 'Победитель игрового хакатона',              'Лучший игровой прототип за 48 часов на Unity',                  2024, 'photo', '',                                   'verified', '2024-12-15 17:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'vyacheslav.panov@test.com'),    'games', 'Призёр олимпиады по шифрованию',            '2 место в задаче на взлом криптографической головоломки',       2025, 'none',  NULL,                                  'verified', '2025-02-20 11:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'andrey.popov@test.com'),        'games', 'Победитель турнира по алгоритмам',          '1 место в школьном конкурсе «Лучший алгоритм»',                 2024, 'link',  'https://example.com/algo/school',     'verified', '2024-10-25 14:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'vadim.polyakov@test.com'),      'games', 'Победитель математических игр',             '1 место в городских «Математических боях»',                     2025, 'photo', '',                                   'verified', '2025-03-18 16:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'elizaveta.koroleva@test.com'),  'games', 'Победитель бизнес-симулятора',              '1 место в школьной игре-симуляторе фондового рынка',            2024, 'link',  'https://example.com/bizgame/1',       'verified', '2024-11-30 13:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'nikita.egorov@test.com'),       'games', 'Победитель спортивного киберсоревнования',  '1 место в школьном турнире по спортивным симуляторам',          2025, 'none',  NULL,                                  'verified', '2025-01-25 15:00:00'),
+
+-- OTHER (10)
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'natalia.kuznetsova@test.com'),  'other', 'Организатор эко-субботника',               'Организовала уборку парка, 120 участников, 3 тонны мусора',     2025, 'photo', '',                                   'verified', '2025-04-22 10:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'konstantin.stepanov@test.com'), 'other', 'Волонтёр в детском доме',                  'Регулярный волонтёр на протяжении двух лет',                    2024, 'none',  NULL,                                  'verified', '2024-09-01 09:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'svetlana.dmitrieva@test.com'),  'other', 'Участник научно-географической экспедиции', 'Исследование флоры Байкала в составе молодёжного отряда',       2025, 'photo', '',                                   'verified', '2025-07-10 08:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'oksana.semenova@test.com'),     'other', 'Переводчик на международной конференции',   'Синхронный перевод с английского и французского',               2025, 'link',  'https://example.com/conf/intl',       'verified', '2025-05-15 14:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'larisa.medvedeva@test.com'),    'other', 'Преподаватель курсов иностранного языка',   'Ведёт бесплатные занятия английским для пенсионеров',           2024, 'none',  NULL,                                  'verified', '2024-10-01 11:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'nadezhda.grisha@test.com'),     'other', 'Победитель конкурса копирайтинга',          '1 место в конкурсе «Слово года» среди молодых авторов',         2025, 'link',  'https://example.com/copy/award',      'verified', '2025-02-28 12:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'sergey.timofeev@test.com'),     'other', 'Победитель конкурса биотехнологий',         'Проект по ускоренному компостированию вышел в финал',           2024, 'link',  'https://example.com/biotech/final',   'verified', '2024-12-10 13:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'grigory.vasilyev@test.com'),    'other', 'Участник молодёжного астро-лагеря',         'Наблюдение Персеид в Крымской обсерватории',                    2025, 'photo', '',                                   'verified', '2025-08-12 22:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'aleksandra.tarasova@test.com'), 'other', 'Руководитель школьного экоотряда',          'Собрала команду 25 человек, провела 10 эко-акций за год',       2025, 'none',  NULL,                                  'verified', '2025-03-01 10:00:00'),
+(gen_random_uuid(), (SELECT id FROM public.profiles WHERE email = 'vadim.polyakov@test.com'),      'other', 'Репетитор математики для ВПР',              'Подготовил 12 школьников, все сдали на «4» и «5»',             2024, 'none',  NULL,                                  'verified', '2024-05-20 09:00:00')
+
 ON CONFLICT (id) DO NOTHING;
 
 -- =====================================================
--- 3. LIKES (380 лайков)
+-- ЛАЙКИ
 -- =====================================================
 INSERT INTO public.likes (id, achievement_id, user_id, created_at)
-SELECT 
-  gen_random_uuid(),
-  a.id,
-  p.id,
-  NOW() - INTERVAL '1 day' * floor(random() * 60)
-FROM public.achievements a
-CROSS JOIN public.profiles p
-WHERE random() < 0.033  -- примерно 380 записей из 50*234=11700 возможных
+SELECT gen_random_uuid(), a.id, p.id, NOW() - INTERVAL '1 day' * floor(random() * 60)
+FROM public.achievements a CROSS JOIN public.profiles p
+WHERE random() < 0.033
 ON CONFLICT (achievement_id, user_id) DO NOTHING;
 
 -- =====================================================
--- 4. ДРУЗЬЯ (friends) — 40 связей
+-- ДРУЗЬЯ
 -- =====================================================
 INSERT INTO public.friends (id, user_id, friend_id, status, created_at)
-SELECT 
-  gen_random_uuid(),
-  p1.id,
-  p2.id,
-  'accepted',
-  NOW() - INTERVAL '1 day' * floor(random() * 30)
-FROM public.profiles p1
-CROSS JOIN public.profiles p2
-WHERE p1.id < p2.id  -- избегаем дубликатов
-  AND random() < 0.033  -- примерно 40 связей
+SELECT gen_random_uuid(), p1.id, p2.id, 'accepted', NOW() - INTERVAL '1 day' * floor(random() * 30)
+FROM public.profiles p1 CROSS JOIN public.profiles p2
+WHERE p1.id < p2.id AND random() < 0.033
 LIMIT 40
 ON CONFLICT (user_id, friend_id) DO NOTHING;
+
+-- =====================================================
+-- Возвращаем нормальный режим: триггеры снова стреляют.
+-- =====================================================
+SET session_replication_role = origin;
