@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/entities/auth'
 import { useFriendsStore } from '@/entities/friends'
 import { useProfileStore } from '@/entities/profile'
+import { useOnboardingStore } from '@/features/onboarding'
 import { showToast } from '@/shared/lib/api'
 
 function getInitials(name: string): string {
@@ -21,6 +22,7 @@ export function Header() {
   const navigate = useNavigate()
   const { loadFriendships, pendingIncomingCount } = useFriendsStore()
   const { loadProfile, getProfile } = useProfileStore()
+  const startOnboarding = useOnboardingStore((s) => s.start)
   const pendingCount = token && user ? pendingIncomingCount() : 0
   const profile = user ? getProfile(user.id) : undefined
   const avatar = profile?.avatar ?? null
@@ -62,11 +64,12 @@ export function Header() {
         {/* Desktop nav */}
         <nav className="hidden items-center gap-6 sm:flex">
           {token && (
-            <NavLink to="/feed" className={navClass}>Лента</NavLink>
+            <NavLink to="/feed" className={navClass} data-onboard="feed">Лента</NavLink>
           )}
           {token && (
             <NavLink
               to="/friends"
+              data-onboard="friends"
               className={({ isActive }) =>
                 `relative text-sm font-medium transition-colors ${isActive ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'}`
               }
@@ -88,6 +91,7 @@ export function Header() {
               <button
                 type="button"
                 onClick={() => setDropdownOpen((v) => !v)}
+                data-onboard="profile"
                 className="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden ring-2 ring-gray-200 hover:ring-indigo-400 transition-all focus:outline-none"
                 aria-label="Меню профиля"
               >
@@ -119,6 +123,13 @@ export function Header() {
                   >
                     Настройки
                   </NavLink>
+                  <button
+                    type="button"
+                    onClick={() => { setDropdownOpen(false); startOnboarding() }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Подсказки
+                  </button>
                   <div className="border-t border-gray-100 mt-1">
                     <button
                       type="button"
