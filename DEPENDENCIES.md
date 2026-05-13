@@ -1,4 +1,4 @@
-# Зависимости проекта (Olympiad Tracker)
+# Зависимости проекта (CORK)
 
 ## Frontend (`package.json`)
 
