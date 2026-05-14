@@ -20,7 +20,7 @@ export function EditProfileForm({ profile, onSuccess }: Props) {
     defaultValues: { name: profile.name, goal: profile.goal },
   })
 
-  const onSubmit = async (_data: UpdateProfileData) => {
+  const onSubmit = async () => {
     try {
       showToast('success', 'Профиль обновлён!')
       onSuccess()

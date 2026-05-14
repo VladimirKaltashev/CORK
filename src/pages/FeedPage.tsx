@@ -247,11 +247,13 @@ export function FeedPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchInitial(category, feedMode)
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!debouncedSearch.trim() || !user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchResults([])
       return
     }
@@ -267,7 +269,7 @@ export function FeedPage() {
         else { setSearchResults((data ?? []).map((p) => ({ id: p.id, name: p.name, avatar: p.avatar ?? null }))) }
         setIsSearching(false)
       })
-  }, [debouncedSearch, user]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, user])
 
   const handleFilterChange = (cat: CategoryFilter) => {
     if (cat === category) return

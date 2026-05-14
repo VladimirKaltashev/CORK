@@ -77,10 +77,6 @@ export function AdminPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [rejectTarget, setRejectTarget] = useState<Achievement | null>(null)
 
-  useEffect(() => {
-    loadPending()
-  }, [])
-
   const loadPending = async () => {
     setIsLoading(true)
     try {
@@ -112,6 +108,11 @@ export function AdminPage() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadPending()
+  }, [])
 
   const handleVerify = async (id: string) => {
     const { error } = await supabase

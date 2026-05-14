@@ -1,5 +1,6 @@
 export { TaskList } from './TaskList'
 export { TaskModal } from './TaskModal'
 export { TaskComments } from './TaskComments'
-export { TimerWidget, formatElapsed } from './TimerWidget'
+export { TimerWidget } from './TimerWidget'
+export { formatElapsed } from './format'
 export { SessionReportModal } from './SessionReportModal'
