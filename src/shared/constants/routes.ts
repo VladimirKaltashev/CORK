@@ -12,5 +12,6 @@ export const ROUTES = {
   ADMIN: '/admin',
   SEARCH: '/search',
   FRIENDS: '/friends',
+  LEADERBOARD: '/leaderboard',
   NOT_FOUND: '*',
 } as const
