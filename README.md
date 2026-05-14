@@ -134,12 +134,31 @@ _Будущие маршруты: `/challenges` (активные + истори
 
 ## Запуск локально
 
-### 1. Установка зависимостей
+### Быстро — одним кликом / одной командой
+
+В корне проекта есть `start.ps1` (и обёртка `start.cmd` для двойного клика). Скрипт:
+1. Проверяет/запускает Docker Desktop.
+2. Поднимает локальный Supabase (если ещё не запущен).
+3. Опционально применяет миграции + seed (`-Reset`).
+4. Открывает `http://localhost:5173` в браузере.
+5. Запускает Vite dev-server в текущем окне.
+
+```powershell
+.\start.ps1               # обычный запуск
+.\start.ps1 -Reset        # + supabase db reset (после изменений схемы/seed)
+.\start.ps1 -NoBrowser    # без открытия браузера
+```
+
+Двойной клик по `start.cmd` равнозначен `.\start.ps1` без флагов.
+
+### Вручную (если хочется по шагам)
+
+#### 1. Установка зависимостей
 ```bash
 npm install
 ```
 
-### 2. Локальный Supabase
+#### 2. Локальный Supabase
 Нужен установленный Supabase CLI ([инструкция](https://supabase.com/docs/guides/cli)).
 
 ```bash
@@ -153,12 +172,22 @@ VITE_SUPABASE_URL=http://127.0.0.1:54321
 VITE_SUPABASE_ANON_KEY=<твой anon key>
 ```
 
-### 3. Dev-сервер
+#### 3. Dev-сервер
 ```bash
 npm run dev
 ```
 
 Открой `http://localhost:5173`. Тестовые пользователи — пароль `Test123456`, список email в `supabase/seed.sql`.
+
+### Если supabase не стартует (Windows)
+
+Скорее всего, Hyper-V/WSL зарезервировал порт 54322. Из админского PowerShell:
+```powershell
+net stop winnat
+& 'C:\supabase-cli\supabase.exe' stop
+net start winnat
+.\start.ps1
+```
 
 ## Скрипты
 
