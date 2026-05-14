@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Button, Label } from '@primer/react'
 import { useAuthStore } from '@/entities/auth'
 import { useAchievementsStore } from '@/entities/achievements/store'
+import { ReactionBar } from '@/features/reactions'
+import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import type { Achievement, AchievementCategory, AchievementStatus } from '@/shared/types'
 
 type LabelVariant = 'default' | 'primary' | 'secondary' | 'accent' | 'success' | 'attention' | 'severe' | 'danger' | 'done' | 'sponsors'
@@ -63,7 +65,7 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1 mb-1">
             <Label variant={meta.variant}>{meta.label}</Label>
-            <span className="text-xs text-gray-500">{achievement.year}</span>
+            <span className="text-xs text-gray-500">{formatAchievementDate(getEventDate(achievement.meta), achievement.year)}</span>
             <span
               className="ml-auto text-base leading-none"
               title={{ pending: 'На проверке', verified: 'Подтверждено', rejected: 'Отклонено' }[achievement.status]}
@@ -94,6 +96,11 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
                 <Button size="small" variant="primary" onClick={handleApprove}>Подтвердить</Button>
                 <Button size="small" variant="danger" onClick={() => setShowRejectForm(true)}>Отклонить</Button>
               </>
+            )}
+            {achievement.status === 'verified' && (
+              <div className="ml-auto">
+                <ReactionBar achievementId={achievement.id} disabled={!user} size="sm" />
+              </div>
             )}
           </div>
         </div>

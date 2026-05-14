@@ -7,7 +7,11 @@ import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
 import { useAuthStore } from '@/entities/auth'
 import { useFriendsStore } from '@/entities/friends'
+import { useReactionsStore } from '@/entities/reactions'
+import { ReactionBar, BudgetWidget } from '@/features/reactions'
+import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { useDebounce } from '@/shared/hooks'
+import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import type { AchievementCategory, ProofType } from '@/shared/types'
 
 interface UserResult {
@@ -105,11 +109,10 @@ interface FeedItem {
   title: string
   description: string
   year: number
+  eventDate: string | null
   proofType: ProofType
   proofValue?: string
   createdAt: string
-  likesCount: number
-  likedByMe: boolean
 }
 
 function formatRelativeTime(dateStr: string): string {
@@ -144,7 +147,6 @@ function UserAvatar({ userId, name, avatar }: { userId: string; name: string; av
 
 async function loadPage(
   offset: number,
-  userId: string | undefined,
   category: CategoryFilter,
   friendIds?: string[],
 ): Promise<{ items: FeedItem[]; hasMore: boolean }> {
@@ -172,25 +174,16 @@ async function loadPage(
   if (error) throw error
   if (!achData?.length) return { items: [], hasMore: false }
 
-  const achIds = achData.map((r) => r.id)
   const userIds = [...new Set(achData.map((r) => r.user_id))]
 
-  const [{ data: profilesData }, { data: likesData }] = await Promise.all([
-    supabase.from('profiles').select('id, name, avatar').in('id', userIds),
-    supabase.from('likes').select('achievement_id, user_id').in('achievement_id', achIds),
-  ])
+  const { data: profilesData } = await supabase
+    .from('profiles')
+    .select('id, name, avatar')
+    .in('id', userIds)
 
   const profileMap: Record<string, { name: string; avatar: string | null }> = Object.fromEntries(
     (profilesData ?? []).map((p) => [p.id, { name: p.name, avatar: p.avatar ?? null }])
   )
-
-  const likesByAch: Record<string, number> = {}
-  const myLikes = new Set<string>()
-
-  for (const like of likesData ?? []) {
-    likesByAch[like.achievement_id] = (likesByAch[like.achievement_id] ?? 0) + 1
-    if (userId && like.user_id === userId) myLikes.add(like.achievement_id)
-  }
 
   return {
     items: achData.map((row) => ({
@@ -202,11 +195,10 @@ async function loadPage(
       title: row.title,
       description: row.description,
       year: row.year,
+      eventDate: getEventDate(row.meta as Record<string, unknown> | null),
       proofType: row.proof_type,
       proofValue: row.proof_value ?? undefined,
       createdAt: row.created_at,
-      likesCount: likesByAch[row.id] ?? 0,
-      likedByMe: myLikes.has(row.id),
     })),
     hasMore: achData.length === PAGE_SIZE,
   }
@@ -217,12 +209,12 @@ type FeedMode = 'all' | 'friends'
 export function FeedPage() {
   const { user } = useAuthStore()
   const friendsStore = useFriendsStore()
+  const loadReactions = useReactionsStore((s) => s.loadForAchievements)
   const [items, setItems] = useState<FeedItem[]>([])
   const [offset, setOffset] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [liking, setLiking] = useState<Set<string>>(new Set())
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [feedMode, setFeedMode] = useState<FeedMode>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -236,11 +228,12 @@ export function FeedPage() {
   const fetchInitial = (cat: CategoryFilter, mode: FeedMode) => {
     const fIds = mode === 'friends' ? friendsStore.acceptedFriendIds() : undefined
     setIsLoading(true)
-    loadPage(0, user?.id, cat, fIds)
+    loadPage(0, cat, fIds)
       .then(({ items: loaded, hasMore: more }) => {
         setItems(loaded)
         setOffset(loaded.length)
         setHasMore(more)
+        loadReactions(loaded.map((i) => i.id), user?.id)
       })
       .catch(() => showToast('error', 'Не удалось загрузить ленту'))
       .finally(() => setIsLoading(false))
@@ -292,10 +285,11 @@ export function FeedPage() {
   const handleLoadMore = async () => {
     setLoadingMore(true)
     try {
-      const { items: more, hasMore: moreExists } = await loadPage(offset, user?.id, category, getFriendIds())
+      const { items: more, hasMore: moreExists } = await loadPage(offset, category, getFriendIds())
       setItems((prev) => [...prev, ...more])
       setOffset((prev) => prev + more.length)
       setHasMore(moreExists)
+      loadReactions(more.map((i) => i.id), user?.id)
     } catch {
       showToast('error', 'Не удалось загрузить ещё')
     } finally {
@@ -303,65 +297,34 @@ export function FeedPage() {
     }
   }
 
-  const handleLike = async (item: FeedItem) => {
-    if (!user || liking.has(item.id)) return
-    setLiking((prev) => new Set(prev).add(item.id))
-    const wasLiked = item.likedByMe
-
-    setItems((prev) =>
-      prev.map((a) =>
-        a.id === item.id
-          ? { ...a, likedByMe: !wasLiked, likesCount: wasLiked ? a.likesCount - 1 : a.likesCount + 1 }
-          : a
-      )
-    )
-
-    try {
-      if (wasLiked) {
-        const { error } = await supabase.from('likes').delete().eq('achievement_id', item.id).eq('user_id', user.id)
-        if (error) throw error
-      } else {
-        const { error } = await supabase.from('likes').insert({ achievement_id: item.id, user_id: user.id })
-        if (error) throw error
-      }
-    } catch {
-      setItems((prev) =>
-        prev.map((a) =>
-          a.id === item.id
-            ? { ...a, likedByMe: wasLiked, likesCount: wasLiked ? a.likesCount + 1 : a.likesCount - 1 }
-            : a
-        )
-      )
-      showToast('error', 'Не удалось обновить лайк')
-    } finally {
-      setLiking((prev) => {
-        const next = new Set(prev)
-        next.delete(item.id)
-        return next
-      })
-    }
-  }
-
   return (
     <div className="mx-auto max-w-2xl py-6 px-3">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <h1 className="text-2xl font-bold text-gray-900">Лента достижений</h1>
-        <div className="flex rounded-md border border-gray-300 overflow-hidden text-sm">
-          {(['all', 'friends'] as FeedMode[]).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => handleModeChange(mode)}
-              className={`px-3 py-1.5 transition-colors ${
-                feedMode === mode
-                  ? 'bg-indigo-600 text-white font-semibold'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              {mode === 'all' ? 'Все' : 'Друзья'}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <BudgetWidget />
+          <div className="flex rounded-md border border-gray-300 overflow-hidden text-sm">
+            {(['all', 'friends'] as FeedMode[]).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => handleModeChange(mode)}
+                className={`px-3 py-1.5 transition-colors ${
+                  feedMode === mode
+                    ? 'bg-indigo-600 text-white font-semibold'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                {mode === 'all' ? 'Все' : 'Друзья'}
+              </button>
+            ))}
+          </div>
         </div>
+      </div>
+
+      {/* Inline create card */}
+      <div className="mb-3">
+        <InlineCreateCard />
       </div>
 
       {/* User search */}
@@ -452,25 +415,13 @@ export function FeedPage() {
                       </div>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <span className="text-xs text-gray-400 uppercase tracking-wide">{item.category}</span>
-                        <span className="text-xs text-gray-400">· {item.year}</span>
+                        <span className="text-xs text-gray-400">· {formatAchievementDate(item.eventDate, item.year)}</span>
                       </div>
                     </div>
 
-                    {/* Like button */}
-                    <button
-                      type="button"
-                      onClick={() => handleLike(item)}
-                      disabled={!user || liking.has(item.id)}
-                      className={`flex flex-col items-center gap-0.5 flex-shrink-0 rounded-md px-2 py-1 transition-colors ${
-                        item.likedByMe
-                          ? 'text-red-500 hover:text-red-600'
-                          : 'text-gray-400 hover:text-red-400'
-                      } disabled:opacity-50`}
-                      aria-label={item.likedByMe ? 'Убрать лайк' : 'Поставить лайк'}
-                    >
-                      <span className="text-xl leading-none">{item.likedByMe ? '❤️' : '🤍'}</span>
-                      <span className="text-xs font-medium">{item.likesCount}</span>
-                    </button>
+                    <div className="flex-shrink-0">
+                      <ReactionBar achievementId={item.id} disabled={!user} size="sm" />
+                    </div>
                   </div>
 
                   <h2 className="text-base font-semibold text-gray-900 mt-2">{item.title}</h2>

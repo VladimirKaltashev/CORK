@@ -10,6 +10,7 @@ import { FeedPage } from '@/pages/FeedPage'
 import { AdminPage } from '@/pages/AdminPage'
 import { SearchPage } from '@/pages/SearchPage'
 import { FriendsPage } from '@/pages/FriendsPage'
+import { LeaderboardPage } from '@/pages/LeaderboardPage'
 
 export function App() {
   return (
@@ -29,6 +30,7 @@ export function App() {
               <Route path="/profile/:id" element={<ProfilePage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/friends" element={<FriendsPage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
             </Route>
 
             <Route element={<ProtectedRoute requiredRole="admin" />}>

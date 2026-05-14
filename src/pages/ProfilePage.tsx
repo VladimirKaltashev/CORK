@@ -5,9 +5,10 @@ import { useAuthStore } from '@/entities/auth'
 import { useProfileStore, type LocalProfile } from '@/entities/profile'
 import { useAchievementsStore } from '@/entities/achievements/store'
 import { useFriendsStore } from '@/entities/friends'
+import { useReactionsStore } from '@/entities/reactions'
+import { useCreateAchievementDialog } from '@/entities/achievements/createDialog'
 import { AvatarUpload } from '@/shared/ui/AvatarUpload'
 import { EditProfileModal } from '@/features/profile/EditProfileModal'
-import { AddAchievementModal } from '@/features/profile/AddAchievementModal'
 import { AchievementCard } from '@/features/profile/AchievementCard'
 
 function ContactLink({ href, label, children }: { href: string; label?: string; children: React.ReactNode }) {
@@ -24,6 +25,26 @@ function ContactLink({ href, label, children }: { href: string; label?: string; 
   )
 }
 
+function ScoreBlock({ crowns, clowns }: { crowns: number; clowns: number }) {
+  if (crowns === 0 && clowns === 0) return null
+  const ratio = clowns === 0 ? null : (crowns / clowns).toFixed(1)
+  return (
+    <div className="flex items-center gap-4 rounded-md border border-gray-300 bg-white p-3">
+      <div className="flex items-center gap-1.5">
+        <span className="text-2xl leading-none">👑</span>
+        <span className="text-xl font-bold text-amber-700 tabular-nums">{crowns}</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="text-2xl leading-none">🤡</span>
+        <span className="text-xl font-bold text-red-600 tabular-nums">{clowns}</span>
+      </div>
+      <div className="ml-auto text-sm text-gray-500">
+        {ratio !== null ? <>ratio <span className="font-semibold text-gray-700 tabular-nums">{ratio}</span></> : <span className="text-gray-400">пока без клоунов</span>}
+      </div>
+    </div>
+  )
+}
+
 export function ProfilePage() {
   const { id } = useParams<{ id: string }>()
   const { user: authUser } = useAuthStore()
@@ -35,16 +56,26 @@ export function ProfilePage() {
   const { achievements: allAchievements, isLoading: achLoading, loadAchievements } = useAchievementsStore()
   const achievements = isOwn ? allAchievements : allAchievements.filter((a) => a.status === 'verified')
   const { getRelationship, sendRequest, acceptRequest, removeRecord } = useFriendsStore()
+  const loadReactions = useReactionsStore((s) => s.loadForAchievements)
+  const loadScoresFor = useReactionsStore((s) => s.loadScoresFor)
+  const score = useReactionsStore((s) => (profileId ? s.userScores[profileId] : undefined))
+  const openCreateDialog = useCreateAchievementDialog((s) => s.open)
 
   const [showEdit, setShowEdit] = useState(false)
-  const [showAddAch, setShowAddAch] = useState(false)
   const [friendBusy, setFriendBusy] = useState(false)
 
   useEffect(() => {
     if (!profileId) return
     profileStore.loadProfile(profileId)
     loadAchievements(profileId)
+    loadScoresFor(profileId)
   }, [profileId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const verifiedIds = allAchievements.filter((a) => a.status === 'verified').map((a) => a.id)
+    if (verifiedIds.length === 0) return
+    loadReactions(verifiedIds, authUser?.id)
+  }, [allAchievements, authUser?.id, loadReactions])
 
   const liveProfile: LocalProfile | null = profileStore.profiles[profileId] ?? null
 
@@ -179,6 +210,9 @@ export function ProfilePage() {
         </div>
       </div>
 
+      {/* Score */}
+      <ScoreBlock crowns={score?.crowns ?? 0} clowns={score?.clowns ?? 0} />
+
       {/* Bio block */}
       {liveProfile.bio ? (
         <div className="border border-gray-300 rounded-md bg-white p-4">
@@ -202,7 +236,7 @@ export function ProfilePage() {
             )}
           </h2>
           {isOwn && (
-            <Button variant="primary" onClick={() => setShowAddAch(true)}>+ Добавить</Button>
+            <Button variant="primary" onClick={openCreateDialog}>+ Добавить</Button>
           )}
         </div>
 
@@ -230,7 +264,6 @@ export function ProfilePage() {
           onClose={() => setShowEdit(false)}
         />
       )}
-      {showAddAch && <AddAchievementModal onClose={() => setShowAddAch(false)} />}
     </div>
   )
 }

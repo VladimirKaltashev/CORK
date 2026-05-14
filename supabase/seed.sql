@@ -1,7 +1,7 @@
 -- =====================================================
 -- ОЧИСТКА (правильный порядок)
 -- =====================================================
-TRUNCATE TABLE public.likes CASCADE;
+TRUNCATE TABLE public.reactions CASCADE;
 TRUNCATE TABLE public.achievements CASCADE;
 TRUNCATE TABLE public.friends CASCADE;
 TRUNCATE TABLE public.profiles CASCADE;
@@ -194,12 +194,28 @@ INSERT INTO public.achievements (id, user_id, category, title, description, year
 ON CONFLICT (id) DO NOTHING;
 
 -- =====================================================
--- ЛАЙКИ
+-- РЕАКЦИИ (crown/clown)
+-- created_at сдвигается на 14-365 дней назад, чтобы тестовые
+-- реакции не попадали в недельный бюджет текущей недели.
+-- Распределение: ~65% crown, ~35% clown (короны чаще).
 -- =====================================================
-INSERT INTO public.likes (id, achievement_id, user_id, created_at)
-SELECT gen_random_uuid(), a.id, p.id, NOW() - INTERVAL '1 day' * floor(random() * 60)
-FROM public.achievements a CROSS JOIN public.profiles p
-WHERE random() < 0.033
+INSERT INTO public.reactions (id, achievement_id, user_id, kind, cost, created_at)
+SELECT
+  gen_random_uuid(),
+  achievement_id,
+  user_id,
+  kind,
+  CASE kind WHEN 'crown' THEN 1 ELSE 2 END AS cost,
+  created_at
+FROM (
+  SELECT
+    a.id AS achievement_id,
+    p.id AS user_id,
+    CASE WHEN random() < 0.65 THEN 'crown' ELSE 'clown' END AS kind,
+    NOW() - INTERVAL '1 day' * (14 + floor(random() * 350)) AS created_at
+  FROM public.achievements a CROSS JOIN public.profiles p
+  WHERE random() < 0.04 AND a.user_id <> p.id
+) sub
 ON CONFLICT (achievement_id, user_id) DO NOTHING;
 
 -- =====================================================

@@ -82,6 +82,9 @@ export function Header() {
               )}
             </NavLink>
           )}
+          {token && (
+            <NavLink to="/leaderboard" data-onboard="leaderboard" className={navClass}>Рейтинг</NavLink>
+          )}
           {token && user?.role === 'admin' && (
             <NavLink to="/admin" className={navClass}>Модерация</NavLink>
           )}
@@ -197,6 +200,15 @@ export function Header() {
                   {pendingCount}
                 </span>
               )}
+            </NavLink>
+          )}
+          {token && (
+            <NavLink
+              to="/leaderboard"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}
+            >
+              Рейтинг
             </NavLink>
           )}
           {token && user?.role === 'admin' && (
