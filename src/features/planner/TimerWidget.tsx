@@ -5,6 +5,7 @@ import { useStatusStore } from '@/entities/status'
 import { useAuthStore } from '@/entities/auth'
 import { api } from '@/shared/lib/api'
 import { SessionReportModal } from './SessionReportModal'
+import { formatElapsed } from './format'
 import { ROUTES } from '@/shared/constants/routes'
 import type { Subject } from '@/shared/types'
 
@@ -15,13 +16,6 @@ const SUBJECT_LABELS: Record<Subject, string> = {
   informatics: 'Информатика',
   chemistry: 'Химия',
   biology: 'Биология',
-}
-
-export function formatElapsed(seconds: number): string {
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  const s = seconds % 60
-  return [h, m, s].map((v) => String(v).padStart(2, '0')).join(':')
 }
 
 interface TimerWidgetProps {

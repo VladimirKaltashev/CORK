@@ -5,7 +5,7 @@ import { useStatusStore } from '@/entities/status'
 import { useAuthStore } from '@/entities/auth'
 import { api } from '@/shared/lib/api'
 import { SessionReportModal } from '@/features/planner/SessionReportModal'
-import { formatElapsed } from '@/features/planner/TimerWidget'
+import { formatElapsed } from '@/features/planner'
 import { ROUTES } from '@/shared/constants/routes'
 import type { Subject } from '@/shared/types'
 
