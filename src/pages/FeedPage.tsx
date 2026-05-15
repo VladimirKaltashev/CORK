@@ -36,7 +36,7 @@ function FriendButton({ targetId }: { targetId: string }) {
           catch { /* shown by store */ }
           finally { setBusy(false) }
         }}
-        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
       >
         {busy ? '...' : 'Добавить'}
       </button>
@@ -57,7 +57,7 @@ function FriendButton({ targetId }: { targetId: string }) {
           try { await acceptRequest(rel.record.id) }
           finally { setBusy(false) }
         }}
-        className="text-sm px-3 py-1 rounded-md bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
       >
         {busy ? '...' : 'Принять'}
       </button>
@@ -74,7 +74,7 @@ function FriendButton({ targetId }: { targetId: string }) {
           try { await removeRecord(rel.record.id) }
           finally { setBusy(false) }
         }}
-        className="text-sm px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+        className="text-sm px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
       >
         {busy ? '...' : 'Удалить'}
       </button>
@@ -300,10 +300,10 @@ export function FeedPage() {
   return (
     <div className="mx-auto max-w-2xl py-6 px-3">
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-2xl font-bold text-gray-900">Лента достижений</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Лента достижений</h1>
         <div className="flex items-center gap-2">
           <BudgetWidget />
-          <div className="flex rounded-md border border-gray-300 overflow-hidden text-sm">
+          <div className="flex rounded-md border border-gray-300 overflow-hidden text-sm dark:border-gray-700">
             {(['all', 'friends'] as FeedMode[]).map((mode) => (
               <button
                 key={mode}
@@ -312,7 +312,7 @@ export function FeedPage() {
                 className={`px-3 py-1.5 transition-colors ${
                   feedMode === mode
                     ? 'bg-indigo-600 text-white font-semibold'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
                 }`}
               >
                 {mode === 'all' ? 'Все' : 'Друзья'}
@@ -334,18 +334,18 @@ export function FeedPage() {
           placeholder="Найти пользователей..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
         />
         {searchQuery.trim() && (
           <div className="mt-2 flex flex-col gap-2">
             {isSearching && (
-              <div className="py-2 text-center text-sm text-gray-500">Поиск...</div>
+              <div className="py-2 text-center text-sm text-gray-500 dark:text-gray-400">Поиск...</div>
             )}
             {!isSearching && searchResults.length === 0 && (
-              <div className="py-2 text-center text-sm text-gray-500">Никого не найдено</div>
+              <div className="py-2 text-center text-sm text-gray-500 dark:text-gray-400">Никого не найдено</div>
             )}
             {searchResults.map((u) => (
-              <div key={u.id} className="flex items-center justify-between gap-3 border border-gray-300 rounded-md bg-white p-3">
+              <div key={u.id} className="flex items-center justify-between gap-3 border border-gray-300 rounded-md bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
                 <Link to={`/profile/${u.id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity">
                   {u.avatar ? (
                     <img src={u.avatar} alt={u.name} className="w-8 h-8 rounded-full object-cover ring-1 ring-gray-200 flex-shrink-0" />
@@ -354,7 +354,7 @@ export function FeedPage() {
                       {getInitials(u.name)}
                     </div>
                   )}
-                  <span className="text-sm font-medium text-gray-900 truncate">{u.name}</span>
+                  <span className="text-sm font-medium text-gray-900 truncate dark:text-white">{u.name}</span>
                 </Link>
                 <FriendButton targetId={u.id} />
               </div>
@@ -372,8 +372,8 @@ export function FeedPage() {
             onClick={() => handleFilterChange(f.value)}
             className={`px-3 py-1.5 rounded-full text-sm transition-colors border ${
               category === f.value
-                ? 'border-indigo-500 bg-indigo-50 text-indigo-700 font-semibold'
-                : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-900'
+                ? 'border-indigo-500 bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-400'
+                : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:text-white'
             }`}
           >
             {f.label}
@@ -394,7 +394,7 @@ export function FeedPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {items.map((item) => (
-            <div key={item.id} className="border border-gray-300 rounded-md bg-white p-4">
+            <div key={item.id} className="border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
               <div className="flex gap-3">
                 {/* Avatar */}
                 <UserAvatar userId={item.userId} name={item.userName} avatar={item.userAvatar} />
@@ -406,7 +406,7 @@ export function FeedPage() {
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <Link
                           to={`/profile/${item.userId}`}
-                          className="text-sm font-semibold text-gray-900 hover:text-indigo-600 transition-colors"
+                          className="text-sm font-semibold text-gray-900 hover:text-indigo-600 transition-colors dark:text-white dark:hover:text-indigo-400"
                         >
                           {item.userName}
                         </Link>
@@ -424,8 +424,8 @@ export function FeedPage() {
                     </div>
                   </div>
 
-                  <h2 className="text-base font-semibold text-gray-900 mt-2">{item.title}</h2>
-                  <p className="text-sm text-gray-600 mt-0.5">{item.description}</p>
+                  <h2 className="text-base font-semibold text-gray-900 mt-2 dark:text-white">{item.title}</h2>
+                  <p className="text-sm text-gray-600 mt-0.5 dark:text-gray-300">{item.description}</p>
 
                   {item.proofType === 'url' && item.proofValue && (
                     <a

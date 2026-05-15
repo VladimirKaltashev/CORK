@@ -34,7 +34,7 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md' }: Re
         cost={1}
         disabled={disabled || pending}
         onClick={() => handleClick('crown')}
-        activeClass="bg-amber-50 text-amber-700 ring-amber-300"
+        activeClass="bg-amber-50 text-amber-700 ring-amber-300 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-500/60"
         emojiClass={emoji}
         padding={padding}
       />
@@ -45,7 +45,7 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md' }: Re
         cost={2}
         disabled={disabled || pending}
         onClick={() => handleClick('clown')}
-        activeClass="bg-red-50 text-red-700 ring-red-300"
+        activeClass="bg-red-50 text-red-700 ring-red-300 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-500/60"
         emojiClass={emoji}
         padding={padding}
       />
@@ -79,7 +79,7 @@ function ReactionButton({
   const base = `inline-flex items-center gap-1 rounded-full ring-1 transition-colors disabled:opacity-50 ${padding}`
   const cls = active
     ? `${base} ${activeClass}`
-    : `${base} ring-gray-200 text-gray-600 hover:bg-gray-50`
+    : `${base} ring-gray-200 text-gray-600 hover:bg-gray-50 dark:ring-gray-600 dark:text-gray-300 dark:hover:bg-gray-700`
   return (
     <button
       type="button"

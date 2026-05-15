@@ -34,7 +34,7 @@ function FriendButton({ targetId }: { targetId: string }) {
           catch { /* shown by store */ }
           finally { setBusy(false) }
         }}
-        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
       >
         {busy ? '...' : 'Добавить'}
       </button>
@@ -55,7 +55,7 @@ function FriendButton({ targetId }: { targetId: string }) {
           try { await acceptRequest(rel.record.id) }
           finally { setBusy(false) }
         }}
-        className="text-sm px-3 py-1 rounded-md bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
       >
         {busy ? '...' : 'Принять'}
       </button>
@@ -72,7 +72,7 @@ function FriendButton({ targetId }: { targetId: string }) {
           try { await removeRecord(rel.record.id) }
           finally { setBusy(false) }
         }}
-        className="text-sm px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+        className="text-sm px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
       >
         {busy ? '...' : 'Удалить'}
       </button>

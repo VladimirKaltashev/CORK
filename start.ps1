@@ -39,9 +39,9 @@ Set-Location $PSScriptRoot
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 chcp 65001 > $null
 
-$SupabaseExe     = 'C:\supabase-cli\supabase.exe'
+$SupabaseExe      = Join-Path $PSScriptRoot 'supabase\supabase.exe'
 $DockerDesktopExe = 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
-$DevUrl          = 'http://localhost:5173'
+$DevUrl           = 'http://localhost:5173'
 
 function Write-Section($title) {
     Write-Host ''
@@ -103,7 +103,7 @@ if (Test-DockerRunning) {
 Write-Section 'Supabase'
 if (-not (Test-Path $SupabaseExe)) {
     Write-Host "Supabase CLI not found at $SupabaseExe" -ForegroundColor Red
-    Write-Host 'Install it (https://supabase.com/docs/guides/cli) or edit the path in start.ps1.'
+    Write-Host 'Place supabase.exe into ./supabase/ (https://supabase.com/docs/guides/cli) or edit the path in start.ps1.'
     exit 1
 }
 

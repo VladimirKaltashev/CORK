@@ -18,6 +18,7 @@ interface AuthStore {
   register: (name: string, email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   checkAuth: () => Promise<void>
+  updateUser: (patch: Partial<Omit<AuthUser, 'id'>>) => void
 }
 
 async function loadProfile(userId: string, email: string): Promise<AuthUser> {
@@ -83,4 +84,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
       set({ token: null, user: null, isLoading: false })
     }
   },
+
+  updateUser: (patch) =>
+    set((s) => (s.user ? { user: { ...s.user, ...patch } } : s)),
 }))

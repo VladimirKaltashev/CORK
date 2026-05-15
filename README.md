@@ -143,6 +143,8 @@ _Будущие маршруты: `/challenges` (активные + истори
 4. Открывает `http://localhost:5173` в браузере.
 5. Запускает Vite dev-server в текущем окне.
 
+Supabase CLI лежит в репозитории по пути `./supabase/supabase.exe` — отдельная установка не нужна.
+
 ```powershell
 .\start.ps1               # обычный запуск
 .\start.ps1 -Reset        # + supabase db reset (после изменений схемы/seed)
@@ -150,6 +152,17 @@ _Будущие маршруты: `/challenges` (активные + истори
 ```
 
 Двойной клик по `start.cmd` равнозначен `.\start.ps1` без флагов.
+
+### Остановка стека
+
+`Ctrl+C` в окне со start.ps1 завершает только Vite — контейнеры Supabase продолжат крутиться в Docker. Чтобы их погасить:
+
+```powershell
+.\stop.ps1                # supabase stop (DB volume сохраняется)
+.\stop.ps1 -NoBackup      # без дампа БД перед остановкой
+```
+
+Двойной клик по `stop.cmd` равнозначен `.\stop.ps1`. Docker Desktop остаётся работать — закрывай его руками, если нужно.
 
 ### Вручную (если хочется по шагам)
 
@@ -159,11 +172,12 @@ npm install
 ```
 
 #### 2. Локальный Supabase
-Нужен установленный Supabase CLI ([инструкция](https://supabase.com/docs/guides/cli)).
+Локальный `supabase.exe` уже лежит в `./supabase/supabase.exe`. Если хочешь использовать глобально установленный CLI ([инструкция](https://supabase.com/docs/guides/cli)) — просто замени путь ниже.
 
-```bash
-supabase start          # поднимает Postgres + Auth + Storage в Docker
-supabase db reset       # применяет migrations/ и seed.sql
+```powershell
+./supabase/supabase.exe start          # поднимает Postgres + Auth + Storage в Docker
+./supabase/supabase.exe db reset       # применяет migrations/ и seed.sql
+./supabase/supabase.exe stop           # останавливает контейнеры
 ```
 
 После старта CLI напечатает `API URL` и `anon key` — положи их в `.env.local`:
@@ -184,7 +198,7 @@ npm run dev
 Скорее всего, Hyper-V/WSL зарезервировал порт 54322. Из админского PowerShell:
 ```powershell
 net stop winnat
-& 'C:\supabase-cli\supabase.exe' stop
+.\stop.ps1
 net start winnat
 .\start.ps1
 ```

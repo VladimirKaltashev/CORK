@@ -59,7 +59,7 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
       : achievement.description
 
   return (
-    <div className="border border-gray-300 rounded-md bg-white p-3">
+    <div className="border border-gray-300 rounded-md bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-start gap-3">
         <div className="text-2xl select-none leading-none mt-0.5">{meta.icon}</div>
         <div className="min-w-0 flex-1">
@@ -73,9 +73,9 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
               {STATUS_ICON[achievement.status]}
             </span>
           </div>
-          <p className="font-semibold text-gray-900 m-0">{achievement.title}</p>
+          <p className="font-semibold text-gray-900 m-0 dark:text-white">{achievement.title}</p>
           {descTruncated && (
-            <p className="text-sm text-gray-600 mt-0.5 m-0">{descTruncated}</p>
+            <p className="text-sm text-gray-600 mt-0.5 m-0 dark:text-gray-300">{descTruncated}</p>
           )}
           {achievement.status === 'rejected' && achievement.rejectionReason && (
             <p className="text-xs text-red-500 mt-1 m-0">Причина: {achievement.rejectionReason}</p>

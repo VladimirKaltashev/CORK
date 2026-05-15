@@ -21,9 +21,11 @@ export function BudgetWidget({ variant = 'compact' }: BudgetWidgetProps) {
   if (!token) return null
 
   const lowColor =
-    remaining === 0 ? 'text-red-600 bg-red-50 ring-red-200'
-    : remaining <= 2 ? 'text-amber-700 bg-amber-50 ring-amber-200'
-    : 'text-gray-700 bg-gray-50 ring-gray-200'
+    remaining === 0
+      ? 'text-red-600 bg-red-50 ring-red-200 dark:text-red-300 dark:bg-red-900/30 dark:ring-red-700'
+      : remaining <= 2
+        ? 'text-amber-700 bg-amber-50 ring-amber-200 dark:text-amber-300 dark:bg-amber-900/30 dark:ring-amber-700'
+        : 'text-gray-700 bg-gray-50 ring-gray-200 dark:text-gray-200 dark:bg-gray-700 dark:ring-gray-600'
 
   if (variant === 'compact') {
     return (

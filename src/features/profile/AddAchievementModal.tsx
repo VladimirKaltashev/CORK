@@ -116,17 +116,17 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/50 p-3 sm:p-6" onClick={onClose}>
       <div
-        className="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col"
+        className="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col dark:bg-gray-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-          <span className="text-sm text-gray-500">Новое достижение</span>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+          <span className="text-sm text-gray-500 dark:text-gray-400">Новое достижение</span>
           <button
             type="button"
             onClick={onClose}
             aria-label="Закрыть"
-            className="text-gray-400 hover:text-gray-700 transition-colors"
+            className="text-gray-400 hover:text-gray-700 transition-colors dark:text-gray-500 dark:hover:text-gray-300"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M6 6l12 12M18 6l-6 12" transform="" />
@@ -154,7 +154,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                 onKeyDown={handleKeyDown}
                 rows={4}
                 placeholder="Чем поделишься? Например: «Выиграл городскую олимпиаду по физике, 1 место»"
-                className="w-full resize-none border-0 outline-none text-base text-gray-900 placeholder-gray-400 bg-transparent leading-relaxed"
+                className="w-full resize-none border-0 outline-none text-base text-gray-900 placeholder-gray-400 bg-transparent leading-relaxed dark:text-white dark:placeholder-gray-500"
               />
             </div>
           </div>
@@ -176,20 +176,20 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
             </div>
           )}
           {proofType === 'url' && (
-            <div className="mt-3 flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2">
+            <div className="mt-3 flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 dark:border-gray-700 dark:bg-gray-900/30">
               <span className="text-gray-400 text-sm">🔗</span>
               <input
                 type="url"
                 placeholder="https://..."
                 value={proofValue ?? ''}
                 onChange={(e) => setProofValue(e.target.value)}
-                className="flex-1 border-0 outline-none text-sm text-gray-900 placeholder-gray-400 bg-transparent"
+                className="flex-1 border-0 outline-none text-sm text-gray-900 placeholder-gray-400 bg-transparent dark:text-white dark:placeholder-gray-500"
               />
               <button
                 type="button"
                 onClick={() => handleProofTypeChange('none')}
                 aria-label="Убрать ссылку"
-                className="text-gray-400 hover:text-gray-700"
+                className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <path d="M6 6l12 12M6 18L18 6" />
@@ -210,8 +210,8 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                     onClick={() => setCategory(c.value)}
                     className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs ring-1 transition-colors ${
                       active
-                        ? 'bg-indigo-50 text-indigo-700 ring-indigo-300 font-semibold'
-                        : 'bg-white text-gray-600 ring-gray-200 hover:bg-gray-50'
+                        ? 'bg-indigo-50 text-indigo-700 ring-indigo-300 font-semibold dark:bg-indigo-900/40 dark:text-indigo-200 dark:ring-indigo-500'
+                        : 'bg-white text-gray-600 ring-gray-200 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-600'
                     }`}
                   >
                     <span>{c.icon}</span>
@@ -224,7 +224,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-900/40">
           <div className="flex items-center gap-1">
             <ToolbarButton
               active={proofType === 'photo'}
@@ -259,7 +259,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
             <div className="mx-1 h-6 w-px bg-gray-200" />
 
             {eventDate === null ? (
-              <div className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-600">
+              <div className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-600 dark:text-gray-300">
                 <span className="text-base">📅</span>
                 <input
                   type="number"
@@ -270,18 +270,18 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                     const v = parseInt(e.target.value, 10)
                     if (!isNaN(v)) setYear(Math.max(MIN_YEAR, Math.min(currentYear, v)))
                   }}
-                  className="w-14 bg-transparent border-0 outline-none text-xs text-gray-700 font-medium tabular-nums"
+                  className="w-14 bg-transparent border-0 outline-none text-xs text-gray-700 font-medium tabular-nums dark:text-gray-200"
                 />
                 <button
                   type="button"
                   onClick={() => setEventDate(`${year}-01-01`)}
-                  className="ml-1 text-indigo-600 hover:text-indigo-700 font-medium"
+                  className="ml-1 text-indigo-600 hover:text-indigo-700 font-medium dark:text-indigo-400 dark:hover:text-indigo-300"
                 >
                   + дата
                 </button>
               </div>
             ) : (
-              <div className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-700">
+              <div className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-700 dark:text-gray-200">
                 <span className="text-base">📅</span>
                 <input
                   type="date"
@@ -294,14 +294,14 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                     setEventDate(v)
                     setYear(parseInt(v.slice(0, 4), 10))
                   }}
-                  className="bg-transparent border-0 outline-none text-xs text-gray-700 font-medium"
+                  className="bg-transparent border-0 outline-none text-xs text-gray-700 font-medium dark:text-gray-200 dark:[color-scheme:dark]"
                 />
                 <button
                   type="button"
                   onClick={() => setEventDate(null)}
                   aria-label="Только год"
                   title="Только год"
-                  className="ml-0.5 text-gray-400 hover:text-gray-700"
+                  className="ml-0.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <path d="M6 6l12 12M6 18L18 6" />
@@ -357,8 +357,8 @@ function ToolbarButton({
       aria-label={title}
       className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
         active
-          ? 'bg-indigo-100 text-indigo-700'
-          : 'text-gray-500 hover:bg-white hover:text-gray-700'
+          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+          : 'text-gray-500 hover:bg-white hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200'
       }`}
     >
       {children}

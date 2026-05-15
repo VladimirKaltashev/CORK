@@ -29,17 +29,17 @@ function ScoreBlock({ crowns, clowns }: { crowns: number; clowns: number }) {
   if (crowns === 0 && clowns === 0) return null
   const ratio = clowns === 0 ? null : (crowns / clowns).toFixed(1)
   return (
-    <div className="flex items-center gap-4 rounded-md border border-gray-300 bg-white p-3">
+    <div className="flex items-center gap-4 rounded-md border border-gray-300 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-center gap-1.5">
         <span className="text-2xl leading-none">👑</span>
-        <span className="text-xl font-bold text-amber-700 tabular-nums">{crowns}</span>
+        <span className="text-xl font-bold text-amber-700 tabular-nums dark:text-amber-400">{crowns}</span>
       </div>
       <div className="flex items-center gap-1.5">
         <span className="text-2xl leading-none">🤡</span>
-        <span className="text-xl font-bold text-red-600 tabular-nums">{clowns}</span>
+        <span className="text-xl font-bold text-red-600 tabular-nums dark:text-red-400">{clowns}</span>
       </div>
-      <div className="ml-auto text-sm text-gray-500">
-        {ratio !== null ? <>ratio <span className="font-semibold text-gray-700 tabular-nums">{ratio}</span></> : <span className="text-gray-400">пока без клоунов</span>}
+      <div className="ml-auto text-sm text-gray-500 dark:text-gray-400">
+        {ratio !== null ? <>ratio <span className="font-semibold text-gray-700 tabular-nums dark:text-gray-200">{ratio}</span></> : <span className="text-gray-400 dark:text-gray-500">пока без клоунов</span>}
       </div>
     </div>
   )
@@ -47,7 +47,7 @@ function ScoreBlock({ crowns, clowns }: { crowns: number; clowns: number }) {
 
 export function ProfilePage() {
   const { id } = useParams<{ id: string }>()
-  const { user: authUser } = useAuthStore()
+  const { user: authUser, updateUser } = useAuthStore()
 
   const profileId = id === 'me' || !id ? authUser?.id ?? '' : id
   const isOwn = profileId === authUser?.id
@@ -82,6 +82,9 @@ export function ProfilePage() {
   const handleSaveProfile = (data: Pick<LocalProfile, 'name' | 'bio' | 'avatar' | 'contacts'>) => {
     if (!profileId) return
     profileStore.updateProfile(profileId, data)
+    if (isOwn && data.name) {
+      updateUser({ name: data.name })
+    }
   }
 
   const handleAvatarChange = (base64: string) => {
@@ -116,7 +119,7 @@ export function ProfilePage() {
     <div className="mx-auto max-w-2xl py-4 px-3 flex flex-col gap-4">
 
       {/* Header card */}
-      <div className="border border-gray-300 rounded-md bg-white p-4">
+      <div className="border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
             <AvatarUpload
@@ -130,7 +133,7 @@ export function ProfilePage() {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h1 className="text-2xl font-bold text-gray-900 leading-tight">{liveProfile.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 leading-tight dark:text-white">{liveProfile.name}</h1>
               <div className="flex gap-2 flex-shrink-0">
                 {isOwn ? (
                   <Button onClick={() => setShowEdit(true)}>Редактировать</Button>
@@ -215,9 +218,9 @@ export function ProfilePage() {
 
       {/* Bio block */}
       {liveProfile.bio ? (
-        <div className="border border-gray-300 rounded-md bg-white p-4">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">О себе</h2>
-          <p className="text-sm text-gray-800 whitespace-pre-wrap">{liveProfile.bio}</p>
+        <div className="border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 dark:text-gray-400">О себе</h2>
+          <p className="text-sm text-gray-800 whitespace-pre-wrap dark:text-gray-200">{liveProfile.bio}</p>
         </div>
       ) : isOwn ? (
         <div className="border border-dashed border-gray-300 rounded-md py-4 px-4 flex items-center justify-between">
@@ -229,14 +232,20 @@ export function ProfilePage() {
       {/* Achievements */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             Достижения
             {achievements.length > 0 && (
               <span className="text-sm font-normal text-gray-400 ml-1">({achievements.length})</span>
             )}
           </h2>
           {isOwn && (
-            <Button variant="primary" onClick={openCreateDialog}>+ Добавить</Button>
+            <button
+              type="button"
+              onClick={openCreateDialog}
+              className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
+            >
+              + Добавить
+            </button>
           )}
         </div>
 

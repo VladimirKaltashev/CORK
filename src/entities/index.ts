@@ -15,3 +15,5 @@ export * from './timer/store';
 export * from './status/store';
 export { useReactionsStore, REACTION_COST } from './reactions';
 export type { ReactionKind, ReactionAggregate } from './reactions';
+export { useThemeStore, ThemeApplier } from './theme';
+export type { Theme } from './theme';
