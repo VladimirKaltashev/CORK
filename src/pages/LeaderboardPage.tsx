@@ -68,7 +68,7 @@ export function LeaderboardPage() {
   return (
     <div className="mx-auto max-w-2xl py-6 px-3">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-900">Рейтинг</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Рейтинг</h1>
         <div className="flex rounded-md border border-gray-300 overflow-hidden text-sm">
           <button
             type="button"
@@ -119,8 +119,8 @@ export function LeaderboardPage() {
               <Link
                 key={row.user_id}
                 to={`/profile/${row.user_id}`}
-                className={`flex items-center gap-3 border rounded-md bg-white p-3 transition-colors hover:bg-gray-50 ${
-                  isMe ? 'border-indigo-300 ring-1 ring-indigo-200' : 'border-gray-300'
+                className={`flex items-center gap-3 border rounded-md bg-white p-3 transition-colors hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 ${
+                  isMe ? 'border-indigo-300 ring-1 ring-indigo-200 dark:border-indigo-500 dark:ring-indigo-700' : 'border-gray-300 dark:border-gray-700'
                 }`}
               >
                 <div className="w-8 flex-shrink-0 text-center">
@@ -145,10 +145,10 @@ export function LeaderboardPage() {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-900 truncate">{row.name}</span>
-                    {isMe && <span className="text-xs text-indigo-600 font-medium">это ты</span>}
+                    <span className="text-sm font-semibold text-gray-900 truncate dark:text-white">{row.name}</span>
+                    {isMe && <span className="text-xs text-indigo-600 font-medium dark:text-indigo-400">это ты</span>}
                   </div>
-                  <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400">
+                  <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400 dark:text-gray-500">
                     <span>👑 <span className="tabular-nums">{row.crowns}</span></span>
                     <span>🤡 <span className="tabular-nums">{row.clowns}</span></span>
                   </div>

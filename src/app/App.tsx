@@ -11,36 +11,49 @@ import { AdminPage } from '@/pages/AdminPage'
 import { SearchPage } from '@/pages/SearchPage'
 import { FriendsPage } from '@/pages/FriendsPage'
 import { LeaderboardPage } from '@/pages/LeaderboardPage'
+import { SettingsPage } from '@/pages/SettingsPage'
+import { ThemeApplier, useThemeStore } from '@/entities/theme'
+
+function themeToColorMode(theme: 'light' | 'dark' | 'system'): 'day' | 'night' | 'auto' {
+  if (theme === 'light') return 'day'
+  if (theme === 'dark') return 'night'
+  return 'auto'
+}
 
 export function App() {
+  const theme = useThemeStore((s) => s.theme)
   return (
-    <ThemeProvider colorMode="day">
-      <BrowserRouter>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route element={<PublicRoute />}>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-            </Route>
+    <>
+      <ThemeApplier />
+      <ThemeProvider colorMode={themeToColorMode(theme)}>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route element={<PublicRoute />}>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+              </Route>
 
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Navigate to="/feed" replace />} />
-              <Route path="/feed" element={<FeedPage />} />
-              <Route path="/profile/me" element={<ProfilePage />} />
-              <Route path="/profile/:id" element={<ProfilePage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/friends" element={<FriendsPage />} />
-              <Route path="/leaderboard" element={<LeaderboardPage />} />
-            </Route>
+              <Route element={<ProtectedRoute />}>
+                <Route path="/" element={<Navigate to="/feed" replace />} />
+                <Route path="/feed" element={<FeedPage />} />
+                <Route path="/profile/me" element={<ProfilePage />} />
+                <Route path="/profile/:id" element={<ProfilePage />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/friends" element={<FriendsPage />} />
+                <Route path="/leaderboard" element={<LeaderboardPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+              </Route>
 
-            <Route element={<ProtectedRoute requiredRole="admin" />}>
-              <Route path="/admin" element={<AdminPage />} />
-            </Route>
+              <Route element={<ProtectedRoute requiredRole="admin" />}>
+                <Route path="/admin" element={<AdminPage />} />
+              </Route>
 
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+    </>
   )
 }

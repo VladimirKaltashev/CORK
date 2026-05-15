@@ -11,7 +11,11 @@ function getInitials(name: string): string {
 }
 
 function navClass({ isActive }: { isActive: boolean }) {
-  return `text-sm font-medium transition-colors ${isActive ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'}`
+  return `text-sm font-medium transition-colors ${
+    isActive
+      ? 'text-indigo-600 dark:text-indigo-400'
+      : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+  }`
 }
 
 export function Header() {
@@ -55,9 +59,9 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-sm">
+    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <NavLink to="/feed" className="text-lg font-bold tracking-wider text-gray-900">
+        <NavLink to="/feed" className="text-lg font-bold tracking-wider text-gray-900 dark:text-white">
           CORK
         </NavLink>
 
@@ -71,7 +75,11 @@ export function Header() {
               to="/friends"
               data-onboard="friends"
               className={({ isActive }) =>
-                `relative text-sm font-medium transition-colors ${isActive ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'}`
+                `relative text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                }`
               }
             >
               Друзья
@@ -108,36 +116,36 @@ export function Header() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 rounded-md border border-gray-200 bg-white shadow-lg z-50">
-                  <div className="px-4 py-2.5 border-b border-gray-100">
-                    <p className="text-xs font-medium text-gray-900 truncate">{name}</p>
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-md border border-gray-200 bg-white shadow-lg z-50 dark:border-gray-700 dark:bg-gray-800">
+                  <div className="px-4 py-2.5 border-b border-gray-100 dark:border-gray-700">
+                    <p className="text-xs font-medium text-gray-900 dark:text-white truncate">{name}</p>
                   </div>
                   <NavLink
                     to="/profile/me"
                     onClick={() => setDropdownOpen(false)}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     Мой профиль
                   </NavLink>
                   <NavLink
                     to="/settings"
                     onClick={() => setDropdownOpen(false)}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     Настройки
                   </NavLink>
                   <button
                     type="button"
                     onClick={() => { setDropdownOpen(false); startOnboarding() }}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     Подсказки
                   </button>
-                  <div className="border-t border-gray-100 mt-1">
+                  <div className="border-t border-gray-100 mt-1 dark:border-gray-700">
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors dark:hover:bg-red-900/20"
                     >
                       Выйти
                     </button>
@@ -149,7 +157,7 @@ export function Header() {
             <div className="flex items-center gap-2">
               <NavLink
                 to="/login"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 Войти
               </NavLink>
@@ -176,12 +184,12 @@ export function Header() {
 
       {/* Mobile nav */}
       {menuOpen && (
-        <nav className="flex flex-col border-t border-gray-200 bg-white px-4 py-3 sm:hidden">
+        <nav className="flex flex-col border-t border-gray-200 bg-white px-4 py-3 sm:hidden dark:border-gray-800 dark:bg-gray-900">
           {token && (
             <NavLink
               to="/feed"
               onClick={() => setMenuOpen(false)}
-              className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}
+              className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
             >
               Лента
             </NavLink>
@@ -191,7 +199,7 @@ export function Header() {
               to="/friends"
               onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-2 py-2 text-sm font-medium ${isActive ? 'text-indigo-600' : 'text-gray-600'}`
+                `flex items-center gap-2 py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`
               }
             >
               Друзья
@@ -206,7 +214,7 @@ export function Header() {
             <NavLink
               to="/leaderboard"
               onClick={() => setMenuOpen(false)}
-              className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}
+              className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
             >
               Рейтинг
             </NavLink>
@@ -215,7 +223,7 @@ export function Header() {
             <NavLink
               to="/admin"
               onClick={() => setMenuOpen(false)}
-              className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}
+              className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
             >
               Модерация
             </NavLink>
@@ -225,14 +233,14 @@ export function Header() {
               <NavLink
                 to="/profile/me"
                 onClick={() => setMenuOpen(false)}
-                className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}
+                className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
               >
                 Мой профиль
               </NavLink>
               <NavLink
                 to="/settings"
                 onClick={() => setMenuOpen(false)}
-                className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}
+                className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
               >
                 Настройки
               </NavLink>
@@ -240,12 +248,12 @@ export function Header() {
           )}
 
           {token ? (
-            <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-1">
-              {user && <span className="text-xs text-gray-500 truncate">{name}</span>}
+            <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-1 dark:border-gray-700">
+              {user && <span className="text-xs text-gray-500 truncate dark:text-gray-400">{name}</span>}
               <button
                 type="button"
                 onClick={handleLogout}
-                className="text-sm font-medium text-red-500"
+                className="text-sm font-medium text-red-500 dark:text-red-400"
               >
                 Выйти
               </button>
@@ -255,14 +263,14 @@ export function Header() {
               <NavLink
                 to="/login"
                 onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-gray-600"
+                className="text-sm font-medium text-gray-600 dark:text-gray-300"
               >
                 Войти
               </NavLink>
               <NavLink
                 to="/register"
                 onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-indigo-600"
+                className="text-sm font-medium text-indigo-600 dark:text-indigo-400"
               >
                 Регистрация
               </NavLink>
