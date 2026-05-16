@@ -31,7 +31,7 @@ function isRpcBudgetResult(value: unknown): value is RpcBudgetResult {
   return typeof v.spent === 'number' && typeof v.remaining === 'number'
 }
 
-function applyToggleLocally(prev: ReactionAggregate, kind: ReactionKind): ReactionAggregate {
+export function applyToggleLocally(prev: ReactionAggregate, kind: ReactionKind): ReactionAggregate {
   if (prev.myKind === kind) {
     return {
       crowns: prev.crowns - (kind === 'crown' ? 1 : 0),
@@ -48,7 +48,7 @@ function applyToggleLocally(prev: ReactionAggregate, kind: ReactionKind): Reacti
   return { crowns, clowns, myKind: kind }
 }
 
-function computeBudgetDelta(prevKind: ReactionKind | null, nextKind: ReactionKind): number {
+export function computeBudgetDelta(prevKind: ReactionKind | null, nextKind: ReactionKind): number {
   if (prevKind === nextKind) return REACTION_COST[nextKind]
   const refund = prevKind ? REACTION_COST[prevKind] : 0
   return refund - REACTION_COST[nextKind]

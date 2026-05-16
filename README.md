@@ -213,9 +213,63 @@ net start winnat
 | `npm run lint`           | ESLint по `ts`/`tsx`                        |
 | `npm run lint:fix`       | ESLint с автофиксами                        |
 | `npm run format`         | Prettier по `src/**/*.{ts,tsx,css}`         |
-| `npm test`               | Vitest run                                  |
-| `npm run test:coverage`  | Покрытие                                    |
-| `npm run e2e`            | Playwright                                  |
+| `npm test`               | Vitest run (юнит/интеграционные тесты)      |
+| `npm run test:coverage`  | Те же тесты + отчёт по покрытию             |
+| `npm run test:ui`        | Vitest UI в браузере (watch + детали)       |
+| `npm run e2e`            | Playwright (E2E)                            |
+
+## Тесты
+
+### Юнит и интеграционные
+
+Используем **Vitest 4** + **@testing-library/react** + **jsdom**. Тесты лежат рядом с кодом: `*.test.ts(x)` (фолдер `src/**`).
+
+```bash
+npm test                  # одноразовый прогон всех тестов
+npm run test:coverage     # + отчёт покрытия (текст + html в ./coverage/index.html)
+npm run test:ui           # интерактивный UI Vitest, удобно для отладки
+```
+
+Текущий статус (на момент сдачи):
+
+- **10 тестовых файлов, 76 тестов, 100% pass**
+- **Покрытие: ~37% statements / ~36% lines / 46% functions** — выше требуемого порога 25%.
+
+Что покрыто:
+
+| Файл | Что тестируется |
+|---|---|
+| `src/shared/lib/cn.test.ts` | мердж className (tailwind-merge + clsx) |
+| `src/shared/lib/permissions.test.ts` | ролевая система `hasMinRole` |
+| `src/shared/lib/achievementDate.test.ts` | парсинг `meta.event_date` и форматирование |
+| `src/shared/schemas/auth.test.ts` | Zod-схемы login и register |
+| `src/shared/schemas/achievement.test.ts` | валидация формы достижения (категория, год, длины) |
+| `src/shared/schemas/profile.test.ts` | валидация редактирования профиля |
+| `src/shared/schemas/feed.test.ts` | session / achievement / post схемы |
+| `src/entities/theme/store.test.ts` | смена темы + persist в localStorage |
+| `src/entities/reactions/store.test.ts` | чистая логика оптимистичного апдейта и дельты бюджета |
+| `src/entities/friends/store.test.ts` | селекторы `getRelationship`, `acceptedFriendIds`, `pendingIncomingCount` |
+
+### Как удостовериться, что всё работает
+
+1. `npm install` (если ещё не).
+2. `npm test` — должно вывести в конце:
+   ```
+   Test Files  10 passed (10)
+        Tests  76 passed (76)
+   ```
+   Если число тестов меньше — что-то поменялось в коде и тесты пропустили; пройдись по выводу.
+3. `npm run test:coverage` — внизу будет таблица; общий блок «All files» должен показывать ≥25% по строкам/стейтментам. HTML-отчёт открывается из `./coverage/index.html`.
+4. Если хочется убедиться, что тесты реально что-то проверяют — поломай один (например, в `src/shared/lib/permissions.ts` верни `false` из `hasMinRole`): прогон должен упасть на permissions.test.ts с красным выводом. Верни обратно — снова зелёное.
+
+### E2E (Playwright)
+
+```bash
+npm run e2e          # headless прогон
+npm run e2e:ui       # интерактивный режим
+```
+
+> На момент сдачи E2E-сценарии не написаны — оставлено как точка расширения.
 
 ## Правила контрибуции
 
