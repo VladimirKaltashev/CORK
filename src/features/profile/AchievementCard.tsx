@@ -4,25 +4,45 @@ import { useAuthStore } from '@/entities/auth'
 import { useAchievementsStore } from '@/entities/achievements/store'
 import { ReactionBar } from '@/features/reactions'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
+import { CategoryIcon, CheckIcon, HourglassIcon, CrossMarkIcon } from '@/shared/ui'
 import type { Achievement, AchievementCategory, AchievementStatus } from '@/shared/types'
 
 type LabelVariant = 'default' | 'primary' | 'secondary' | 'accent' | 'success' | 'attention' | 'severe' | 'danger' | 'done' | 'sponsors'
 
-const CATEGORY_META: Record<AchievementCategory, { icon: string; label: string; variant: LabelVariant }> = {
-  olympiad: { icon: '🎓', label: 'Олимпиады',    variant: 'primary' },
-  academic: { icon: '📚', label: 'Успеваемость', variant: 'success' },
-  it:       { icon: '💻', label: 'IT',           variant: 'accent' },
-  creative: { icon: '🎨', label: 'Творчество',   variant: 'sponsors' },
-  sport:    { icon: '⚽', label: 'Спорт',        variant: 'attention' },
-  movies:   { icon: '🎬', label: 'Фильмы',       variant: 'done' },
-  games:    { icon: '🎮', label: 'Игры',         variant: 'severe' },
-  other:    { icon: '✨', label: 'Интересное',   variant: 'secondary' },
+const CATEGORY_META: Record<AchievementCategory, { label: string; variant: LabelVariant }> = {
+  olympiad: { label: 'Олимпиады',    variant: 'primary' },
+  academic: { label: 'Успеваемость', variant: 'success' },
+  it:       { label: 'IT',           variant: 'accent' },
+  creative: { label: 'Творчество',   variant: 'sponsors' },
+  sport:    { label: 'Спорт',        variant: 'attention' },
+  movies:   { label: 'Фильмы',       variant: 'done' },
+  games:    { label: 'Игры',         variant: 'severe' },
+  other:    { label: 'Интересное',   variant: 'secondary' },
 }
 
-const STATUS_ICON: Record<AchievementStatus, string> = {
-  pending:  '⏳',
-  verified: '✅',
-  rejected: '❌',
+function StatusBadge({ status }: { status: AchievementStatus }) {
+  if (status === 'verified') {
+    return (
+      <CheckIcon
+        className="ml-auto w-5 h-5 text-green-600 dark:text-green-400"
+        aria-label="Подтверждено"
+      />
+    )
+  }
+  if (status === 'pending') {
+    return (
+      <HourglassIcon
+        className="ml-auto w-5 h-5"
+        aria-label="На проверке"
+      />
+    )
+  }
+  return (
+    <CrossMarkIcon
+      className="ml-auto w-5 h-5"
+      aria-label="Отклонено"
+    />
+  )
 }
 
 interface AchievementCardProps {
@@ -61,17 +81,14 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
   return (
     <div className="border border-gray-300 rounded-md bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-start gap-3">
-        <div className="text-2xl select-none leading-none mt-0.5">{meta.icon}</div>
+        <div className="mt-0.5 text-gray-700 dark:text-gray-300">
+          <CategoryIcon category={achievement.category} className="w-7 h-7" />
+        </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1 mb-1">
             <Label variant={meta.variant}>{meta.label}</Label>
             <span className="text-xs text-gray-500">{formatAchievementDate(getEventDate(achievement.meta), achievement.year)}</span>
-            <span
-              className="ml-auto text-base leading-none"
-              title={{ pending: 'На проверке', verified: 'Подтверждено', rejected: 'Отклонено' }[achievement.status]}
-            >
-              {STATUS_ICON[achievement.status]}
-            </span>
+            <StatusBadge status={achievement.status} />
           </div>
           <p className="font-semibold text-gray-900 m-0 dark:text-white">{achievement.title}</p>
           {descTruncated && (

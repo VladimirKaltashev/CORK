@@ -12,6 +12,7 @@ import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { useDebounce } from '@/shared/hooks'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
+import { CategoryIcon } from '@/shared/ui'
 import type { AchievementCategory, ProofType } from '@/shared/types'
 
 interface UserResult {
@@ -90,14 +91,14 @@ type CategoryFilter = AchievementCategory | 'all'
 
 const FILTERS: { value: CategoryFilter; label: string }[] = [
   { value: 'all',      label: 'Все' },
-  { value: 'olympiad', label: '🎓 Олимпиады' },
-  { value: 'academic', label: '📚 Успеваемость' },
-  { value: 'it',       label: '💻 IT' },
-  { value: 'creative', label: '🎨 Творчество' },
-  { value: 'sport',    label: '⚽ Спорт' },
-  { value: 'movies',   label: '🎬 Фильмы' },
-  { value: 'games',    label: '🎮 Игры' },
-  { value: 'other',    label: '✨ Другое' },
+  { value: 'olympiad', label: 'Олимпиады' },
+  { value: 'academic', label: 'Успеваемость' },
+  { value: 'it',       label: 'IT' },
+  { value: 'creative', label: 'Творчество' },
+  { value: 'sport',    label: 'Спорт' },
+  { value: 'movies',   label: 'Фильмы' },
+  { value: 'games',    label: 'Игры' },
+  { value: 'other',    label: 'Другое' },
 ]
 
 interface FeedItem {
@@ -370,12 +371,13 @@ export function FeedPage() {
             key={f.value}
             type="button"
             onClick={() => handleFilterChange(f.value)}
-            className={`px-3 py-1.5 rounded-full text-sm transition-colors border ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors border ${
               category === f.value
                 ? 'border-indigo-500 bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-400'
                 : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:text-white'
             }`}
           >
+            {f.value !== 'all' && <CategoryIcon category={f.value} className="w-4 h-4" />}
             {f.label}
           </button>
         ))}

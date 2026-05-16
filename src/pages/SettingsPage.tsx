@@ -1,9 +1,12 @@
 import { useThemeStore, type Theme } from '@/entities/theme'
+import { SunIcon, MoonIcon, SystemIcon } from '@/shared/ui'
 
-const THEMES: { value: Theme; icon: string; label: string; description: string }[] = [
-  { value: 'light',  icon: '☀️', label: 'Светлая',   description: 'Всегда светлая' },
-  { value: 'dark',   icon: '🌙', label: 'Тёмная',    description: 'Всегда тёмная' },
-  { value: 'system', icon: '🖥️', label: 'Системная', description: 'Как в настройках ОС' },
+type IconComponent = typeof SunIcon
+
+const THEMES: { value: Theme; Icon: IconComponent; label: string; description: string }[] = [
+  { value: 'light',  Icon: SunIcon,    label: 'Светлая',   description: 'Всегда светлая' },
+  { value: 'dark',   Icon: MoonIcon,   label: 'Тёмная',    description: 'Всегда тёмная' },
+  { value: 'system', Icon: SystemIcon, label: 'Системная', description: 'Как в настройках ОС' },
 ]
 
 export function SettingsPage() {
@@ -21,24 +24,24 @@ export function SettingsPage() {
         </div>
 
         <div className="grid grid-cols-3 gap-2">
-          {THEMES.map((t) => {
-            const active = t.value === theme
+          {THEMES.map(({ value, Icon, label, description }) => {
+            const active = value === theme
             return (
               <button
-                key={t.value}
+                key={value}
                 type="button"
-                onClick={() => setTheme(t.value)}
+                onClick={() => setTheme(value)}
                 className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-colors ${
                   active
                     ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-400'
                     : 'border-gray-300 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700'
                 }`}
               >
-                <span className="text-2xl leading-none">{t.icon}</span>
+                <Icon className="w-7 h-7 text-gray-700 dark:text-gray-200" />
                 <span className={`text-sm font-semibold ${active ? 'text-indigo-700 dark:text-indigo-200' : 'text-gray-900 dark:text-white'}`}>
-                  {t.label}
+                  {label}
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">{t.description}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{description}</span>
               </button>
             )
           })}

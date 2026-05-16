@@ -1,5 +1,4 @@
 import { useRef } from 'react'
-import { Button } from '@primer/react'
 
 interface AvatarUploadProps {
   avatar: string | null
@@ -58,16 +57,15 @@ export function AvatarUpload({ avatar, name, onChange, size = 'md', editable = t
       </div>
       {editable && (
         <>
-          <Button
+          <button
             type="button"
-            size="small"
             onClick={() => inputRef.current?.click()}
             title="Загрузить фото"
-            className="absolute bottom-0 right-0 rounded-full p-0 flex items-center justify-center"
-            style={{ width: 24, height: 24, minWidth: 'unset' }}
+            aria-label="Загрузить фото"
+            className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-white text-gray-700 border border-gray-300 shadow-sm flex items-center justify-center text-base font-bold leading-none hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
           >
-            ✎
-          </Button>
+            <span className="-mt-0.5">+</span>
+          </button>
           <input
             ref={inputRef}
             type="file"

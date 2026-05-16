@@ -2,18 +2,8 @@ import { useEffect, useState } from 'react'
 import { Button, FormControl, Textarea } from '@primer/react'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
-import type { Achievement, AchievementCategory } from '@/shared/types'
-
-const CATEGORY_ICONS: Record<AchievementCategory, string> = {
-  olympiad: '🎓',
-  academic: '📚',
-  it: '💻',
-  creative: '🎨',
-  sport: '⚽',
-  movies: '🎬',
-  games: '🎮',
-  other: '✨',
-}
+import { CategoryIcon } from '@/shared/ui'
+import type { Achievement } from '@/shared/types'
 
 function RejectModal({
   achievement,
@@ -163,7 +153,7 @@ export function AdminPage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">{CATEGORY_ICONS[ach.category]}</span>
+                    <CategoryIcon category={ach.category} className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                     <span className="text-xs text-gray-400 uppercase tracking-wide">{ach.category}</span>
                     <span className="text-xs text-gray-400">· {ach.year}</span>
                   </div>
