@@ -3,17 +3,18 @@ import { useAchievementsStore } from '@/entities/achievements/store'
 import { useAuthStore } from '@/entities/auth'
 import { useProfileStore } from '@/entities/profile'
 import { showToast } from '@/shared/lib/toast'
+import { CategoryIcon, CalendarIcon } from '@/shared/ui'
 import type { AchievementCategory, ProofType } from '@/shared/types'
 
-const CATEGORIES: { value: AchievementCategory; icon: string; label: string }[] = [
-  { value: 'olympiad', icon: '🎓', label: 'Олимпиады' },
-  { value: 'academic', icon: '📚', label: 'Учёба' },
-  { value: 'it',       icon: '💻', label: 'IT' },
-  { value: 'creative', icon: '🎨', label: 'Творчество' },
-  { value: 'sport',    icon: '⚽', label: 'Спорт' },
-  { value: 'movies',   icon: '🎬', label: 'Фильмы' },
-  { value: 'games',    icon: '🎮', label: 'Игры' },
-  { value: 'other',    icon: '✨', label: 'Другое' },
+const CATEGORIES: { value: AchievementCategory; label: string }[] = [
+  { value: 'olympiad', label: 'Олимпиады' },
+  { value: 'academic', label: 'Учёба' },
+  { value: 'it',       label: 'IT' },
+  { value: 'creative', label: 'Творчество' },
+  { value: 'sport',    label: 'Спорт' },
+  { value: 'movies',   label: 'Фильмы' },
+  { value: 'games',    label: 'Игры' },
+  { value: 'other',    label: 'Другое' },
 ]
 
 const currentYear = new Date().getFullYear()
@@ -129,8 +130,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
             className="text-gray-400 hover:text-gray-700 transition-colors dark:text-gray-500 dark:hover:text-gray-300"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M6 6l12 12M18 6l-6 12" transform="" />
-              <path d="M6 6l12 12M6 18L18 6" />
+              <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </button>
         </div>
@@ -214,7 +214,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                         : 'bg-white text-gray-600 ring-gray-200 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-600'
                     }`}
                   >
-                    <span>{c.icon}</span>
+                    <CategoryIcon category={c.value} className="w-3.5 h-3.5" />
                     <span>{c.label}</span>
                   </button>
                 )
@@ -260,7 +260,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
 
             {eventDate === null ? (
               <div className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-600 dark:text-gray-300">
-                <span className="text-base">📅</span>
+                <CalendarIcon className="w-4 h-4" />
                 <input
                   type="number"
                   min={MIN_YEAR}
@@ -282,7 +282,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
               </div>
             ) : (
               <div className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-700 dark:text-gray-200">
-                <span className="text-base">📅</span>
+                <CalendarIcon className="w-4 h-4" />
                 <input
                   type="date"
                   min={`${MIN_YEAR}-01-01`}

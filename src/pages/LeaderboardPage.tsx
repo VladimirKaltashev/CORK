@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
 import { useAuthStore } from '@/entities/auth'
+import { CrownIcon, ClownIcon } from '@/shared/ui'
 
 type Board = 'kings' | 'clowns'
 
@@ -62,7 +63,7 @@ export function LeaderboardPage() {
   }, [board])
 
   const scoreValue = (row: LeaderboardRow) => (board === 'kings' ? row.crowns : row.clowns)
-  const scoreEmoji = board === 'kings' ? '👑' : '🤡'
+  const ScoreIcon = board === 'kings' ? CrownIcon : ClownIcon
   const scoreColor = board === 'kings' ? 'text-amber-700' : 'text-red-600'
 
   return (
@@ -73,31 +74,33 @@ export function LeaderboardPage() {
           <button
             type="button"
             onClick={() => setBoard('kings')}
-            className={`px-3 py-1.5 transition-colors ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 transition-colors ${
               board === 'kings'
                 ? 'bg-amber-500 text-white font-semibold'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            👑 Короли
+            <CrownIcon className="w-4 h-4" />
+            Короли
           </button>
           <button
             type="button"
             onClick={() => setBoard('clowns')}
-            className={`px-3 py-1.5 transition-colors ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 transition-colors ${
               board === 'clowns'
                 ? 'bg-red-500 text-white font-semibold'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            🤡 Клоуны
+            <ClownIcon className="w-4 h-4" />
+            Клоуны
           </button>
         </div>
       </div>
 
       <p className="text-sm text-gray-500 mb-4">
         {board === 'kings'
-          ? 'Те, кого толпа короновала чаще всех. По сумме корон 👑 на всех достижениях.'
+          ? 'Те, кого толпа короновала чаще всех. По сумме корон на всех достижениях.'
           : 'Те, кому больше всего прилетело клоунов. Носится с гордостью.'}
       </p>
 
@@ -149,13 +152,13 @@ export function LeaderboardPage() {
                     {isMe && <span className="text-xs text-indigo-600 font-medium dark:text-indigo-400">это ты</span>}
                   </div>
                   <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400 dark:text-gray-500">
-                    <span>👑 <span className="tabular-nums">{row.crowns}</span></span>
-                    <span>🤡 <span className="tabular-nums">{row.clowns}</span></span>
+                    <span className="inline-flex items-center gap-1"><CrownIcon className="w-3.5 h-3.5" /><span className="tabular-nums">{row.crowns}</span></span>
+                    <span className="inline-flex items-center gap-1"><ClownIcon className="w-3.5 h-3.5" /><span className="tabular-nums">{row.clowns}</span></span>
                   </div>
                 </div>
 
                 <div className="flex-shrink-0 flex items-center gap-1">
-                  <span className="text-xl leading-none">{scoreEmoji}</span>
+                  <ScoreIcon className="w-6 h-6" />
                   <span className={`text-xl font-bold tabular-nums ${scoreColor}`}>{scoreValue(row)}</span>
                 </div>
               </Link>

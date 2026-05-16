@@ -8,6 +8,7 @@ import { useFriendsStore } from '@/entities/friends'
 import { useReactionsStore } from '@/entities/reactions'
 import { useCreateAchievementDialog } from '@/entities/achievements/createDialog'
 import { AvatarUpload } from '@/shared/ui/AvatarUpload'
+import { CrownIcon, ClownIcon } from '@/shared/ui'
 import { EditProfileModal } from '@/features/profile/EditProfileModal'
 import { AchievementCard } from '@/features/profile/AchievementCard'
 
@@ -31,11 +32,11 @@ function ScoreBlock({ crowns, clowns }: { crowns: number; clowns: number }) {
   return (
     <div className="flex items-center gap-4 rounded-md border border-gray-300 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-center gap-1.5">
-        <span className="text-2xl leading-none">👑</span>
+        <CrownIcon className="w-7 h-7" />
         <span className="text-xl font-bold text-amber-700 tabular-nums dark:text-amber-400">{crowns}</span>
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="text-2xl leading-none">🤡</span>
+        <ClownIcon className="w-7 h-7" />
         <span className="text-xl font-bold text-red-600 tabular-nums dark:text-red-400">{clowns}</span>
       </div>
       <div className="ml-auto text-sm text-gray-500 dark:text-gray-400">
