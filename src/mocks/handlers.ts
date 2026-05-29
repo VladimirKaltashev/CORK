@@ -99,6 +99,14 @@ const getDb = () => {
     )
   }
 
+  // Seed posts for feed
+  const posts = db.posts as Array<Record<string, unknown>>
+  if (posts.length === 0) {
+    posts.push(
+      { id: 'p1', authorId: '1', content: 'Seed post', createdAt: new Date().toISOString(), likes: [], comments: [] },
+    )
+  }
+
   return db
 }
 
@@ -154,7 +162,7 @@ export const handlers = [
   }),
 
   // ── Feed (Generic) ──
-  http.get('/api/feed', ({ request }) => {
+  http.get('http://127.0.0.1:8000/feed', ({ request }) => {
     const db = getDb()
     const url = new URL(request.url)
     const page = Number(url.searchParams.get('page') ?? '1')
@@ -171,7 +179,7 @@ export const handlers = [
   }),
 
   // ── Posts (Create) ──
-  http.post('/api/posts', async ({ request }) => {
+  http.post('http://127.0.0.1:8000/posts', async ({ request }) => {
     const db = getDb()
     const body = await request.json() as Record<string, unknown>
     const posts = db.posts as Array<Record<string, unknown>>
@@ -181,13 +189,13 @@ export const handlers = [
   }),
 
   // ── Dashboard Stats ──
-  http.get('/dashboard/stats', async () => {
+  http.get('http://127.0.0.1:8000/dashboard/stats', async () => {
     await new Promise((r) => setTimeout(r, 200))
     return HttpResponse.json({ totalSessions: 24, totalHours: 87, weekSessions: 5, weekHours: 12, currentStreak: 7, maxStreak: 14, goalProgress: 65, goalDescription: '100 часов по математике' })
   }),
 
   // ── Global Feed ──
-  http.get('/feed/global', async ({ request }) => {
+  http.get('http://127.0.0.1:8000/feed/global', async ({ request }) => {
     await new Promise((r) => setTimeout(r, 300))
     const url = new URL(request.url)
     const page = parseInt(url.searchParams.get('page') || '1')
@@ -202,7 +210,7 @@ export const handlers = [
   }),
 
   // ── Leaderboard ──
-  http.get('/leaderboard', async ({ request }) => {
+  http.get('http://127.0.0.1:8000/leaderboard', async ({ request }) => {
     await new Promise((r) => setTimeout(r, 250))
     const url = new URL(request.url)
     const entries: LeaderboardEntry[] = [
@@ -216,14 +224,14 @@ export const handlers = [
   }),
 
   // ── Achievement Verify ──
-  http.post('/achievements/:id/verify', async ({ params, request }) => {
+  http.post('http://127.0.0.1:8000/achievements/:id/verify', async ({ params, request }) => {
     await new Promise((r) => setTimeout(r, 300))
     const body = await request.json() as { verified: boolean }
     return HttpResponse.json({ success: true, achievement: { id: params.id, verified: body.verified ? 'verified' : 'rejected' } })
   }),
 
   // ── User Achievements ──
-  http.get('/user/:id/achievements', async ({ params }) => {
+  http.get('http://127.0.0.1:8000/user/:id/achievements', async ({ params }) => {
     await new Promise((r) => setTimeout(r, 200))
     return HttpResponse.json({ achievements: [
       { id: '1', userId: params.id, title: 'Победитель ВсОШ', badge: 'gold', verified: 'verified', earnedAt: '2024-03-10', description: '1 место' },
@@ -232,7 +240,7 @@ export const handlers = [
   }),
 
   // ── Extended Profile ──
-  http.get('/profile/extended/:id', async () => {
+  http.get('http://127.0.0.1:8000/profile/extended/:id', async () => {
     await new Promise((r) => setTimeout(r, 200))
     return HttpResponse.json({ userId: '1', bio: 'Увлекаюсь математикой и экономикой', socialLinks: { telegram: '@user', github: 'user' }, favoriteSubjects: ['math', 'physics'], monthlyGoal: { subject: 'math', targetHours: 50, currentHours: 32 } })
   }),
