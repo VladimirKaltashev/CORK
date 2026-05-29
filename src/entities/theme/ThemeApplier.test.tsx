@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render, waitFor } from '@testing-library/react'
 import { ThemeApplier } from './ThemeApplier'
 import { useThemeStore } from './store'

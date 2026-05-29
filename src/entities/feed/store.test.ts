@@ -24,10 +24,10 @@ describe('useFeedStore', () => {
   })
 
   it('setFilter resets items and page', () => {
-    useFeedStore.setState({ items: [{ id: '1', type: 'post', data: {} as never }], page: 2 })
-    useFeedStore.getState().setFilter('sessions')
+    useFeedStore.setState({ items: [{ id: '1', type: 'post', createdAt: '2024-01-01', author: { id: 'a1', name: 'T', role: 'user' }, data: { id: 'p1', content: 'test', likes: [], comments: [] } } as never], page: 2 })
+    useFeedStore.getState().setFilter('session')
     const s = useFeedStore.getState()
-    expect(s.filter).toBe('sessions')
+    expect(s.filter).toBe('session')
     expect(s.items).toEqual([])
     expect(s.page).toBe(0)
     expect(s.hasMore).toBe(true)
@@ -58,10 +58,10 @@ describe('useFeedStore', () => {
     }
     useFeedStore.setState({ items: [post as never] })
     useFeedStore.getState().optimisticLike('p1', 'u2')
-    let item = useFeedStore.getState().items[0] as typeof post
+    let item = useFeedStore.getState().items[0] as unknown as typeof post
     expect(item.data.likes).toContain('u2')
     useFeedStore.getState().optimisticLike('p1', 'u1')
-    item = useFeedStore.getState().items[0] as typeof post
+    item = useFeedStore.getState().items[0] as unknown as typeof post
     expect(item.data.likes).not.toContain('u1')
   })
 
@@ -73,7 +73,7 @@ describe('useFeedStore', () => {
     }
     useFeedStore.setState({ items: [post as never] })
     useFeedStore.getState().revertLike('p1', ['u1'])
-    const item = useFeedStore.getState().items[0] as typeof post
+    const item = useFeedStore.getState().items[0] as unknown as typeof post
     expect(item.data.likes).toEqual(['u1'])
   })
 
@@ -86,8 +86,8 @@ describe('useFeedStore', () => {
     useFeedStore.setState({ items: [post as never] })
     const comment = { id: 'c1', text: 'nice', createdAt: '2024-01-01', userId: 'u1', userName: 'A' }
     useFeedStore.getState().addComment('p1', comment as never)
-    const item = useFeedStore.getState().items[0] as typeof post
-    expect(item.data.comments.length).toBe(1)
-    expect(item.data.comments[0].text).toBe('nice')
+    const item = useFeedStore.getState().items[0] as unknown as typeof post
+    expect((item.data.comments as unknown as Array<{text: string}>).length).toBe(1)
+    expect((item.data.comments as unknown as Array<{text: string}>)[0].text).toBe('nice')
   })
 })

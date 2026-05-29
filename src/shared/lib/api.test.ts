@@ -27,7 +27,7 @@ describe('api interceptors', () => {
     const mockGetState = vi.fn().mockReturnValue({ token: 'test-token', logout: vi.fn() })
     useAuthStore.getState = mockGetState
     const req = { headers: {} } as never
-    const result = await api.interceptors.request.handlers[0].fulfilled(req)
+    const result = await api.interceptors.request.handlers![0]!.fulfilled(req)
     expect(result.headers.Authorization).toBe('Bearer test-token')
   })
 
@@ -35,13 +35,13 @@ describe('api interceptors', () => {
     const mockGetState = vi.fn().mockReturnValue({ token: null, logout: vi.fn() })
     useAuthStore.getState = mockGetState
     const req = { headers: {} } as never
-    const result = await api.interceptors.request.handlers[0].fulfilled(req)
+    const result = await api.interceptors.request.handlers![0]!.fulfilled(req)
     expect(result.headers.Authorization).toBeUndefined()
   })
 
   it('response interceptor passes through success', async () => {
     const response = { data: 'ok' } as never
-    const result = await api.interceptors.response.handlers[0].fulfilled(response)
+    const result = await api.interceptors.response.handlers![0]!.fulfilled(response)
     expect(result).toBe(response)
   })
 
@@ -49,26 +49,26 @@ describe('api interceptors', () => {
     const mockLogout = vi.fn()
     useAuthStore.getState = vi.fn().mockReturnValue({ token: 'old', logout: mockLogout })
     const error = { isAxiosError: true, response: { status: 401, data: { message: 'Unauthorized' } } }
-    await expect(api.interceptors.response.handlers[0].rejected(error)).rejects.toBe(error)
+    await expect(api.interceptors.response.handlers![0]!.rejected!(error)).rejects.toBe(error)
     expect(mockLogout).toHaveBeenCalled()
     expect(showToast).toHaveBeenCalledWith('error', 'Сессия истекла')
   })
 
   it('response interceptor handles axios error with message', async () => {
     const error = { isAxiosError: true, response: { status: 500, data: { message: 'Server error' } } }
-    await expect(api.interceptors.response.handlers[0].rejected(error)).rejects.toBe(error)
+    await expect(api.interceptors.response.handlers![0]!.rejected!(error)).rejects.toBe(error)
     expect(showToast).toHaveBeenCalledWith('error', 'Server error')
   })
 
   it('response interceptor handles generic error', async () => {
     const error = { isAxiosError: true, response: {} }
-    await expect(api.interceptors.response.handlers[0].rejected(error)).rejects.toBe(error)
+    await expect(api.interceptors.response.handlers![0]!.rejected!(error)).rejects.toBe(error)
     expect(showToast).toHaveBeenCalledWith('error', 'Произошла ошибка')
   })
 
   it('response interceptor handles non-axios error', async () => {
     const error = new Error('network failure')
-    await expect(api.interceptors.response.handlers[0].rejected(error)).rejects.toBe(error)
+    await expect(api.interceptors.response.handlers![0]!.rejected!(error)).rejects.toBe(error)
     expect(showToast).toHaveBeenCalledWith('error', 'Произошла ошибка')
   })
 })

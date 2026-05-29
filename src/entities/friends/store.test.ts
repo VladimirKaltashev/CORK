@@ -23,7 +23,8 @@ vi.mock('@/shared/lib/supabase', () => ({
   },
 }))
 
-const mockSupabase = (await vi.importMock('@/shared/lib/supabase')).supabase
+type MockFn = ReturnType<typeof vi.fn>
+const mockSupabase = (await vi.importMock('@/shared/lib/supabase') as { supabase: Record<string, MockFn> }).supabase
 
 vi.mock('@/shared/lib/toast', () => ({
   showToast: vi.fn(),
@@ -115,8 +116,8 @@ describe('useFriendsStore', () => {
   })
 
   it('removeRecord removes friend', async () => {
-    const friends = []
-    const profiles = []
+    const friends: Array<{ id: string; user_id: string; friend_id: string; status: string; created_at: string }> = []
+    const profiles: Array<{ id: string; name: string; avatar: null | string }> = []
     mockSupabase.from
       .mockReturnValueOnce({
         delete: vi.fn(() => ({
