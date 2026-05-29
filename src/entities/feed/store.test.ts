@@ -35,7 +35,7 @@ describe('useFeedStore', () => {
 
   it('fetchFeed loads items', async () => {
     const mockData = { data: [{ id: '1', type: 'post', data: { content: 'test', likes: [], comments: [] } }], hasMore: true }
-    ;(api.get as any).mockResolvedValueOnce({ data: mockData })
+    ;(vi.mocked(api.get)).mockResolvedValueOnce({ data: mockData })
     const store = useFeedStore.getState()
     await store.fetchFeed()
     const s = useFeedStore.getState()

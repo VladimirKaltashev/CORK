@@ -25,7 +25,7 @@ describe('useLeaderboardStore', () => {
 
   it('loadLeaderboard fetches entries', async () => {
     const mockData = { entries: [{ rank: 1, userId: 'u1', userName: 'A', score: 100, displayScore: '100ч', sessionsCount: 10, change: 'up' }], total: 50 }
-    ;(api.get as any).mockResolvedValueOnce({ data: mockData })
+    ;(vi.mocked(api.get)).mockResolvedValueOnce({ data: mockData })
     const store = useLeaderboardStore.getState()
     await store.loadLeaderboard()
     const s = useLeaderboardStore.getState()
@@ -36,7 +36,7 @@ describe('useLeaderboardStore', () => {
 
   it('setSubject updates subject and reloads', async () => {
     const mockData = { entries: [{ rank: 1, userId: 'u1', userName: 'A', score: 100, displayScore: '100ч', sessionsCount: 10, change: 'up' }], total: 10 }
-    ;(api.get as any).mockResolvedValueOnce({ data: mockData })
+    ;(vi.mocked(api.get)).mockResolvedValueOnce({ data: mockData })
     const store = useLeaderboardStore.getState()
     await store.setSubject('physics')
     const s = useLeaderboardStore.getState()
@@ -46,7 +46,7 @@ describe('useLeaderboardStore', () => {
 
   it('setPeriod updates period and reloads', async () => {
     const mockData = { entries: [{ rank: 1, userId: 'u1', userName: 'A', score: 100, displayScore: '100ч', sessionsCount: 10, change: 'up' }], total: 10 }
-    ;(api.get as any).mockResolvedValueOnce({ data: mockData })
+    ;(vi.mocked(api.get)).mockResolvedValueOnce({ data: mockData })
     const store = useLeaderboardStore.getState()
     await store.setPeriod('week')
     const s = useLeaderboardStore.getState()

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { useDebounce } from './useDebounce'
 import { renderHook, waitFor } from '@testing-library/react'
 

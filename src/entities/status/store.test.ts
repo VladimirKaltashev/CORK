@@ -25,7 +25,7 @@ describe('useStatusStore', () => {
 
   it('fetchStatus loads status from server', async () => {
     const mockStatus = { status: 'studying', subject: 'math', task: 'problems' }
-    ;(api.get as any).mockResolvedValueOnce({ data: mockStatus })
+    ;(vi.mocked(api.get)).mockResolvedValueOnce({ data: mockStatus })
     await useStatusStore.getState().fetchStatus('1')
     const s = useStatusStore.getState()
     expect(s.status).toEqual(mockStatus)
