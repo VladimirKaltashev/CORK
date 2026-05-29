@@ -1,4 +1,4 @@
-import { useReactionsStore } from '@/entities/reactions'
+import { useReactionsStore, REACTION_COST } from '@/entities/reactions'
 import type { ReactionKind } from '@/entities/reactions'
 import { CrownIcon, ClownIcon } from '@/shared/ui'
 
@@ -11,6 +11,7 @@ interface ReactionBarProps {
 export function ReactionBar({ achievementId, disabled = false, size = 'md' }: ReactionBarProps) {
   const agg = useReactionsStore((s) => s.byAchievement[achievementId])
   const pending = useReactionsStore((s) => s.pending.has(achievementId))
+  const budgetRemaining = useReactionsStore((s) => s.budgetRemaining)
   const toggle = useReactionsStore((s) => s.toggle)
 
   const crowns = agg?.crowns ?? 0
@@ -19,6 +20,7 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md' }: Re
 
   const handleClick = (kind: ReactionKind) => {
     if (disabled || pending) return
+    if (myKind !== kind && budgetRemaining < REACTION_COST[kind]) return
     toggle(achievementId, kind)
   }
 
