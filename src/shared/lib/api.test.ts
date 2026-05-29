@@ -1,5 +1,4 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import axios from 'axios'
 import { api } from './api'
 import { useAuthStore } from '@/entities/auth'
 import { showToast } from './toast'

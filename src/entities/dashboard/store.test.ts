@@ -26,7 +26,7 @@ describe('useDashboardStore', () => {
 
   it('loadStats fetches dashboard stats', async () => {
     const mockStats = { totalSessions: 24, totalHours: 87, weekSessions: 5 }
-    ;(api.get as any).mockResolvedValueOnce({ data: mockStats })
+    ;(vi.mocked(api.get)).mockResolvedValueOnce({ data: mockStats })
     const store = useDashboardStore.getState()
     await store.loadStats()
     const s = useDashboardStore.getState()
@@ -37,7 +37,7 @@ describe('useDashboardStore', () => {
 
   it('loadGlobalFeed fetches global feed', async () => {
     const mockFeed = { items: [{ id: '1', type: 'achievement_earned' }], hasMore: false }
-    ;(api.get as any).mockResolvedValueOnce({ data: mockFeed })
+    ;(vi.mocked(api.get)).mockResolvedValueOnce({ data: mockFeed })
     const store = useDashboardStore.getState()
     await store.loadGlobalFeed()
     const s = useDashboardStore.getState()
@@ -49,7 +49,7 @@ describe('useDashboardStore', () => {
 
   it('loadGlobalFeed with reset replaces feed', async () => {
     const mockFeed = { items: [{ id: '1', type: 'achievement_earned' }], hasMore: false }
-    ;(api.get as any).mockResolvedValue({ data: mockFeed })
+    ;(vi.mocked(api.get)).mockResolvedValue({ data: mockFeed })
     const store = useDashboardStore.getState()
     await store.loadGlobalFeed()
     await store.loadGlobalFeed(true)

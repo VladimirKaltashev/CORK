@@ -6,11 +6,11 @@ const mockAuthState = { token: 'abc' }
 const mockReactionsState = { budgetRemaining: 10, budgetLoaded: true, loadBudget: vi.fn() }
 
 vi.mock('@/entities/auth', () => ({
-  useAuthStore: (selector?: any) => selector ? selector(mockAuthState) : mockAuthState,
+  useAuthStore: (selector?: unknown) => typeof selector === 'function' ? selector(mockAuthState) : mockAuthState,
 }))
 
 vi.mock('@/entities/reactions', () => ({
-  useReactionsStore: (selector?: any) => selector ? selector(mockReactionsState) : mockReactionsState,
+  useReactionsStore: (selector?: unknown) => typeof selector === 'function' ? selector(mockReactionsState) : mockReactionsState,
 }))
 
 describe('BudgetWidget', () => {

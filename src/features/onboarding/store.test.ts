@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest'
+import { describe, expect, it, beforeEach } from 'vitest'
 import { useOnboardingStore } from './store'
 
 const STORAGE_KEY = 'onboarding_v1_completed'

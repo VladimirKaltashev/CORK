@@ -11,7 +11,7 @@ const mockState = {
 }
 
 vi.mock('@/entities/reactions', () => ({
-  useReactionsStore: (selector: any) => selector(mockState),
+  useReactionsStore: (selector: (state: typeof mockState) => typeof mockState) => selector(mockState),
   REACTION_COST: { crown: 1, clown: 2 },
 }))
 

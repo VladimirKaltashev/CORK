@@ -27,7 +27,7 @@ describe('usePlannerStore', () => {
 
   it('loadTasks fetches tasks', async () => {
     const mockTasks = [{ id: 't1', title: 'Task 1', priority: 'high', deadline: '2024-01-01', subject: 'math', completed: false, createdAt: '2024-01-01', commentsCount: 0 }]
-    ;(api.get as any).mockResolvedValueOnce({ data: { tasks: mockTasks } })
+    ;(vi.mocked(api.get)).mockResolvedValueOnce({ data: { tasks: mockTasks } })
     const store = usePlannerStore.getState()
     await store.loadTasks()
     const s = usePlannerStore.getState()
@@ -38,7 +38,7 @@ describe('usePlannerStore', () => {
 
   it('loadSessions fetches sessions', async () => {
     const mockSessions = [{ id: 's1', userId: '1', subject: 'math', durationSeconds: 3600, checkpoints: [], report: 'report', completedAt: '2024-01-01' }]
-    ;(api.get as any).mockResolvedValueOnce({ data: { sessions: mockSessions } })
+    ;(vi.mocked(api.get)).mockResolvedValueOnce({ data: { sessions: mockSessions } })
     const store = usePlannerStore.getState()
     await store.loadSessions()
     const s = usePlannerStore.getState()
@@ -48,7 +48,7 @@ describe('usePlannerStore', () => {
 
   it('createTask adds task to list', async () => {
     const newTask = { id: 't-new', title: 'New Task', priority: 'high', deadline: '2024-01-01', subject: 'math', description: 'desc', completed: false, createdAt: '2024-01-01', commentsCount: 0 }
-    ;(api.post as any).mockResolvedValueOnce({ data: newTask })
+    ;(vi.mocked(api.post)).mockResolvedValueOnce({ data: newTask })
     const store = usePlannerStore.getState()
     await store.createTask({ title: 'New Task', priority: 'high', deadline: '2024-01-01', subject: 'math', description: 'desc' })
     const s = usePlannerStore.getState()
@@ -60,7 +60,7 @@ describe('usePlannerStore', () => {
     const existing = { id: 't1', title: 'Old', priority: 'high', deadline: '2024-01-01', subject: 'math', completed: false, createdAt: '2024-01-01', commentsCount: 0 }
     const updated = { ...existing, title: 'Updated' }
     usePlannerStore.setState({ tasks: [existing as never] })
-    ;(api.patch as any).mockResolvedValueOnce({ data: updated })
+    ;(vi.mocked(api.patch)).mockResolvedValueOnce({ data: updated })
     const store = usePlannerStore.getState()
     await store.updateTask('t1', { title: 'Updated' })
     expect(usePlannerStore.getState().tasks[0].title).toBe('Updated')
@@ -69,7 +69,7 @@ describe('usePlannerStore', () => {
   it('toggleTask toggles completed flag', async () => {
     const task = { id: 't1', title: 'Task', priority: 'high', deadline: '2024-01-01', subject: 'math', completed: false, createdAt: '2024-01-01', commentsCount: 0 }
     usePlannerStore.setState({ tasks: [task as never] })
-    ;(api.patch as any).mockResolvedValueOnce({ data: { ...task, completed: true } })
+    ;(vi.mocked(api.patch)).mockResolvedValueOnce({ data: { ...task, completed: true } })
     const store = usePlannerStore.getState()
     await store.toggleTask('t1')
     expect(usePlannerStore.getState().tasks[0].completed).toBe(true)
@@ -78,7 +78,7 @@ describe('usePlannerStore', () => {
   it('toggleTask reverts on error', async () => {
     const task = { id: 't1', title: 'Task', priority: 'high', deadline: '2024-01-01', subject: 'math', completed: false, createdAt: '2024-01-01', commentsCount: 0 }
     usePlannerStore.setState({ tasks: [task as never] })
-    ;(api.patch as any).mockRejectedValueOnce(new Error('fail'))
+    ;(vi.mocked(api.patch)).mockRejectedValueOnce(new Error('fail'))
     const store = usePlannerStore.getState()
     await store.toggleTask('t1')
     expect(usePlannerStore.getState().tasks[0].completed).toBe(false)
@@ -93,7 +93,7 @@ describe('usePlannerStore', () => {
 
   it('loadComments loads comments for task', async () => {
     const mockComments = [{ id: 'c1', taskId: 't1', text: 'hello', createdAt: '2024-01-01', userId: '1', userName: 'A' }]
-    ;(api.get as any).mockResolvedValueOnce({ data: { comments: mockComments } })
+    ;(vi.mocked(api.get)).mockResolvedValueOnce({ data: { comments: mockComments } })
     const store = usePlannerStore.getState()
     await store.loadComments('t1')
     const comments = usePlannerStore.getState().taskComments['t1']
@@ -103,7 +103,7 @@ describe('usePlannerStore', () => {
 
   it('addComment adds comment to task', async () => {
     const newComment = { id: 'c2', taskId: 't1', text: 'test comment', createdAt: '2024-01-01', userId: '1', userName: 'A' }
-    ;(api.post as any).mockResolvedValueOnce({ data: newComment })
+    ;(vi.mocked(api.post)).mockResolvedValueOnce({ data: newComment })
     const store = usePlannerStore.getState()
     await store.addComment('t1', 'test comment')
     const comments = usePlannerStore.getState().taskComments['t1']
