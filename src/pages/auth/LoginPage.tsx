@@ -34,8 +34,9 @@ export function LoginPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+          <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
           <input
+            id="email"
             {...register('email')}
             type="email"
             autoComplete="email"
@@ -50,8 +51,9 @@ export function LoginPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Пароль</label>
+          <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Пароль</label>
           <input
+            id="password"
             {...register('password')}
             type="password"
             autoComplete="current-password"

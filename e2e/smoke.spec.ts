@@ -9,8 +9,8 @@ test('smoke: login page loads', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Войти' })).toBeVisible()
 })
 
-test('smoke: home redirects to feed', async ({ page }) => {
+test('smoke: home redirects to login when unauthenticated', async ({ page }) => {
   await page.goto('/')
-  await page.waitForURL(/.*feed/)
-  await expect(page.getByRole('heading', { name: 'Лента достижений' })).toBeVisible()
+  await page.waitForURL(/.*login/)
+  await expect(page.getByRole('heading', { name: 'Вход' })).toBeVisible()
 })
