@@ -114,6 +114,8 @@ export const useReactionsStore = create<ReactionsState>((set, get) => ({
     const prev = state.byAchievement[achievementId] ?? EMPTY
     const optimistic = applyToggleLocally(prev, kind)
     const budgetDelta = computeBudgetDelta(prev.myKind, kind)
+    const prevBudgetRemaining = state.budgetRemaining
+    const prevBudgetSpent = state.budgetSpent
 
     set((s) => {
       const pending = new Set(s.pending)
@@ -138,11 +140,11 @@ export const useReactionsStore = create<ReactionsState>((set, get) => ({
     })
 
     if (error) {
-      set((s) => ({
-        byAchievement: { ...s.byAchievement, [achievementId]: prev },
-        budgetRemaining: Math.max(0, s.budgetRemaining - budgetDelta),
-        budgetSpent: Math.max(0, s.budgetSpent + budgetDelta),
-      }))
+      set({
+        byAchievement: { ...get().byAchievement, [achievementId]: prev },
+        budgetRemaining: prevBudgetRemaining,
+        budgetSpent: prevBudgetSpent,
+      })
       const exceeded = error.message?.toLowerCase().includes('budget exceeded')
       showToast('error', exceeded ? 'Не хватает голосов на этой неделе' : 'Не удалось поставить реакцию')
       return
