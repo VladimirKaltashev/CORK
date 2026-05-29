@@ -19,7 +19,8 @@ vi.mock('@/shared/lib/supabase', () => ({
   },
 }))
 
-const mockSupabase = (await vi.importMock('@/shared/lib/supabase')).supabase
+type MockFn = ReturnType<typeof vi.fn>
+const mockSupabase = (await vi.importMock('@/shared/lib/supabase') as { supabase: { auth: { signInWithPassword: MockFn; signUp: MockFn; signOut: MockFn; getSession: MockFn }; from: MockFn } }).supabase
 
 describe('useAuthStore', () => {
   beforeEach(() => {

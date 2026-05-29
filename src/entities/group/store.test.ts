@@ -36,7 +36,7 @@ describe('useGroupStore', () => {
   })
 
   it('fetchGroup loads single group', async () => {
-    const group = { id: 'g1', name: 'Math', description: 'Math group', memberCount: 10, isSubscribed: false }
+    const group = { id: 'g1', name: 'Math', description: 'Math group', subject: 'math', memberCount: 10, isSubscribed: false, createdAt: '2024-01-01' }
     ;(vi.mocked(api.get)).mockResolvedValueOnce({ data: group })
     await useGroupStore.getState().fetchGroup('g1')
     const s = useGroupStore.getState()
@@ -46,7 +46,7 @@ describe('useGroupStore', () => {
 
   it('subscribe toggles subscription', async () => {
     ;(vi.mocked(api.post)).mockResolvedValueOnce({ data: { success: true } })
-    useGroupStore.setState({ groups: [{ id: 'g1', name: 'Math', description: 'Math group', memberCount: 10, isSubscribed: false }], current: null, isLoading: false })
+    useGroupStore.setState({ groups: [{ id: 'g1', name: 'Math', description: 'Math group', subject: 'math', memberCount: 10, isSubscribed: false, createdAt: '2024-01-01' }], current: null, isLoading: false })
     await useGroupStore.getState().subscribe('g1')
     const s = useGroupStore.getState()
     expect(s.groups[0].isSubscribed).toBe(true)

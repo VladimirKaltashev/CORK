@@ -23,7 +23,7 @@ describe('Feed store integration', () => {
     const allItems = useFeedStore.getState().items
     expect(allItems.length).toBeGreaterThan(0)
 
-    useFeedStore.getState().setFilter('popular')
+    useFeedStore.getState().setFilter('achievement')
     const filteredItems = useFeedStore.getState().items
     expect(filteredItems.length).toBe(0)
     expect(useFeedStore.getState().page).toBe(0)

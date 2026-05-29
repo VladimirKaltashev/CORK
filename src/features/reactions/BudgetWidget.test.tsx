@@ -1,8 +1,8 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { BudgetWidget } from './BudgetWidget'
 
-const mockAuthState = { token: 'abc' }
+const mockAuthState: { token: string | null } = { token: 'abc' }
 const mockReactionsState = { budgetRemaining: 10, budgetLoaded: true, loadBudget: vi.fn() }
 
 vi.mock('@/entities/auth', () => ({

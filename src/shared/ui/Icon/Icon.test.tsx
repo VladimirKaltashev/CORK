@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render } from '@testing-library/react'
 import { CategoryIcon } from './Icon'
 import type { AchievementCategory } from '@/shared/types'

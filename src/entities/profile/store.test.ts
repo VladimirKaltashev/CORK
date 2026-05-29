@@ -16,7 +16,8 @@ vi.mock('@/shared/lib/supabase', () => ({
   },
 }))
 
-const mockSupabase = (await vi.importMock('@/shared/lib/supabase')).supabase
+type MockFn = ReturnType<typeof vi.fn>
+const mockSupabase = (await vi.importMock('@/shared/lib/supabase') as { supabase: Record<string, MockFn> }).supabase
 
 vi.mock('@/shared/lib/toast', () => ({
   showToast: vi.fn(),
