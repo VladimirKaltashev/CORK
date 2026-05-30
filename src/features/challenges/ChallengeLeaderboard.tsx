@@ -1,8 +1,11 @@
 import { useEffect } from 'react'
 import { useChallengesStore } from '@/entities/challenges'
+import { useAuthStore } from '@/entities/auth'
+import { CupIcon } from '@/shared/ui'
 
 export function ChallengeLeaderboard() {
   const { currentChallenge, leaderboard, loadLeaderboard, isLoading } = useChallengesStore()
+  const { user } = useAuthStore()
 
   useEffect(() => {
     if (currentChallenge?.id) {
@@ -14,11 +17,11 @@ export function ChallengeLeaderboard() {
   if (!leaderboard.length) return <div className="text-center py-4 text-gray-500">Пока нет участников</div>
 
   return (
-    <div className="rounded-xl border border-gray-200 overflow-hidden">
-      <h3 className="font-bold text-lg px-4 py-3 bg-gray-50 border-b">🏆 Лидерборд</h3>
+    <div className="rounded-xl border border-gray-200 overflow-hidden dark:border-gray-700 dark:bg-gray-800">
+      <h3 className="font-bold text-lg px-4 py-3 bg-gray-50 border-b flex items-center gap-2 dark:bg-gray-900 dark:border-gray-700 dark:text-white"><CupIcon className="w-5 h-5" />Лидерборд</h3>
       <table className="w-full">
         <thead>
-          <tr className="text-left text-sm text-gray-500">
+          <tr className="text-left text-sm text-gray-500 dark:text-gray-400">
             <th className="px-4 py-2 w-12">#</th>
             <th className="px-4 py-2">Игрок</th>
             <th className="px-4 py-2 text-right">Прогресс</th>
@@ -27,13 +30,13 @@ export function ChallengeLeaderboard() {
         </thead>
         <tbody>
           {leaderboard.map((row, index) => (
-            <tr key={row.userId} className="border-t hover:bg-gray-50">
+            <tr key={row.userId} className="border-t hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50">
               <td className="px-4 py-2 font-bold">
                 {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
               </td>
-              <td className="px-4 py-2">{row.userName}</td>
+              <td className="px-4 py-2">{row.userId === user?.id ? 'Вы' : row.userName}</td>
               <td className="px-4 py-2 text-right font-bold">{row.totalProgress}</td>
-              <td className="px-4 py-2 text-right text-gray-500">{row.submissionCount}</td>
+              <td className="px-4 py-2 text-right text-gray-500 dark:text-gray-400">{row.submissionCount}</td>
             </tr>
           ))}
         </tbody>
