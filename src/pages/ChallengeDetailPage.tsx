@@ -6,7 +6,7 @@ import {
   SubmissionForm,
   SubmissionCard,
 } from '@/features/challenges'
-import { CategoryIcon } from '@/shared/ui'
+import { CategoryIcon, CheckIcon, HourglassIcon } from '@/shared/ui'
 
 export function ChallengeDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -38,12 +38,12 @@ export function ChallengeDetailPage() {
   const isCompleted = currentChallenge.status === 'completed'
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-4xl mx-auto p-4 dark:text-white">
       <div className="mb-6">
         <h1 className="text-2xl font-bold mb-2">{currentChallenge.title}</h1>
-        <p className="text-gray-600">{currentChallenge.description}</p>
+        <p className="text-gray-600 dark:text-gray-300">{currentChallenge.description}</p>
 
-        <div className="flex gap-4 mt-3 text-sm text-gray-500">
+        <div className="flex gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
           {currentChallenge.category && (
             <span className="flex items-center gap-1">
               <CategoryIcon category={currentChallenge.category} className="w-4 h-4" />
@@ -56,10 +56,10 @@ export function ChallengeDetailPage() {
           </span>
           <span
             className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-              isActive ? 'bg-green-100 text-green-800' : isCompleted ? 'bg-gray-100 text-gray-800' : 'bg-yellow-100 text-yellow-800'
+              isActive ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400' : isCompleted ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
             }`}
           >
-            {isActive ? '🔥 Активный' : isCompleted ? '✅ Завершён' : '⏳ Ожидает'}
+            {isActive ? 'Активный' : isCompleted ? <><CheckIcon className="inline w-3 h-3 mr-1" />Завершён</> : <><HourglassIcon className="inline w-3 h-3 mr-1" />Ожидает</>}
           </span>
         </div>
       </div>
@@ -67,7 +67,7 @@ export function ChallengeDetailPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           {isActive && (
-            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 dark:bg-gray-800 dark:border-gray-700">
               <SubmissionForm
                 proofConfig={currentChallenge.proofConfig}
                 onSubmit={async (data) => {
@@ -78,9 +78,9 @@ export function ChallengeDetailPage() {
           )}
 
           <div>
-            <h3 className="font-bold text-lg mb-3">Мои сабмиты</h3>
+            <h3 className="font-bold text-lg mb-3">Сабмиты</h3>
             {submissions.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">Пока нет доказательств</p>
+              <p className="text-gray-500 text-center py-4 dark:text-gray-400">Пока нет доказательств</p>
             ) : (
               <div className="space-y-3">
                 {submissions.map((sub) => (

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { challengeSubmissionSchema } from '@/shared/schemas'
@@ -22,17 +22,24 @@ export function SubmissionForm({ proofConfig, onSubmit }: SubmissionFormProps) {
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm({
     resolver: zodResolver(challengeSubmissionSchema),
     defaultValues: {
-      proofType: 'text',
+      proofType: (proofConfig.fields.find((f) => f !== 'value') ?? 'text') as string,
       proofValue: '',
       value: undefined,
       description: '',
     },
   })
 
+  const proofType = watch('proofType')
   const hasField = (field: string) => proofConfig.fields.includes(field as never)
+
+  const availableProofTypes = useMemo(() => {
+    const proofFields = proofConfig.fields.filter((f) => f !== 'value')
+    return proofFields.length > 0 ? proofFields : ['text']
+  }, [proofConfig.fields])
 
   const handleFormSubmit = async (data: {
     proofType: string
@@ -40,12 +47,11 @@ export function SubmissionForm({ proofConfig, onSubmit }: SubmissionFormProps) {
     value?: number
     description: string
   }) => {
-    // Validate required fields
     if (hasField('value') && proofConfig.valueRequired && !data.value) {
       showToast('error', `Поле "${proofConfig.valueLabel ?? 'значение'}" обязательно`)
       return
     }
-    if (hasField('photo') && !data.proofValue) {
+    if ((proofType === 'photo' || proofType === 'url') && !data.proofValue) {
       showToast('error', 'Добавьте доказательство')
       return
     }
@@ -65,16 +71,51 @@ export function SubmissionForm({ proofConfig, onSubmit }: SubmissionFormProps) {
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <h3 className="font-bold text-lg">Добавить прогресс</h3>
 
-      {hasField('text') && (
+      <div>
+        <label className="block text-sm font-medium mb-1">Тип доказательства</label>
+        <select {...register('proofType')} className="w-full rounded-lg border border-gray-300 p-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+          {availableProofTypes.includes('text') && <option value="text">Текст</option>}
+          {availableProofTypes.includes('photo') && <option value="photo">Фото</option>}
+          {availableProofTypes.includes('url') && <option value="url">Ссылка</option>}
+        </select>
+      </div>
+
+      {proofType === 'text' && (
         <div>
           <label className="block text-sm font-medium mb-1">Описание</label>
           <textarea
             {...register('description')}
-            className="w-full rounded-lg border border-gray-300 p-2"
+            className="w-full rounded-lg border border-gray-300 p-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
             rows={3}
             placeholder="Что вы сделали?"
           />
           {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
+        </div>
+      )}
+
+      {proofType === 'photo' && (
+        <div>
+          <label className="block text-sm font-medium mb-1">Фото / Скриншот (URL)</label>
+          <input
+            {...register('proofValue')}
+            type="url"
+            className="w-full rounded-lg border border-gray-300 p-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            placeholder="https://example.com/proof.jpg"
+          />
+          {errors.proofValue && <p className="text-red-500 text-sm">{errors.proofValue.message}</p>}
+        </div>
+      )}
+
+      {proofType === 'url' && (
+        <div>
+          <label className="block text-sm font-medium mb-1">Ссылка</label>
+          <input
+            {...register('proofValue')}
+            type="url"
+            className="w-full rounded-lg border border-gray-300 p-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            placeholder="https://strava.com/activities/..."
+          />
+          {errors.proofValue && <p className="text-red-500 text-sm">{errors.proofValue.message}</p>}
         </div>
       )}
 
@@ -87,45 +128,12 @@ export function SubmissionForm({ proofConfig, onSubmit }: SubmissionFormProps) {
           <input
             {...register('value', { valueAsNumber: true })}
             type="number"
-            className="w-full rounded-lg border border-gray-300 p-2"
+            className="w-full rounded-lg border border-gray-300 p-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
             placeholder="Например, 45"
           />
           {errors.value && <p className="text-red-500 text-sm">{errors.value.message}</p>}
         </div>
       )}
-
-      {hasField('photo') && (
-        <div>
-          <label className="block text-sm font-medium mb-1">Фото / Скриншот (URL)</label>
-          <input
-            {...register('proofValue')}
-            type="url"
-            className="w-full rounded-lg border border-gray-300 p-2"
-            placeholder="https://example.com/proof.jpg"
-          />
-        </div>
-      )}
-
-      {hasField('url') && (
-        <div>
-          <label className="block text-sm font-medium mb-1">Ссылка</label>
-          <input
-            {...register('proofValue')}
-            type="url"
-            className="w-full rounded-lg border border-gray-300 p-2"
-            placeholder="https://strava.com/activities/..."
-          />
-        </div>
-      )}
-
-      <div>
-        <label className="block text-sm font-medium mb-1">Тип доказательства</label>
-        <select {...register('proofType')} className="w-full rounded-lg border border-gray-300 p-2">
-          <option value="text">Текст</option>
-          <option value="photo">Фото</option>
-          <option value="url">Ссылка</option>
-        </select>
-      </div>
 
       <button
         type="submit"

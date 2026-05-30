@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useChallengesStore } from '@/entities/challenges'
-import { CategoryIcon } from '@/shared/ui'
+import { CategoryIcon, CupIcon } from '@/shared/ui'
 
 export function ChallengeBanner() {
   const { activeChallenge, loadActiveChallenge } = useChallengesStore()
@@ -24,10 +24,10 @@ export function ChallengeBanner() {
   if (!activeChallenge) return null
 
   return (
-    <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-4 mb-6 shadow-lg">
+    <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-4 mb-6 shadow-lg dark:from-green-700 dark:to-emerald-800">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-bold text-lg">🏆 Идёт челлендж: {activeChallenge.title}</h2>
+          <h2 className="font-bold text-lg"><CupIcon className="inline w-5 h-5 mr-1" />Идёт челлендж: {activeChallenge.title}</h2>
           <p className="text-sm text-white/90 mt-1">{activeChallenge.description}</p>
           <div className="flex gap-3 mt-2 text-sm text-white/80">
             {activeChallenge.category && (
