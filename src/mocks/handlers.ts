@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw'
-import type { GlobalFeedEvent, LeaderboardEntry, Task, TaskComment, StudySession, UserStudyStatus, Subject, TaskPriority, Checkpoint, Achievement, AchievementCategory, AchievementStatus, ProofType } from '@/shared/types'
+import type { GlobalFeedEvent, LeaderboardEntry, Task, TaskComment, StudySession, UserStudyStatus, Subject, TaskPriority, Checkpoint, Achievement, AchievementCategory, AchievementStatus, ProofType, Challenge, ChallengeSubmission } from '@/shared/types'
+import { MOCK_CHALLENGES, MOCK_CHALLENGE_SUBMISSIONS } from './challengeData'
 
 // ── In-Memory DB ──
 const getDb = () => {
@@ -403,5 +404,104 @@ export const handlers = [
     if (idx === -1) return new HttpResponse(null, { status: 404 })
     achievements[idx] = { ...achievements[idx], status: body.status, rejectionReason: body.rejectionReason }
     return HttpResponse.json(achievements[idx])
+  }),
+
+  // ── Challenges ──
+  http.get('http://127.0.0.1:8000/challenges', () => {
+    return HttpResponse.json({ challenges: MOCK_CHALLENGES })
+  }),
+
+  http.get('http://127.0.0.1:8000/challenges/active', () => {
+    const active = MOCK_CHALLENGES.find((c) => c.status === 'active') ?? null
+    return HttpResponse.json({ challenge: active })
+  }),
+
+  http.get('http://127.0.0.1:8000/challenges/:id', ({ params }) => {
+    const challenge = MOCK_CHALLENGES.find((c) => c.id === params.id)
+    if (!challenge) return new HttpResponse(null, { status: 404 })
+    return HttpResponse.json({ challenge })
+  }),
+
+  http.get('http://127.0.0.1:8000/challenges/:id/submissions', ({ params }) => {
+    const submissions = MOCK_CHALLENGE_SUBMISSIONS[params.id as string] ?? []
+    return HttpResponse.json({ submissions })
+  }),
+
+  http.get('http://127.0.0.1:8000/challenges/:id/submissions/all', ({ params }) => {
+    const submissions = MOCK_CHALLENGE_SUBMISSIONS[params.id as string] ?? []
+    return HttpResponse.json({ submissions })
+  }),
+
+  http.get('http://127.0.0.1:8000/challenges/:id/leaderboard', ({ params }) => {
+    const submissions = MOCK_CHALLENGE_SUBMISSIONS[params.id as string] ?? []
+    const map = new Map<string, { userId: string; userName: string; totalProgress: number; submissionCount: number }>()
+    for (const s of submissions) {
+      const existing = map.get(s.userId)
+      if (existing) {
+        existing.totalProgress += s.value ?? 1
+        existing.submissionCount += 1
+      } else {
+        map.set(s.userId, {
+          userId: s.userId,
+          userName: s.userName ?? 'Аноним',
+          totalProgress: s.value ?? 1,
+          submissionCount: 1,
+        })
+      }
+    }
+    const leaderboard = Array.from(map.values()).sort((a, b) => b.totalProgress - a.totalProgress)
+    return HttpResponse.json({ leaderboard })
+  }),
+
+  http.post('http://127.0.0.1:8000/challenges/:id/submissions', async ({ params, request }) => {
+    const body = await request.json() as Omit<ChallengeSubmission, 'id' | 'challengeId' | 'userId' | 'submittedAt'>
+    const newSub: ChallengeSubmission = {
+      id: crypto.randomUUID(),
+      challengeId: params.id as string,
+      userId: 'current-user',
+      proofType: body.proofType as ProofType,
+      proofValue: body.proofValue ?? '',
+      value: body.value ?? null,
+      description: body.description ?? '',
+      submittedAt: new Date().toISOString(),
+      userName: 'Текущий пользователь',
+    }
+    const list = MOCK_CHALLENGE_SUBMISSIONS[params.id as string] ?? []
+    list.push(newSub)
+    MOCK_CHALLENGE_SUBMISSIONS[params.id as string] = list
+    return new HttpResponse(JSON.stringify(newSub), { status: 201 })
+  }),
+
+  http.post('http://127.0.0.1:8000/challenges', async ({ request }) => {
+    const body = await request.json() as Omit<Challenge, 'id' | 'createdBy' | 'createdAt' | 'participantCount'>
+    const newChallenge: Challenge = {
+      id: crypto.randomUUID(),
+      ...body,
+      createdBy: 'admin-id',
+      createdAt: new Date().toISOString(),
+      participantCount: 0,
+    }
+    MOCK_CHALLENGES.push(newChallenge)
+    return new HttpResponse(JSON.stringify(newChallenge), { status: 201 })
+  }),
+
+  http.patch('http://127.0.0.1:8000/challenges/:id', async ({ params, request }) => {
+    const body = await request.json() as Partial<Challenge>
+    const idx = MOCK_CHALLENGES.findIndex((c) => c.id === params.id)
+    if (idx === -1) return new HttpResponse(null, { status: 404 })
+    MOCK_CHALLENGES[idx] = { ...MOCK_CHALLENGES[idx], ...body }
+    return HttpResponse.json(MOCK_CHALLENGES[idx])
+  }),
+
+  http.delete('http://127.0.0.1:8000/challenges/submissions/:id', ({ params }) => {
+    for (const challengeId of Object.keys(MOCK_CHALLENGE_SUBMISSIONS)) {
+      const list = MOCK_CHALLENGE_SUBMISSIONS[challengeId]
+      const idx = list.findIndex((s) => s.id === params.id)
+      if (idx !== -1) {
+        list.splice(idx, 1)
+        return new HttpResponse(null, { status: 204 })
+      }
+    }
+    return new HttpResponse(null, { status: 404 })
   }),
 ]

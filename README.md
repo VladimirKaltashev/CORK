@@ -100,8 +100,6 @@ auth.users (Supabase Auth)
 profiles ─┬─── goals          (вишлист, 👑 и 🤡; при выполнении → achievement)
           └─── posts          (свободная арена, 👑 и 🤡, опц. challenge_id)
 
-challenges  +  badges         (недельные/месячные челленджи + бейджи)
-
 reactions ── расширение на target_type: 'goal' | 'post'
 ```
 
@@ -118,12 +116,14 @@ reactions ── расширение на target_type: 'goal' | 'post'
 | `/groups`               | авторизованные  | Список учебных групп                                |
 | `/groups/:id`           | авторизованные  | Детальная страница группы                           |
 | `/leaderboard`          | авторизованные  | Рейтинг пользователей                               |
+| `/challenges`           | авторизованные  | Активные и архивные челленджи                       |
+| `/challenges/:id`       | авторизованные  | Детали челленджа: сабмиты, лидерборд, форма         |
 | `/search`               | авторизованные  | Поиск пользователей                                 |
 | `/settings`             | авторизованные  | Настройки профиля                                   |
-| `/admin`                | role=admin      | Модерация достижений, управление челленджами        |
+| `/admin`                | role=admin      | Модерация достижений и челленджей (создание/сабмиты)|
 | `/login`, `/register`   | гости           | Auth-экраны                                         |
 
-_Будущие маршруты: `/challenges` (активные + история), публичный профиль без логина._
+_Будущие маршруты: публичный профиль без логина._
 
 ## Запуск локально
 
@@ -229,16 +229,16 @@ npm run e2e:ui            # Playwright интерактивный UI
 
 ### Статус
 
-**43 тестовых файла, 231 тест, 100% pass**
+**44 тестовых файла, 238 тестов, 100% pass**
 
 | Тип | Описание | Файлы (примеры) |
 |-----|----------|-----------------|
-| **Схемы** (Zod) | Валидация форм регистрации, достижений, профиля, фида, челленджей | `shared/schemas/auth`, `achievement`, `profile`, `feed` |
+| **Схемы** (Zod) | Валидация форм регистрации, достижений, профиля, фида, челленджей | `shared/schemas/auth`, `achievement`, `profile`, `feed`, `challenge` |
 | **Утилиты** | cn(), даты, permissions, debounce, toast, api, mockData, supabase client | `shared/lib/*` |
-| **Сторы (unit)** | Логика Zustand-сторов: auth, profile, achievements, friends, feed, planner, reactions, theme, timer, group, dashboard, leaderboard, status, onboarding | `entities/*/store`, `entities/*/store.test` |
+| **Сторы (unit)** | Логика Zustand-сторов: auth, profile, achievements, friends, feed, planner, reactions, theme, timer, group, dashboard, leaderboard, status, onboarding, challenges | `entities/*/store`, `entities/*/store.test` |
 | **Компоненты** | Рендер UI-компонентов: Toast, Icon, AvatarUpload, ThemeApplier, ReactionBar, BudgetWidget, ProtectedRoute, PublicRoute, useModal, format | `shared/ui/*`, `features/*`, `app/router/*` |
-| **Интеграционные (MSW)** | Сквозные сценарии против MSW-бэкенда: auth, routes, planner, dashboard, reactions, feed | `test/integration/*` |
-| **E2E (Playwright)** | Smoke: login page, home→login redirect. Login flow: проверка отображения ошибки | `e2e/smoke`, `e2e/login` |
+| **Интеграционные (MSW)** | Сквозные сценарии против MSW-бэкенда: auth, routes, planner, dashboard, reactions, feed, challenges | `test/integration/*` |
+| **E2E (Playwright)** | Smoke: login page, home→login redirect, challenges. Login flow: проверка отображения ошибки | `e2e/smoke`, `e2e/login`, `e2e/challenges` |
 
 ### CI/CD — GitHub Actions
 
