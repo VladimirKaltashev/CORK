@@ -3,13 +3,13 @@ import { test, expect } from '@playwright/test'
 test.describe('Challenges', () => {
   test('challenges page loads and shows active challenge', async ({ page }) => {
     await page.goto('/login')
-    await page.getByLabel('Email').fill('testuser@example.com')
-    await page.getByLabel('Password').fill('Test123456')
+    await page.getByLabel('Email').fill('test@test.com')
+    await page.getByLabel('Пароль').fill('password123')
     await page.getByRole('button', { name: 'Войти' }).click()
 
     // Wait for login to complete or error
     await Promise.race([
-      page.waitForURL('/feed', { timeout: 5000 }).then(() => true),
+      page.waitForURL(/.*feed/, { timeout: 5000 }).then(() => true),
       page.waitForSelector('[role="alert"], [role="status"]', { timeout: 5000 }).then(() => false),
     ])
 
@@ -24,12 +24,12 @@ test.describe('Challenges', () => {
 
   test('challenge detail page loads', async ({ page }) => {
     await page.goto('/login')
-    await page.getByLabel('Email').fill('testuser@example.com')
-    await page.getByLabel('Password').fill('Test123456')
+    await page.getByLabel('Email').fill('test@test.com')
+    await page.getByLabel('Пароль').fill('password123')
     await page.getByRole('button', { name: 'Войти' }).click()
 
     await Promise.race([
-      page.waitForURL('/feed', { timeout: 5000 }).then(() => true),
+      page.waitForURL(/.*feed/, { timeout: 5000 }).then(() => true),
       page.waitForSelector('[role="alert"], [role="status"]', { timeout: 5000 }).then(() => false),
     ])
 
