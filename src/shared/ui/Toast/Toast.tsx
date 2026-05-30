@@ -22,6 +22,7 @@ export function ToastContainer() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
+          role={toast.type === 'error' ? 'alert' : 'status'}
           className={`flex items-center gap-3 rounded-lg px-4 py-3 text-white shadow-lg ${STYLES[toast.type]} animate-in fade-in slide-in-from-right-4 min-w-64 max-w-sm`}
         >
           <span className="text-base font-bold">{ICONS[toast.type]}</span>
