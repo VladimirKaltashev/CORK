@@ -10,6 +10,7 @@ import { useFriendsStore } from '@/entities/friends'
 import { useReactionsStore } from '@/entities/reactions'
 import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
+import { ChallengeBanner } from '@/features/challenges'
 import { useDebounce } from '@/shared/hooks'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import { CategoryIcon } from '@/shared/ui'
@@ -322,6 +323,9 @@ export function FeedPage() {
           </div>
         </div>
       </div>
+
+      {/* Active challenge banner */}
+      <ChallengeBanner />
 
       {/* Inline create card */}
       <div className="mb-3">

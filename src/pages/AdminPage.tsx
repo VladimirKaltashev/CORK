@@ -3,7 +3,9 @@ import { Button, FormControl, Textarea } from '@primer/react'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
 import { CategoryIcon } from '@/shared/ui'
-import type { Achievement } from '@/shared/types'
+import { useChallengesStore } from '@/entities/challenges'
+import { SubmissionCard } from '@/features/challenges'
+import type { Achievement, Challenge, ChallengeSubmission } from '@/shared/types'
 
 function RejectModal({
   achievement,
@@ -63,9 +65,17 @@ function RejectModal({
 }
 
 export function AdminPage() {
+  const [activeTab, setActiveTab] = useState<'achievements' | 'challenges'>('achievements')
   const [pending, setPending] = useState<Achievement[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [rejectTarget, setRejectTarget] = useState<Achievement | null>(null)
+
+  const [challenges, setChallenges] = useState<Challenge[]>([])
+  const [allSubmissions, setAllSubmissions] = useState<ChallengeSubmission[]>([])
+  const [selectedChallenge, setSelectedChallenge] = useState<string | null>(null)
+  const [isLoadingChallenges, setIsLoadingChallenges] = useState(false)
+
+  const { deleteSubmission } = useChallengesStore()
 
   const loadPending = async () => {
     setIsLoading(true)
@@ -96,6 +106,64 @@ export function AdminPage() {
       showToast('error', 'Не удалось загрузить достижения')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadChallenges = async () => {
+    setIsLoadingChallenges(true)
+    try {
+      const { data, error } = await supabase
+        .from('challenges')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setChallenges(
+        (data ?? []).map((row: Record<string, unknown>) => ({
+          id: row.id as string,
+          title: row.title as string,
+          description: row.description as string,
+          category: row.category as string | null,
+          goalType: row.goal_type as string,
+          unit: row.unit as string | null,
+          proofConfig: row.proof_config as unknown as { fields: string[]; valueLabel?: string; valueRequired?: boolean },
+          startsAt: row.starts_at as string,
+          endsAt: row.ends_at as string,
+          status: row.status as string,
+          createdBy: row.created_by as string,
+          createdAt: row.created_at as string,
+        })) as unknown as Challenge[]
+      )
+    } catch {
+      showToast('error', 'Не удалось загрузить челленджи')
+    } finally {
+      setIsLoadingChallenges(false)
+    }
+  }
+
+  const loadSubmissionsForChallenge = async (challengeId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('challenge_submissions')
+        .select('*, profiles:user_id(name, avatar)')
+        .eq('challenge_id', challengeId)
+        .order('submitted_at', { ascending: false })
+      if (error) throw error
+      setAllSubmissions(
+        (data ?? []).map((row: Record<string, unknown>) => ({
+          id: row.id as string,
+          challengeId: row.challenge_id as string,
+          userId: row.user_id as string,
+          proofType: row.proof_type as 'photo' | 'url' | 'none',
+          proofValue: row.proof_value as string,
+          value: row.value as number | null,
+          description: row.description as string,
+          submittedAt: row.submitted_at as string,
+          userName: (row.profiles as Record<string, unknown>)?.name as string,
+        }))
+      )
+      setSelectedChallenge(challengeId)
+    } catch {
+      showToast('error', 'Не удалось загрузить сабмиты')
     }
   }
 
@@ -133,67 +201,155 @@ export function AdminPage() {
 
   return (
     <div className="mx-auto max-w-3xl py-6 px-3">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        Модерация достижений
-        {!isLoading && (
-          <span className="text-base font-normal text-gray-400 ml-2">({pending.length} на проверке)</span>
-        )}
-      </h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">Админ-панель</h1>
 
-      {isLoading ? (
-        <div className="py-10 text-center text-sm text-gray-500">Загрузка...</div>
-      ) : pending.length === 0 ? (
-        <div className="border border-dashed border-gray-300 rounded-md py-10 text-center">
-          <span className="text-sm text-gray-500">Нет достижений на проверке</span>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {pending.map((ach) => (
-            <div key={ach.id} className="border border-gray-300 rounded-md bg-white p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <CategoryIcon category={ach.category} className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                    <span className="text-xs text-gray-400 uppercase tracking-wide">{ach.category}</span>
-                    <span className="text-xs text-gray-400">· {ach.year}</span>
-                  </div>
-                  <h2 className="text-base font-semibold text-gray-900">{ach.title}</h2>
-                  <p className="text-sm text-gray-600 mt-1">{ach.description}</p>
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 border-b border-gray-200">
+        {(['achievements', 'challenges'] as const).map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => {
+              setActiveTab(tab)
+              if (tab === 'challenges') loadChallenges()
+            }}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {tab === 'achievements' ? 'Достижения' : 'Челленджи'}
+          </button>
+        ))}
+      </div>
 
-                  {ach.proofType === 'url' && ach.proofValue && (
-                    <a
-                      href={ach.proofValue}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-block text-xs text-blue-600 hover:underline"
-                    >
-                      Доказательство (ссылка) →
-                    </a>
-                  )}
-                  {ach.proofType === 'photo' && ach.proofValue && (
-                    <img
-                      src={ach.proofValue}
-                      alt="Доказательство"
-                      className="mt-2 h-28 w-auto rounded object-cover"
-                    />
-                  )}
-                  {ach.proofType === 'none' && (
-                    <span className="mt-2 inline-block text-xs text-gray-400">Доказательства нет</span>
-                  )}
-                </div>
+      {activeTab === 'achievements' ? (
+        <>
+          <h2 className="text-lg font-bold text-gray-900 mb-4">
+            Модерация достижений
+            {!isLoading && (
+              <span className="text-base font-normal text-gray-400 ml-2">({pending.length} на проверке)</span>
+            )}
+          </h2>
 
-                <div className="flex flex-col gap-2 flex-shrink-0">
-                  <Button variant="primary" onClick={() => handleVerify(ach.id)}>
-                    Подтвердить
-                  </Button>
-                  <Button variant="danger" onClick={() => setRejectTarget(ach)}>
-                    Отклонить
-                  </Button>
-                </div>
-              </div>
+          {isLoading ? (
+            <div className="py-10 text-center text-sm text-gray-500">Загрузка...</div>
+          ) : pending.length === 0 ? (
+            <div className="border border-dashed border-gray-300 rounded-md py-10 text-center">
+              <span className="text-sm text-gray-500">Нет достижений на проверке</span>
             </div>
-          ))}
-        </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {pending.map((ach) => (
+                <div key={ach.id} className="border border-gray-300 rounded-md bg-white p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <CategoryIcon category={ach.category} className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                        <span className="text-xs text-gray-400 uppercase tracking-wide">{ach.category}</span>
+                        <span className="text-xs text-gray-400">· {ach.year}</span>
+                      </div>
+                      <h2 className="text-base font-semibold text-gray-900">{ach.title}</h2>
+                      <p className="text-sm text-gray-600 mt-1">{ach.description}</p>
+
+                      {ach.proofType === 'url' && ach.proofValue && (
+                        <a
+                          href={ach.proofValue}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 inline-block text-xs text-blue-600 hover:underline"
+                        >
+                          Доказательство (ссылка) →
+                        </a>
+                      )}
+                      {ach.proofType === 'photo' && ach.proofValue && (
+                        <img
+                          src={ach.proofValue}
+                          alt="Доказательство"
+                          className="mt-2 h-28 w-auto rounded object-cover"
+                        />
+                      )}
+                      {ach.proofType === 'none' && (
+                        <span className="mt-2 inline-block text-xs text-gray-400">Доказательства нет</span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-2 flex-shrink-0">
+                      <Button variant="primary" onClick={() => handleVerify(ach.id)}>
+                        Подтвердить
+                      </Button>
+                      <Button variant="danger" onClick={() => setRejectTarget(ach)}>
+                        Отклонить
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Управление челленджами</h2>
+
+          {isLoadingChallenges ? (
+            <div className="py-10 text-center text-sm text-gray-500">Загрузка...</div>
+          ) : (
+            <>
+              {/* Challenges list */}
+              <div className="flex flex-col gap-3 mb-6">
+                {challenges.map((challenge) => (
+                  <div
+                    key={challenge.id}
+                    className={`border rounded-md bg-white p-4 cursor-pointer transition ${
+                      selectedChallenge === challenge.id
+                        ? 'border-indigo-500 ring-1 ring-indigo-500'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                    onClick={() => loadSubmissionsForChallenge(challenge.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-bold">{challenge.title}</h3>
+                        <p className="text-sm text-gray-500">
+                          {challenge.status} · {challenge.goalType} ·{' '}
+                          {new Date(challenge.startsAt).toLocaleDateString('ru')} –{' '}
+                          {new Date(challenge.endsAt).toLocaleDateString('ru')}
+                        </p>
+                      </div>
+                      <span className="text-sm text-gray-400">{challenge.category ?? 'Без категории'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Submissions for selected challenge */}
+              {selectedChallenge && (
+                <div>
+                  <h3 className="font-bold text-md mb-3">Сабмиты</h3>
+                  {allSubmissions.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4">Нет сабмитов</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {allSubmissions.map((sub) => (
+                        <SubmissionCard
+                          key={sub.id}
+                          submission={sub}
+                          isAdmin
+                          onDelete={async (id) => {
+                            await deleteSubmission(id)
+                            await loadSubmissionsForChallenge(selectedChallenge)
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
 
       {rejectTarget && (

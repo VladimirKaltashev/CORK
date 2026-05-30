@@ -12,6 +12,8 @@ import { SearchPage } from '@/pages/SearchPage'
 import { FriendsPage } from '@/pages/FriendsPage'
 import { LeaderboardPage } from '@/pages/LeaderboardPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { ChallengesPage } from '@/pages/ChallengesPage'
+import { ChallengeDetailPage } from '@/pages/ChallengeDetailPage'
 import { ThemeApplier, useThemeStore } from '@/entities/theme'
 
 function themeToColorMode(theme: 'light' | 'dark' | 'system'): 'day' | 'night' | 'auto' {
@@ -43,6 +45,8 @@ export function App() {
                 <Route path="/friends" element={<FriendsPage />} />
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/challenges" element={<ChallengesPage />} />
+                <Route path="/challenges/:id" element={<ChallengeDetailPage />} />
               </Route>
 
               <Route element={<ProtectedRoute requiredRole="admin" />}>

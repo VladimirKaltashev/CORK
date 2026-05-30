@@ -93,6 +93,9 @@ export function Header() {
           {token && (
             <NavLink to="/leaderboard" data-onboard="leaderboard" className={navClass}>Рейтинг</NavLink>
           )}
+          {token && (
+            <NavLink to="/challenges" className={navClass}>Челленджи</NavLink>
+          )}
           {token && user?.role === 'admin' && (
             <NavLink to="/admin" className={navClass}>Модерация</NavLink>
           )}
@@ -217,6 +220,15 @@ export function Header() {
               className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
             >
               Рейтинг
+            </NavLink>
+          )}
+          {token && (
+            <NavLink
+              to="/challenges"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
+            >
+              Челленджи
             </NavLink>
           )}
           {token && user?.role === 'admin' && (

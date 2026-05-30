@@ -229,6 +229,69 @@ LIMIT 40
 ON CONFLICT (user_id, friend_id) DO NOTHING;
 
 -- =====================================================
+-- ЧЕЛЛЕНДЖИ
+-- =====================================================
+INSERT INTO public.challenges (id, title, description, category, goal_type, unit, proof_config, starts_at, ends_at, status, created_by, created_at)
+VALUES
+  ('11111111-1111-1111-1111-111111111111', 'На велике — больше всех!', 'Кто проедет больше километров на велосипеде за неделю? Делись скриншотами из Strava!', 'sport', 'distance', 'км', '{"fields": ["photo", "value"], "valueLabel": "км", "valueRequired": true}'::jsonb, NOW() - INTERVAL '3 days', NOW() + INTERVAL '4 days', 'active', (SELECT id FROM public.profiles WHERE email = 'alexey.ivanov@test.com' LIMIT 1), NOW() - INTERVAL '5 days'),
+  ('22222222-2222-2222-2222-222222222222', 'Кино-марафон', 'Посмотри как можно больше фильмов за неделю! Делись рецензиями.', 'movies', 'count', 'фильмов', '{"fields": ["text", "url"], "valueLabel": "фильмов", "valueRequired": false}'::jsonb, NOW() - INTERVAL '17 days', NOW() - INTERVAL '10 days', 'completed', (SELECT id FROM public.profiles WHERE email = 'alexey.ivanov@test.com' LIMIT 1), NOW() - INTERVAL '20 days'),
+  ('33333333-3333-3333-3333-333333333333', 'Код каждый день', 'Сделай коммит в GitHub каждый день. Минимум — один.', 'it', 'boolean', null, '{"fields": ["url"], "valueLabel": "дней", "valueRequired": false}'::jsonb, NOW() - INTERVAL '24 days', NOW() - INTERVAL '17 days', 'completed', (SELECT id FROM public.profiles WHERE email = 'alexey.ivanov@test.com' LIMIT 1), NOW() - INTERVAL '27 days');
+
+-- =====================================================
+-- САБМИТЫ ЧЕЛЛЕНДЖЕЙ
+-- =====================================================
+INSERT INTO public.challenge_submissions (challenge_id, user_id, proof_type, proof_value, value, description, submitted_at)
+SELECT
+  '11111111-1111-1111-1111-111111111111',
+  p.id,
+  CASE WHEN random() < 0.5 THEN 'photo' ELSE 'text' END,
+  CASE WHEN random() < 0.5 THEN 'https://example.com/strava-proof.jpg' ELSE 'Сегодня проехал ' || (floor(random() * 50) + 5)::text || ' км' END,
+  floor(random() * 50) + 5,
+  'Отличная погода для катания!',
+  NOW() - INTERVAL '1 day' * floor(random() * 3)
+FROM public.profiles p
+ORDER BY random()
+LIMIT 20;
+
+INSERT INTO public.challenge_submissions (challenge_id, user_id, proof_type, proof_value, value, description, submitted_at)
+SELECT
+  '22222222-2222-2222-2222-222222222222',
+  p.id,
+  'text',
+  'https://example.com/movie-review.jpg',
+  1,
+  'Сегодня посмотрел ' || (CASE WHEN random() < 0.25 THEN '«Интерстеллар»' WHEN random() < 0.5 THEN '«Начало»' WHEN random() < 0.75 THEN '«Дюнкерк»' ELSE '«Оппенгеймер»' END),
+  NOW() - INTERVAL '14 days' - INTERVAL '1 day' * floor(random() * 5)
+FROM public.profiles p
+ORDER BY random()
+LIMIT 35;
+
+-- =====================================================
+-- БЕЙДЖИ
+-- =====================================================
+INSERT INTO public.badges (user_id, type, label, challenge_id, awarded_at)
+SELECT
+  (SELECT user_id FROM public.challenge_submissions WHERE challenge_id = '22222222-2222-2222-2222-222222222222' GROUP BY user_id ORDER BY sum(coalesce(value, 1)) DESC LIMIT 1),
+  'king_week',
+  'Король недели: Кино-марафон',
+  '22222222-2222-2222-2222-222222222222',
+  NOW() - INTERVAL '9 days'
+UNION ALL
+SELECT
+  (SELECT user_id FROM public.challenge_submissions WHERE challenge_id = '33333333-3333-3333-3333-333333333333' GROUP BY user_id ORDER BY sum(coalesce(value, 1)) DESC LIMIT 1),
+  'king_week',
+  'Король недели: Код каждый день',
+  '33333333-3333-3333-3333-333333333333',
+  NOW() - INTERVAL '16 days'
+UNION ALL
+SELECT
+  (SELECT user_id FROM public.challenge_submissions WHERE challenge_id = '22222222-2222-2222-2222-222222222222' GROUP BY user_id ORDER BY sum(coalesce(value, 1)) ASC LIMIT 1),
+  'clown_week',
+  'Клоун недели: Кино-марафон',
+  '22222222-2222-2222-2222-222222222222',
+  NOW() - INTERVAL '9 days';
+
+-- =====================================================
 -- Возвращаем нормальный режим: триггеры снова стреляют.
 -- =====================================================
 SET session_replication_role = origin;
