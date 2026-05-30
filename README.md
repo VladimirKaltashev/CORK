@@ -65,11 +65,11 @@ src/
 - `src/features/onboarding/` — coachmark-тур по UI: подсветка реальных элементов через `data-onboard="…"`.
 - Автозапуск один раз после первого логина (флаг `onboarding_v1_completed` в `localStorage`).
 - Повторный запуск — пункт «Подсказки» в выпадашке аватара.
-- _Будет переписан под механику CORK: реакции с бюджетом, цели, челленджи._
+- _Будет переписан под механику CORK: цели, челленджи._
 
 ## Схема БД
 
-### Текущая (фундамент)
+### Текущая
 
 ```
 auth.users (Supabase Auth)
@@ -81,7 +81,12 @@ auth.users (Supabase Auth)
                                                        meta, created_at)
                                             │
                                             ▼
-                                  public.likes (achievement_id, user_id)
+                                  public.reactions (achievement_id, user_id, kind: 'crown' | 'clown', cost)
+                                    └─ бюджет: 10 голосов/неделю, сброс понедельник 00:00
+                                    └─ корона = 1 голос, клоун = 2 голоса
+                                    └─ мутации через RPC: toggle_reaction(), get_reaction_budget()
+
+                                  view profile_scores (id, name, avatar, crowns, clowns)
 
    public.friends (user_id, friend_id, status: 'pending' | 'accepted')
 ```
@@ -89,46 +94,34 @@ auth.users (Supabase Auth)
 Категории: `olympiad | academic | it | creative | sport | movies | games | other`.
 Статус достижения: `pending | verified | rejected` (модерация админом).
 
-### Целевая (после миграции под концепцию CORK)
+### В разработке
 
 ```
-profiles ─┬──▶ achievements   (защищённое портфолио, только 👑)
-          ├──▶ goals          (вишлист, 👑 и 🤡; при выполнении → achievement)
-          └──▶ posts          (свободная арена, 👑 и 🤡, опц. challenge_id)
+profiles ─┬─── goals          (вишлист, 👑 и 🤡; при выполнении → achievement)
+          └─── posts          (свободная арена, 👑 и 🤡, опц. challenge_id)
 
-reactions (target_type, target_id, user_id, kind: 'crown' | 'clown', cost)
-   ├─ target_type: 'achievement' | 'goal' | 'post'
-   └─ кост: корона = 1, клоун = 2
+challenges  +  badges         (недельные/месячные челленджи + бейджи)
 
-reaction_budgets (user_id, week_start, spent)
-   └─ 10 голосов в неделю, сброс понедельник 00:00
-
-challenges (id, title, type: 'weekly' | 'monthly' | 'seasonal',
-            category?, starts_at, ends_at)
-
-badges (user_id, type: 'king_week' | 'clown_week' | 'king_month' | 'serial_king' | ...,
-        label, awarded_at, challenge_id?)
-
-friends (user_id, friend_id, status: 'pending' | 'accepted')
+reactions ── расширение на target_type: 'goal' | 'post'
 ```
-
-Дорожка миграции:
-1. `reactions` заменяет `likes`, расширяет на goals и posts.
-2. Появляются `goals` (вишлист) и `posts` (свободные посты).
-3. `reaction_budgets` — учёт недельных голосов.
-4. `challenges` + `badges` — недельный/месячный ритм и постоянные награды.
 
 ## Маршруты
 
-| Путь                | Кто видит       | Что внутри                                          |
-|---------------------|-----------------|-----------------------------------------------------|
-| `/feed`             | авторизованные  | Лента (Все / Друзья + фильтр категорий + сортировки) |
-| `/profile/me`       | авторизованные  | Свой профиль: достижения, цели, посты, бейджи       |
-| `/profile/:id`      | авторизованные  | Чужой профиль + кнопка дружбы                       |
-| `/friends`          | авторизованные  | Друзья и входящие заявки                            |
-| `/search`           | авторизованные  | Поиск пользователей                                 |
-| `/admin`            | role=admin      | Модерация достижений и конверсий целей              |
-| `/login`,`/register`| гости           | Auth-экраны                                         |
+| Путь                    | Кто видит       | Что внутри                                          |
+|-------------------------|-----------------|-----------------------------------------------------|
+| `/feed`                 | авторизованные  | Лента (Все / Друзья + фильтр категорий + сортировки) |
+| `/profile/me`           | авторизованные  | Свой профиль: достижения, цели, посты, бейджи       |
+| `/profile/:id`          | авторизованные  | Чужой профиль + кнопка дружбы                       |
+| `/planner`              | авторизованные  | Планировщик задач и учебных сессий                  |
+| `/timer`                | авторизованные  | Таймер pomodoro / учебных сессий                    |
+| `/friends`              | авторизованные  | Друзья и входящие заявки                            |
+| `/groups`               | авторизованные  | Список учебных групп                                |
+| `/groups/:id`           | авторизованные  | Детальная страница группы                           |
+| `/leaderboard`          | авторизованные  | Рейтинг пользователей                               |
+| `/search`               | авторизованные  | Поиск пользователей                                 |
+| `/settings`             | авторизованные  | Настройки профиля                                   |
+| `/admin`                | role=admin      | Модерация достижений, управление челленджами        |
+| `/login`, `/register`   | гости           | Auth-экраны                                         |
 
 _Будущие маршруты: `/challenges` (активные + история), публичный профиль без логина._
 
@@ -216,60 +209,48 @@ net start winnat
 | `npm test`               | Vitest run (юнит/интеграционные тесты)      |
 | `npm run test:coverage`  | Те же тесты + отчёт по покрытию             |
 | `npm run test:ui`        | Vitest UI в браузере (watch + детали)       |
-| `npm run e2e`            | Playwright (E2E)                            |
+| `npm run e2e`            | Playwright (E2E) headless                   |
+| `npm run e2e:ui`         | Playwright (E2E) интерактивный UI          |
 
-## Тесты
+## Тестирование
 
-### Юнит и интеграционные
-
-Используем **Vitest 4** + **@testing-library/react** + **jsdom**. Тесты лежат рядом с кодом: `*.test.ts(x)` (фолдер `src/**`).
-
-```bash
-npm test                  # одноразовый прогон всех тестов
-npm run test:coverage     # + отчёт покрытия (текст + html в ./coverage/index.html)
-npm run test:ui           # интерактивный UI Vitest, удобно для отладки
-```
-
-Текущий статус (на момент сдачи):
-
-- **10 тестовых файлов, 76 тестов, 100% pass**
-- **Покрытие: ~37% statements / ~36% lines / 46% functions** — выше требуемого порога 25%.
-
-Что покрыто:
-
-| Файл | Что тестируется |
-|---|---|
-| `src/shared/lib/cn.test.ts` | мердж className (tailwind-merge + clsx) |
-| `src/shared/lib/permissions.test.ts` | ролевая система `hasMinRole` |
-| `src/shared/lib/achievementDate.test.ts` | парсинг `meta.event_date` и форматирование |
-| `src/shared/schemas/auth.test.ts` | Zod-схемы login и register |
-| `src/shared/schemas/achievement.test.ts` | валидация формы достижения (категория, год, длины) |
-| `src/shared/schemas/profile.test.ts` | валидация редактирования профиля |
-| `src/shared/schemas/feed.test.ts` | session / achievement / post схемы |
-| `src/entities/theme/store.test.ts` | смена темы + persist в localStorage |
-| `src/entities/reactions/store.test.ts` | чистая логика оптимистичного апдейта и дельты бюджета |
-| `src/entities/friends/store.test.ts` | селекторы `getRelationship`, `acceptedFriendIds`, `pendingIncomingCount` |
-
-### Как удостовериться, что всё работает
-
-1. `npm install` (если ещё не).
-2. `npm test` — должно вывести в конце:
-   ```
-   Test Files  10 passed (10)
-        Tests  76 passed (76)
-   ```
-   Если число тестов меньше — что-то поменялось в коде и тесты пропустили; пройдись по выводу.
-3. `npm run test:coverage` — внизу будет таблица; общий блок «All files» должен показывать ≥25% по строкам/стейтментам. HTML-отчёт открывается из `./coverage/index.html`.
-4. Если хочется убедиться, что тесты реально что-то проверяют — поломай один (например, в `src/shared/lib/permissions.ts` верни `false` из `hasMinRole`): прогон должен упасть на permissions.test.ts с красным выводом. Верни обратно — снова зелёное.
-
-### E2E (Playwright)
+### Стек
+- **Vitest 4** + **@testing-library/react** + **jsdom** — unit / component / integration
+- **MSW 2** — моки HTTP-запросов в тестах
+- **Playwright** — E2E в headless / UI-режиме
 
 ```bash
-npm run e2e          # headless прогон
-npm run e2e:ui       # интерактивный режим
+npm test                  # Vitest (231 тестов, 43 файла)
+npm run test:coverage     # + отчёт покрытия
+npm run test:ui           # интерактивный UI Vitest
+npm run e2e               # Playwright headless
+npm run e2e:ui            # Playwright интерактивный UI
 ```
 
-> На момент сдачи E2E-сценарии не написаны — оставлено как точка расширения.
+### Статус
+
+**43 тестовых файла, 231 тест, 100% pass**
+
+| Тип | Описание | Файлы (примеры) |
+|-----|----------|-----------------|
+| **Схемы** (Zod) | Валидация форм регистрации, достижений, профиля, фида, челленджей | `shared/schemas/auth`, `achievement`, `profile`, `feed` |
+| **Утилиты** | cn(), даты, permissions, debounce, toast, api, mockData, supabase client | `shared/lib/*` |
+| **Сторы (unit)** | Логика Zustand-сторов: auth, profile, achievements, friends, feed, planner, reactions, theme, timer, group, dashboard, leaderboard, status, onboarding | `entities/*/store`, `entities/*/store.test` |
+| **Компоненты** | Рендер UI-компонентов: Toast, Icon, AvatarUpload, ThemeApplier, ReactionBar, BudgetWidget, ProtectedRoute, PublicRoute, useModal, format | `shared/ui/*`, `features/*`, `app/router/*` |
+| **Интеграционные (MSW)** | Сквозные сценарии против MSW-бэкенда: auth, routes, planner, dashboard, reactions, feed | `test/integration/*` |
+| **E2E (Playwright)** | Smoke: login page, home→login redirect. Login flow: проверка отображения ошибки | `e2e/smoke`, `e2e/login` |
+
+### CI/CD — GitHub Actions
+
+Пять проверок на каждый push / PR в `.github/workflows/ci.yml`:
+
+| Job | Команда | Зачем |
+|-----|---------|-------|
+| **lint** | `npm run lint` | ESLint + typescript-eslint |
+| **typecheck** | `npx tsc -b --noEmit` | TypeScript strict mode |
+| **test** | `npm test` | Vitest (unit + integration) |
+| **build** | `npm run build` | tsc + vite build |
+| **e2e** | `npm run e2e` | Playwright (требует `VITE_SUPABASE_URL` и `VITE_SUPABASE_ANON_KEY` в secrets) |
 
 ## Правила контрибуции
 
