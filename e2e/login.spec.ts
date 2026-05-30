@@ -12,6 +12,6 @@ test('login flow', async ({ page }) => {
   // Either redirect to feed or show error toast
   await Promise.race([
     page.waitForURL(/.*feed/).then(() => true),
-    page.waitForSelector('[role="status"], .toast, .toast-error', { timeout: 5000 }).then(() => false),
+    page.waitForSelector('[role="alert"], [role="status"]', { timeout: 5000 }).then(() => false),
   ])
 })
