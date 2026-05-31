@@ -36,17 +36,20 @@ export function App() {
                 <Route path="/register" element={<RegisterPage />} />
               </Route>
 
+              {/* Public routes — no auth required */}
+              <Route path="/" element={<Navigate to="/feed" replace />} />
+              <Route path="/feed" element={<FeedPage />} />
+              <Route path="/profile/:id" element={<ProfilePage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/challenges" element={<ChallengesPage />} />
+              <Route path="/challenges/:id" element={<ChallengeDetailPage />} />
+
+              {/* Protected routes — require auth */}
               <Route element={<ProtectedRoute />}>
-                <Route path="/" element={<Navigate to="/feed" replace />} />
-                <Route path="/feed" element={<FeedPage />} />
                 <Route path="/profile/me" element={<ProfilePage />} />
-                <Route path="/profile/:id" element={<ProfilePage />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/friends" element={<FriendsPage />} />
-                <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/challenges" element={<ChallengesPage />} />
-                <Route path="/challenges/:id" element={<ChallengeDetailPage />} />
               </Route>
 
               <Route element={<ProtectedRoute requiredRole="admin" />}>

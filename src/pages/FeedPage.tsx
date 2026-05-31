@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Button } from '@primer/react'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { supabase } from '@/shared/lib/supabase'
@@ -12,7 +13,7 @@ import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { ChallengeBanner } from '@/features/challenges'
 import { useDebounce } from '@/shared/hooks'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
-import { CategoryIcon, CrownIcon, ClownIcon } from '@/shared/ui'
+import { CategoryIcon } from '@/shared/ui'
 import type { AchievementCategory, ProofType } from '@/shared/types'
 
 interface UserResult {
@@ -21,26 +22,79 @@ interface UserResult {
   avatar: string | null
 }
 
-function getInitials(name: string): string {
-  return name.split(' ').map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase() || '?'
+function FriendButton({ targetId }: { targetId: string }) {
+  const { getRelationship, sendRequest, acceptRequest, removeRecord } = useFriendsStore()
+  const [busy, setBusy] = useState(false)
+  const rel = getRelationship(targetId)
+
+  if (!rel) {
+    return (
+      <button
+        type="button"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true)
+          try { await sendRequest(targetId) }
+          catch { /* shown by store */ }
+          finally { setBusy(false) }
+        }}
+        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
+      >
+        {busy ? '...' : 'Добавить'}
+      </button>
+    )
+  }
+
+  if (rel.direction === 'outgoing' && rel.record.status === 'pending') {
+    return <span className="text-xs text-gray-400">Запрос отправлен</span>
+  }
+
+  if (rel.direction === 'incoming' && rel.record.status === 'pending') {
+    return (
+      <button
+        type="button"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true)
+          try { await acceptRequest(rel.record.id) }
+          finally { setBusy(false) }
+        }}
+        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
+      >
+        {busy ? '...' : 'Принять'}
+      </button>
+    )
+  }
+
+  if (rel.record.status === 'accepted') {
+    return (
+      <button
+        type="button"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true)
+          try { await removeRecord(rel.record.id) }
+          finally { setBusy(false) }
+        }}
+        className="text-sm px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+      >
+        {busy ? '...' : 'Удалить'}
+      </button>
+    )
+  }
+
+  return null
 }
 
-function UserAvatar({ userId, name, avatar }: { userId: string; name: string; avatar: string | null }) {
-  return (
-    <Link to={`/profile/${userId}`} className="flex-shrink-0">
-      {avatar ? (
-        <img
-          src={avatar}
-          alt={name}
-          className="w-11 h-11 rounded-xl object-cover border-2 border-ra-border hover:border-ra-accent/40 transition-all duration-300"
-        />
-      ) : (
-        <div className="w-11 h-11 rounded-xl bg-ra-accent/10 text-ra-accent flex items-center justify-center text-sm font-bold border-2 border-ra-border hover:border-ra-accent/40 transition-all duration-300 select-none">
-          {getInitials(name)}
-        </div>
-      )}
-    </Link>
-  )
+function useDismissibleBanner() {
+  const [isDismissed, setIsDismissed] = useState(() => {
+    return localStorage.getItem('hideChallengeBanner') === 'true'
+  })
+  const dismiss = () => {
+    setIsDismissed(true)
+    localStorage.setItem('hideChallengeBanner', 'true')
+  }
+  return { isDismissed, dismiss }
 }
 
 const PAGE_SIZE = 10
@@ -80,6 +134,28 @@ function formatRelativeTime(dateStr: string): string {
   } catch {
     return dateStr
   }
+}
+
+function getInitials(name: string): string {
+  return name.split(' ').map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase() || '?'
+}
+
+function UserAvatar({ userId, name, avatar }: { userId: string; name: string; avatar: string | null }) {
+  return (
+    <Link to={`/profile/${userId}`} className="flex-shrink-0">
+      {avatar ? (
+        <img
+          src={avatar}
+          alt={name}
+          className="w-10 h-10 rounded-full object-cover ring-1 ring-gray-200 hover:ring-indigo-400 transition-all"
+        />
+      ) : (
+        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold ring-1 ring-gray-200 hover:ring-indigo-400 transition-all select-none">
+          {getInitials(name)}
+        </div>
+      )}
+    </Link>
+  )
 }
 
 async function loadPage(
@@ -177,11 +253,13 @@ export function FeedPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchInitial(category, feedMode)
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!debouncedSearch.trim() || !user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchResults([])
       return
     }
@@ -232,235 +310,191 @@ export function FeedPage() {
     }
   }
 
+  const { isDismissed, dismiss } = useDismissibleBanner()
+
   return (
-    <div className="mx-auto max-w-3xl py-8 px-4">
-      {/* Header Section */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="ra-section-title mb-1">Лента достижений</h1>
-          <p className="ra-subtitle">Голосуй за королей, смейся над клоунами</p>
+    <div className="flex gap-8 max-w-7xl mx-auto px-4 py-6">
+      {/* Main content — wide feed */}
+      <main className="flex-1 min-w-0">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Лента достижений</h1>
+          {/* Mode toggle for mobile/small screens */}
+          <div className="flex rounded-md border border-gray-300 overflow-hidden text-sm dark:border-gray-700">
+            {(['all', 'friends'] as FeedMode[]).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => handleModeChange(mode)}
+                className={`px-3 py-1.5 transition-colors ${
+                  feedMode === mode
+                    ? 'bg-indigo-600 text-white font-semibold'
+                    : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                }`}
+              >
+                {mode === 'all' ? 'Все' : 'Друзья'}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <BudgetWidget />
-        </div>
-      </div>
 
-      {/* Mode Toggle */}
-      <div className="flex gap-1 mb-6 p-1 bg-ra-bg-surface rounded-xl border border-ra-border">
-        {(['all', 'friends'] as FeedMode[]).map((mode) => (
-          <button
-            key={mode}
-            type="button"
-            onClick={() => handleModeChange(mode)}
-            className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
-              feedMode === mode
-                ? 'bg-ra-accent text-white shadow-ra-glow'
-                : 'text-ra-text-secondary hover:text-ra-text-primary hover:bg-ra-bg-hover'
-            }`}
-          >
-            {mode === 'all' ? (
-              <span className="flex items-center justify-center gap-2">
-                <CrownIcon className="w-4 h-4" />Все
-              </span>
-            ) : (
-              <span className="flex items-center justify-center gap-2">
-                <ClownIcon className="w-4 h-4" />Друзья
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Active challenge banner */}
-      <ChallengeBanner />
-
-      {/* Inline create card */}
-      <div className="mb-6">
-        <InlineCreateCard />
-      </div>
-
-      {/* User search */}
-      <div className="mb-6">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Найти королей и клоунов..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="ra-input pl-12"
-          />
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ra-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-        {searchQuery.trim() && (
-          <div className="mt-3 flex flex-col gap-2">
-            {isSearching && (
-              <div className="py-3 text-center text-sm text-ra-text-muted">
-                <div className="ra-shimmer h-4 w-32 mx-auto rounded" />
-              </div>
-            )}
-            {!isSearching && searchResults.length === 0 && (
-              <div className="py-4 text-center text-sm text-ra-text-muted ra-glass rounded-xl">
-                Никого не найдено
-              </div>
-            )}
-            {searchResults.map((u) => (
-              <div key={u.id} className="flex items-center justify-between gap-3 ra-glass ra-glass-hover p-3 rounded-xl">
-                <Link to={`/profile/${u.id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity">
-                  {u.avatar ? (
-                    <img src={u.avatar} alt={u.name} className="w-9 h-9 rounded-xl object-cover border-2 border-ra-border flex-shrink-0" />
-                  ) : (
-                    <div className="w-9 h-9 rounded-xl bg-ra-accent/10 text-ra-accent flex items-center justify-center text-xs font-bold flex-shrink-0">
-                      {getInitials(u.name)}
-                    </div>
-                  )}
-                  <span className="text-sm font-medium text-ra-text-primary truncate">{u.name}</span>
-                </Link>
-                <button className="ra-btn-secondary text-xs py-1.5 px-3">Добавить</button>
+        {/* Feed items */}
+        {isLoading ? (
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800 animate-pulse">
+                <div className="flex gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full" />
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
-
-      {/* Category filters */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {FILTERS.map((f) => (
-          <button
-            key={f.value}
-            type="button"
-            onClick={() => handleFilterChange(f.value)}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 border ${
-              category === f.value
-                ? 'border-ra-accent bg-ra-accent/10 text-ra-accent shadow-ra-glow'
-                : 'border-ra-border text-ra-text-secondary hover:border-ra-border-light hover:text-ra-text-primary hover:bg-ra-bg-hover'
-            }`}
-          >
-            {f.value !== 'all' && <CategoryIcon category={f.value} className="w-4 h-4" />}
-            {f.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Feed Items */}
-      {isLoading ? (
-        <div className="flex flex-col gap-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="ra-glass p-5 rounded-xl">
-              <div className="flex gap-4">
-                <div className="ra-shimmer w-11 h-11 rounded-xl flex-shrink-0" />
-                <div className="flex-1 space-y-3">
-                  <div className="ra-shimmer h-4 w-48 rounded" />
-                  <div className="ra-shimmer h-3 w-full rounded" />
-                  <div className="ra-shimmer h-3 w-2/3 rounded" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : items.length === 0 ? (
-        <div className="ra-glass py-16 px-6 text-center rounded-xl">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-ra-accent/10 flex items-center justify-center">
-              <CrownIcon className="w-8 h-8 text-ra-accent/50" />
-            </div>
+        ) : items.length === 0 ? (
+          <div className="border border-dashed border-gray-300 rounded-md py-10 text-center">
+            <span className="text-sm text-gray-500">
+              {feedMode === 'friends'
+                ? 'У вас пока нет друзей с достижениями'
+                : 'Достижений пока нет'}
+            </span>
           </div>
-          <p className="text-ra-text-secondary text-sm font-medium">
-            {feedMode === 'friends'
-              ? 'У вас пока нет друзей с достижениями'
-              : 'Достижений пока нет. Стань первым королём!'}
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="ra-glass ra-glass-hover p-5 rounded-xl transition-all duration-300"
-            >
-              <div className="flex gap-4">
-                {/* Avatar */}
-                <UserAvatar userId={item.userId} name={item.userName} avatar={item.userAvatar} />
+        ) : (
+          <div className="flex flex-col gap-3">
+            {items.map((item) => (
+              <div key={item.id} className="border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+                <div className="flex gap-3">
+                  {/* Avatar */}
+                  <UserAvatar userId={item.userId} name={item.userName} avatar={item.userAvatar} />
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Link
-                          to={`/profile/${item.userId}`}
-                          className="text-sm font-bold text-ra-text-primary hover:text-ra-accent transition-colors"
-                        >
-                          {item.userName}
-                        </Link>
-                        <span className="text-xs text-ra-text-muted">·</span>
-                        <span className="text-xs text-ra-text-muted">{formatRelativeTime(item.createdAt)}</span>
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Link
+                            to={`/profile/${item.userId}`}
+                            className="text-sm font-semibold text-gray-900 hover:text-indigo-600 transition-colors dark:text-white dark:hover:text-indigo-400"
+                          >
+                            {item.userName}
+                          </Link>
+                          <span className="text-xs text-gray-400">·</span>
+                          <span className="text-xs text-gray-400">{formatRelativeTime(item.createdAt)}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-xs text-gray-400 uppercase tracking-wide">{item.category}</span>
+                          <span className="text-xs text-gray-400">· {formatAchievementDate(item.eventDate, item.year)}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-ra-text-muted uppercase tracking-wider font-medium">{item.category}</span>
-                        <span className="text-xs text-ra-text-muted">· {formatAchievementDate(item.eventDate, item.year)}</span>
+
+                      <div className="flex-shrink-0">
+                        <ReactionBar achievementId={item.id} disabled={!user} size="sm" />
                       </div>
                     </div>
 
-                    <div className="flex-shrink-0">
-                      <ReactionBar achievementId={item.id} disabled={!user} size="sm" />
-                    </div>
-                  </div>
+                    <h2 className="text-base font-semibold text-gray-900 mt-2 dark:text-white">{item.title}</h2>
+                    <p className="text-sm text-gray-600 mt-0.5 dark:text-gray-300">{item.description}</p>
 
-                  <h2 className="ra-card-title mt-3">{item.title}</h2>
-                  <p className="ra-card-text mt-1">{item.description}</p>
-
-                  {item.proofType === 'url' && item.proofValue && (
-                    <a
-                      href={item.proofValue}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-flex items-center gap-1 text-xs text-ra-accent hover:text-ra-accent-hover transition-colors"
-                    >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                      Доказательство
-                    </a>
-                  )}
-                  {item.proofType === 'photo' && item.proofValue && (
-                    <div className="mt-3 overflow-hidden rounded-xl border border-ra-border">
+                    {item.proofType === 'url' && item.proofValue && (
+                      <a
+                        href={item.proofValue}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-block text-xs text-blue-600 hover:underline"
+                      >
+                        Доказательство →
+                      </a>
+                    )}
+                    {item.proofType === 'photo' && item.proofValue && (
                       <img
                         src={item.proofValue}
                         alt="Доказательство"
-                        className="w-full h-48 object-cover hover:scale-105 transition-transform duration-500"
+                        className="mt-2 h-28 w-auto rounded object-cover"
                       />
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {hasMore && (
-            <div className="flex justify-center pt-4">
+            {hasMore && (
+              <div className="flex justify-center pt-2">
+                <Button onClick={handleLoadMore} disabled={loadingMore}>
+                  {loadingMore ? 'Загрузка...' : 'Загрузить ещё'}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Sidebar — hidden on mobile/tablet */}
+      <aside className="w-72 flex-shrink-0 hidden lg:block">
+        <div className="sticky top-24 space-y-6">
+          {/* Budget — only for logged in users */}
+          {user && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3 dark:text-white">Бюджет</h3>
+              <BudgetWidget />
+            </div>
+          )}
+
+          {/* Create button — only for logged in users */}
+          {user && (
+            <div>
+              <InlineCreateCard />
+            </div>
+          )}
+
+          {/* Category filters */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3 dark:text-white">Фильтры</h3>
+            <div className="space-y-2">
+              {FILTERS.map((f) => (
+                <label
+                  key={f.value}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors ${
+                    category === f.value
+                      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="category"
+                    value={f.value}
+                    checked={category === f.value}
+                    onChange={() => handleFilterChange(f.value)}
+                    className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span className="text-sm">{f.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Challenge banner — dismissible */}
+          {!isDismissed && (
+            <div className="relative border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
               <button
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                className="ra-btn-primary"
+                type="button"
+                onClick={dismiss}
+                className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                title="Скрыть"
               >
-                {loadingMore ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Загрузка...
-                  </span>
-                ) : (
-                  'Загрузить ещё'
-                )}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
+              <ChallengeBanner />
+              <p className="text-xs text-gray-400 mt-2">Можно отключить в настройках</p>
             </div>
           )}
         </div>
-      )}
+      </aside>
     </div>
   )
 }
