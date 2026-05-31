@@ -101,10 +101,10 @@ test.describe('Challenges', () => {
     await page.waitForURL(/.*feed/, { timeout: 5000 })
 
     await page.goto('/challenges')
-    await expect(page.getByText('Челленджи')).toBeVisible()
-    await expect(page.getByText('Активный челлендж')).toBeVisible()
-    await expect(page.getByText('На велике — больше всех!')).toBeVisible()
-    await expect(page.getByText('История')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Челленджи' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Активный челлендж' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'На велике — больше всех!' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'История' })).toBeVisible()
     await expect(page.getByText('Кино-марафон')).toBeVisible()
   })
 
@@ -187,9 +187,9 @@ test.describe('Challenges', () => {
     await page.waitForURL(/.*feed/, { timeout: 5000 })
 
     await page.goto('/challenges/11111111-1111-1111-1111-111111111111')
-    await expect(page.getByText('На велике — больше всех!')).toBeVisible()
-    await expect(page.getByText('Лидерборд')).toBeVisible()
-    await expect(page.getByText('Мария Петрова')).toBeVisible()
-    await expect(page.getByText('Алексей Иванов')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'На велике — больше всех!' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Лидерборд' })).toBeVisible()
+    await expect(page.getByRole('cell', { name: 'Мария Петрова' })).toBeVisible()
+    await expect(page.getByRole('cell', { name: 'Алексей Иванов' })).toBeVisible()
   })
 })
