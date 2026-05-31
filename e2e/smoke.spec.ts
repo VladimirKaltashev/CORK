@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 
+
 test('smoke: login page loads', async ({ page }) => {
   await page.goto('/login')
   await expect(page).toHaveTitle(/CORK/)
@@ -9,8 +10,16 @@ test('smoke: login page loads', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Войти' })).toBeVisible()
 })
 
-test('smoke: home redirects to login when unauthenticated', async ({ page }) => {
+
+test('smoke: home redirects to feed for guests', async ({ page }) => {
   await page.goto('/')
+  await page.waitForURL(/.*feed/)
+  await expect(page.getByRole('heading', { name: 'Лента достижений' })).toBeVisible()
+})
+
+
+test('smoke: protected routes redirect to login when unauthenticated', async ({ page }) => {
+  await page.goto('/settings')
   await page.waitForURL(/.*login/)
   await expect(page.getByRole('heading', { name: 'Вход' })).toBeVisible()
 })
