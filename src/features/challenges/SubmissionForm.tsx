@@ -26,7 +26,7 @@ export function SubmissionForm({ proofConfig, onSubmit }: SubmissionFormProps) {
   } = useForm({
     resolver: zodResolver(challengeSubmissionSchema),
     defaultValues: {
-      proofType: (proofConfig.fields.find((f) => f !== 'value') ?? 'text') as string,
+      proofType: (proofConfig.fields.find((f) => f !== 'value') ?? 'text') as 'text' | 'photo' | 'url',
       proofValue: '',
       value: undefined,
       description: '',
