@@ -11,80 +11,8 @@ import { useReactionsStore } from '@/entities/reactions'
 import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { ChallengeBanner } from '@/features/challenges'
-import { useDebounce } from '@/shared/hooks'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
-import { CategoryIcon } from '@/shared/ui'
 import type { AchievementCategory, ProofType } from '@/shared/types'
-
-interface UserResult {
-  id: string
-  name: string
-  avatar: string | null
-}
-
-function FriendButton({ targetId }: { targetId: string }) {
-  const { getRelationship, sendRequest, acceptRequest, removeRecord } = useFriendsStore()
-  const [busy, setBusy] = useState(false)
-  const rel = getRelationship(targetId)
-
-  if (!rel) {
-    return (
-      <button
-        type="button"
-        disabled={busy}
-        onClick={async () => {
-          setBusy(true)
-          try { await sendRequest(targetId) }
-          catch { /* shown by store */ }
-          finally { setBusy(false) }
-        }}
-        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
-      >
-        {busy ? '...' : 'Добавить'}
-      </button>
-    )
-  }
-
-  if (rel.direction === 'outgoing' && rel.record.status === 'pending') {
-    return <span className="text-xs text-gray-400">Запрос отправлен</span>
-  }
-
-  if (rel.direction === 'incoming' && rel.record.status === 'pending') {
-    return (
-      <button
-        type="button"
-        disabled={busy}
-        onClick={async () => {
-          setBusy(true)
-          try { await acceptRequest(rel.record.id) }
-          finally { setBusy(false) }
-        }}
-        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
-      >
-        {busy ? '...' : 'Принять'}
-      </button>
-    )
-  }
-
-  if (rel.record.status === 'accepted') {
-    return (
-      <button
-        type="button"
-        disabled={busy}
-        onClick={async () => {
-          setBusy(true)
-          try { await removeRecord(rel.record.id) }
-          finally { setBusy(false) }
-        }}
-        className="text-sm px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-      >
-        {busy ? '...' : 'Удалить'}
-      </button>
-    )
-  }
-
-  return null
-}
 
 function useDismissibleBanner() {
   const [isDismissed, setIsDismissed] = useState(() => {
@@ -230,10 +158,6 @@ export function FeedPage() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [feedMode, setFeedMode] = useState<FeedMode>('all')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<UserResult[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const debouncedSearch = useDebounce(searchQuery, 300)
 
   const getFriendIds = (): string[] | undefined =>
     feedMode === 'friends' ? friendsStore.acceptedFriendIds() : undefined
@@ -256,26 +180,6 @@ export function FeedPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchInitial(category, feedMode)
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (!debouncedSearch.trim() || !user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSearchResults([])
-      return
-    }
-    setIsSearching(true)
-    supabase
-      .from('profiles')
-      .select('id, name, avatar')
-      .ilike('name', `%${debouncedSearch.trim()}%`)
-      .neq('id', user.id)
-      .limit(20)
-      .then(({ data, error }) => {
-        if (error) { showToast('error', 'Ошибка поиска') }
-        else { setSearchResults((data ?? []).map((p) => ({ id: p.id, name: p.name, avatar: p.avatar ?? null }))) }
-        setIsSearching(false)
-      })
-  }, [debouncedSearch, user])
 
   const handleFilterChange = (cat: CategoryFilter) => {
     if (cat === category) return
