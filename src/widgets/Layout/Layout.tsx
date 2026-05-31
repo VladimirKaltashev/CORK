@@ -13,7 +13,7 @@ export function Layout() {
   const closeDialog = useCreateAchievementDialog((s) => s.close)
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <div className="flex min-h-screen flex-col bg-ra-bg-base text-ra-text-primary">
       <Header />
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
         <Outlet />
