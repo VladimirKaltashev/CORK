@@ -13,8 +13,8 @@ function getInitials(name: string): string {
 function navClass({ isActive }: { isActive: boolean }) {
   return `text-sm font-medium transition-colors ${
     isActive
-      ? 'text-ra-accent'
-      : 'text-ra-text-secondary hover:text-ra-text-primary'
+      ? 'text-indigo-600 dark:text-indigo-400'
+      : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
   }`
 }
 
@@ -59,17 +59,15 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-ra-border bg-ra-bg-elevated/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <NavLink to="/feed" className="text-lg font-bold tracking-wider text-ra-text-primary font-display">
-          <span className="bg-gradient-to-r from-ra-accent to-ra-gold bg-clip-text text-transparent">CORK</span>
+        <NavLink to="/feed" className="text-lg font-bold tracking-wider text-gray-900 dark:text-white">
+          CORK
         </NavLink>
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-6 sm:flex">
-          {token && (
-            <NavLink to="/feed" className={navClass} data-onboard="feed">Лента</NavLink>
-          )}
+          <NavLink to="/feed" className={navClass} data-onboard="feed">Лента</NavLink>
           {token && (
             <NavLink
               to="/friends"
@@ -77,28 +75,36 @@ export function Header() {
               className={({ isActive }) =>
                 `relative text-sm font-medium transition-colors ${
                   isActive
-                    ? 'text-ra-accent'
-                    : 'text-ra-text-secondary hover:text-ra-text-primary'
+                    ? 'text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                 }`
               }
             >
               Друзья
               {pendingCount > 0 && (
-                <span className="absolute -top-1.5 -right-3 inline-flex items-center justify-center w-4 h-4 rounded-full bg-ra-danger text-white text-[10px] font-bold">
+                <span className="absolute -top-1.5 -right-3 inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold">
                   {pendingCount}
                 </span>
               )}
             </NavLink>
           )}
-          {token && (
-            <NavLink to="/leaderboard" data-onboard="leaderboard" className={navClass}>Рейтинг</NavLink>
-          )}
-          {token && (
-            <NavLink to="/challenges" className={navClass}>Челленджи</NavLink>
-          )}
+          <NavLink to="/leaderboard" data-onboard="leaderboard" className={navClass}>Рейтинг</NavLink>
+          <NavLink to="/challenges" className={navClass}>Челленджи</NavLink>
           {token && user?.role === 'admin' && (
             <NavLink to="/admin" className={navClass}>Модерация</NavLink>
           )}
+
+          {/* Search icon - available for all users */}
+          <button
+            type="button"
+            onClick={() => navigate('/search')}
+            className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            aria-label="Поиск"
+          >
+            <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
 
           {token ? (
             <div ref={dropdownRef} className="relative">
@@ -106,49 +112,49 @@ export function Header() {
                 type="button"
                 onClick={() => setDropdownOpen((v) => !v)}
                 data-onboard="profile"
-                className="flex items-center justify-center w-9 h-9 rounded-xl overflow-hidden border-2 border-ra-border hover:border-ra-accent/50 transition-all duration-300 focus:outline-none"
+                className="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden ring-2 ring-gray-200 hover:ring-indigo-400 transition-all focus:outline-none"
                 aria-label="Меню профиля"
               >
                 {avatar ? (
                   <img src={avatar} alt={name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-ra-accent/10 text-ra-accent flex items-center justify-center text-sm font-bold select-none">
+                  <div className="w-full h-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold select-none">
                     {getInitials(name)}
                   </div>
                 )}
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-ra-border bg-ra-bg-elevated shadow-ra-card z-50 backdrop-blur-xl">
-                  <div className="px-4 py-3 border-b border-ra-border">
-                    <p className="text-sm font-bold text-ra-text-primary truncate">{name}</p>
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-md border border-gray-200 bg-white shadow-lg z-50 dark:border-gray-700 dark:bg-gray-800">
+                  <div className="px-4 py-2.5 border-b border-gray-100 dark:border-gray-700">
+                    <p className="text-xs font-medium text-gray-900 dark:text-white truncate">{name}</p>
                   </div>
                   <NavLink
                     to="/profile/me"
                     onClick={() => setDropdownOpen(false)}
-                    className="block px-4 py-2.5 text-sm text-ra-text-secondary hover:text-ra-text-primary hover:bg-ra-bg-hover transition-colors"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     Мой профиль
                   </NavLink>
                   <NavLink
                     to="/settings"
                     onClick={() => setDropdownOpen(false)}
-                    className="block px-4 py-2.5 text-sm text-ra-text-secondary hover:text-ra-text-primary hover:bg-ra-bg-hover transition-colors"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     Настройки
                   </NavLink>
                   <button
                     type="button"
                     onClick={() => { setDropdownOpen(false); startOnboarding() }}
-                    className="block w-full text-left px-4 py-2.5 text-sm text-ra-text-secondary hover:text-ra-text-primary hover:bg-ra-bg-hover transition-colors"
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     Подсказки
                   </button>
-                  <div className="border-t border-ra-border mt-1">
+                  <div className="border-t border-gray-100 mt-1 dark:border-gray-700">
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2.5 text-sm text-ra-danger hover:bg-ra-danger/10 transition-colors"
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors dark:hover:bg-red-900/20"
                     >
                       Выйти
                     </button>
@@ -160,13 +166,13 @@ export function Header() {
             <div className="flex items-center gap-2">
               <NavLink
                 to="/login"
-                className="text-sm font-medium text-ra-text-secondary hover:text-ra-text-primary transition-colors"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 Войти
               </NavLink>
               <NavLink
                 to="/register"
-                className="ra-btn-primary text-sm py-1.5 px-3"
+                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
               >
                 Регистрация
               </NavLink>
@@ -177,71 +183,59 @@ export function Header() {
         {/* Mobile burger */}
         <button
           type="button"
-          className="flex items-center justify-center rounded-xl p-2 text-ra-text-secondary hover:bg-ra-bg-hover hover:text-ra-text-primary transition-colors sm:hidden"
+          className="flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 sm:hidden"
           aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
           onClick={() => setMenuOpen((v) => !v)}
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {menuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
+          <span className="text-xl">{menuOpen ? '✕' : '☰'}</span>
         </button>
       </div>
 
       {/* Mobile nav */}
       {menuOpen && (
-        <nav className="flex flex-col border-t border-ra-border bg-ra-bg-elevated px-4 py-3 sm:hidden">
-          {token && (
-            <NavLink
-              to="/feed"
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) => `block py-2.5 text-sm font-medium ${isActive ? 'text-ra-accent' : 'text-ra-text-secondary'}`}
-            >
-              Лента
-            </NavLink>
-          )}
+        <nav className="flex flex-col border-t border-gray-200 bg-white px-4 py-3 sm:hidden dark:border-gray-800 dark:bg-gray-900">
+          <NavLink
+            to="/feed"
+            onClick={() => setMenuOpen(false)}
+            className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
+          >
+            Лента
+          </NavLink>
           {token && (
             <NavLink
               to="/friends"
               onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-2 py-2.5 text-sm font-medium ${isActive ? 'text-ra-accent' : 'text-ra-text-secondary'}`
+                `flex items-center gap-2 py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`
               }
             >
               Друзья
               {pendingCount > 0 && (
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-ra-danger text-white text-[10px] font-bold">
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold">
                   {pendingCount}
                 </span>
               )}
             </NavLink>
           )}
-          {token && (
-            <NavLink
-              to="/leaderboard"
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) => `block py-2.5 text-sm font-medium ${isActive ? 'text-ra-accent' : 'text-ra-text-secondary'}`}
-            >
-              Рейтинг
-            </NavLink>
-          )}
-          {token && (
-            <NavLink
-              to="/challenges"
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) => `block py-2.5 text-sm font-medium ${isActive ? 'text-ra-accent' : 'text-ra-text-secondary'}`}
-            >
-              Челленджи
-            </NavLink>
-          )}
+          <NavLink
+            to="/leaderboard"
+            onClick={() => setMenuOpen(false)}
+            className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
+          >
+            Рейтинг
+          </NavLink>
+          <NavLink
+            to="/challenges"
+            onClick={() => setMenuOpen(false)}
+            className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
+          >
+            Челленджи
+          </NavLink>
           {token && user?.role === 'admin' && (
             <NavLink
               to="/admin"
               onClick={() => setMenuOpen(false)}
-              className={({ isActive }) => `block py-2.5 text-sm font-medium ${isActive ? 'text-ra-accent' : 'text-ra-text-secondary'}`}
+              className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
             >
               Модерация
             </NavLink>
@@ -251,14 +245,14 @@ export function Header() {
               <NavLink
                 to="/profile/me"
                 onClick={() => setMenuOpen(false)}
-                className={({ isActive }) => `block py-2.5 text-sm font-medium ${isActive ? 'text-ra-accent' : 'text-ra-text-secondary'}`}
+                className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
               >
                 Мой профиль
               </NavLink>
               <NavLink
                 to="/settings"
                 onClick={() => setMenuOpen(false)}
-                className={({ isActive }) => `block py-2.5 text-sm font-medium ${isActive ? 'text-ra-accent' : 'text-ra-text-secondary'}`}
+                className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
               >
                 Настройки
               </NavLink>
@@ -266,29 +260,29 @@ export function Header() {
           )}
 
           {token ? (
-            <div className="flex items-center justify-between pt-3 border-t border-ra-border mt-2">
-              {user && <span className="text-xs text-ra-text-muted truncate">{name}</span>}
+            <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-1 dark:border-gray-700">
+              {user && <span className="text-xs text-gray-500 truncate dark:text-gray-400">{name}</span>}
               <button
                 type="button"
                 onClick={handleLogout}
-                className="text-sm font-medium text-ra-danger"
+                className="text-sm font-medium text-red-500 dark:text-red-400"
               >
                 Выйти
               </button>
             </div>
           ) : (
-            <div className="flex flex-col gap-2 pt-3">
+            <div className="flex flex-col gap-2 pt-2">
               <NavLink
                 to="/login"
                 onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-ra-text-secondary"
+                className="text-sm font-medium text-gray-600 dark:text-gray-300"
               >
                 Войти
               </NavLink>
               <NavLink
                 to="/register"
                 onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-ra-accent"
+                className="text-sm font-medium text-indigo-600 dark:text-indigo-400"
               >
                 Регистрация
               </NavLink>

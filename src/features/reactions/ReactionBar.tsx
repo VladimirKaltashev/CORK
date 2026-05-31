@@ -52,6 +52,11 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md' }: Re
         iconClass={iconClass}
         padding={padding}
       />
+      {disabled && (
+        <span className="text-xs text-gray-400 ml-1" title="Войдите, чтобы голосовать">
+          Войти
+        </span>
+      )}
     </div>
   )
 }
