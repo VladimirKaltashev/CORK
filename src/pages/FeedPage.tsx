@@ -7,12 +7,13 @@ import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
 import { useAuthStore } from '@/entities/auth'
 import { useFriendsStore } from '@/entities/friends'
-import { useReactionsStore } from '@/entities/reactions'
+import { useReactionsStore, REACTION_COST } from '@/entities/reactions'
 import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { ChallengeBanner } from '@/features/challenges'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import type { AchievementCategory, ProofType } from '@/shared/types'
+import type { ReactionKind } from '@/entities/reactions'
 
 function useDismissibleBanner() {
   const [isDismissed, setIsDismissed] = useState(() => {
@@ -75,10 +76,10 @@ function UserAvatar({ userId, name, avatar }: { userId: string; name: string; av
         <img
           src={avatar}
           alt={name}
-          className="w-10 h-10 rounded-full object-cover ring-1 ring-gray-200 hover:ring-indigo-400 transition-all"
+          className="w-10 h-10 rounded-full object-cover ring-1 ring-gray-200 hover:ring-brand transition-all"
         />
       ) : (
-        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold ring-1 ring-gray-200 hover:ring-indigo-400 transition-all select-none">
+        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold ring-1 ring-gray-200 hover:ring-brand transition-all select-none">
           {getInitials(name)}
         </div>
       )}
@@ -146,6 +147,76 @@ async function loadPage(
 }
 
 type FeedMode = 'all' | 'friends'
+
+function VerdictBar({ achievementId }: { achievementId: string }) {
+  const agg = useReactionsStore((s) => s.byAchievement[achievementId])
+  const crowns = agg?.crowns ?? 0
+  const clowns = agg?.clowns ?? 0
+  const total = crowns + clowns
+  const kingPct = total > 0 ? Math.round((crowns / total) * 100) : 50
+
+  return (
+    <div className="verdict">
+      <div className="c-verdict-bar" style={{ '--pct': `${kingPct}%` } as React.CSSProperties}>
+        <div className="c-verdict-king" />
+        <div className="c-verdict-clown" />
+        <span className="c-verdict-lbl king">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19A1 1 0 0 1 18 20H6A1 1 0 0 1 5 19V18H19V19Z" />
+          </svg>
+          {kingPct}%
+        </span>
+        <span className="c-verdict-lbl clown">
+          {100 - kingPct}%
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.47 2 2 6.47 2 12C2 17.53 6.47 22 12 22C17.53 22 22 17.53 22 12C22 6.47 17.53 2 12 2M12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20M8.5 14C9.88 14 11 13.1 11 12C11 10.9 9.88 10 8.5 10C7.12 10 6 10.9 6 12C6 13.1 7.12 14 8.5 14M15.5 14C16.88 14 18 13.1 18 12C18 10.9 16.88 10 15.5 10C14.12 10 13 10.9 13 12C13 13.1 14.12 14 15.5 14M12 18C10.33 18 8.86 17.18 8.03 15.97L9.55 14.45C10.09 15.27 10.03 16.17 12 16.17C13.97 16.17 13.91 15.27 14.45 14.45L15.97 15.97C15.14 17.18 13.67 18 12 18Z" />
+          </svg>
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function VoteButtons({ achievementId, disabled = false }: { achievementId: string; disabled?: boolean }) {
+  const agg = useReactionsStore((s) => s.byAchievement[achievementId])
+  const pending = useReactionsStore((s) => s.pending.has(achievementId))
+  const budgetRemaining = useReactionsStore((s) => s.budgetRemaining)
+  const toggle = useReactionsStore((s) => s.toggle)
+  const myKind = agg?.myKind ?? null
+
+  const handleClick = (kind: ReactionKind) => {
+    if (disabled || pending) return
+    if (myKind !== kind && budgetRemaining < REACTION_COST[kind]) return
+    toggle(achievementId, kind)
+  }
+
+  return (
+    <div className="flex gap-2.5 mt-3">
+      <button
+        type="button"
+        disabled={disabled || pending}
+        onClick={() => handleClick('crown')}
+        className={`c-vote-btn c-vote-king ${myKind === 'crown' ? 'c-btn-primary' : ''}`}
+      >
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19A1 1 0 0 1 18 20H6A1 1 0 0 1 5 19V18H19V19Z" />
+        </svg>
+        Король
+      </button>
+      <button
+        type="button"
+        disabled={disabled || pending}
+        onClick={() => handleClick('clown')}
+        className={`c-vote-btn c-vote-clown ${myKind === 'clown' ? 'c-btn-clown' : ''}`}
+      >
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C6.47 2 2 6.47 2 12C2 17.53 6.47 22 12 22C17.53 22 22 17.53 22 12C22 6.47 17.53 2 12 2M12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20M8.5 14C9.88 14 11 13.1 11 12C11 10.9 9.88 10 8.5 10C7.12 10 6 10.9 6 12C6 13.1 7.12 14 8.5 14M15.5 14C16.88 14 18 13.1 18 12C18 10.9 16.88 10 15.5 10C14.12 10 13 10.9 13 12C13 13.1 14.12 14 15.5 14M12 18C10.33 18 8.86 17.18 8.03 15.97L9.55 14.45C10.09 15.27 10.03 16.17 12 16.17C13.97 16.17 13.91 15.27 14.45 14.45L15.97 15.97C15.14 17.18 13.67 18 12 18Z" />
+        </svg>
+        Шут
+      </button>
+    </div>
+  )
+}
 
 export function FeedPage() {
   const { user } = useAuthStore()
@@ -222,19 +293,15 @@ export function FeedPage() {
       <main className="flex-1 min-w-0">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Лента достижений</h1>
-          {/* Mode toggle for mobile/small screens */}
-          <div className="flex rounded-md border border-gray-300 overflow-hidden text-sm dark:border-gray-700">
+          <h1 className="c-head text-2xl font-bold text-gray-900 dark:text-white">Лента достижений</h1>
+          {/* Mode toggle */}
+          <div className="c-feed-tabs">
             {(['all', 'friends'] as FeedMode[]).map((mode) => (
               <button
                 key={mode}
                 type="button"
                 onClick={() => handleModeChange(mode)}
-                className={`px-3 py-1.5 transition-colors ${
-                  feedMode === mode
-                    ? 'bg-indigo-600 text-white font-semibold'
-                    : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
-                }`}
+                className={feedMode === mode ? 'active' : ''}
               >
                 {mode === 'all' ? 'Все' : 'Друзья'}
               </button>
@@ -246,7 +313,7 @@ export function FeedPage() {
         {isLoading ? (
           <div className="flex flex-col gap-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800 animate-pulse">
+              <div key={i} className="c-card animate-pulse">
                 <div className="flex gap-3">
                   <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
                   <div className="flex-1 space-y-2">
@@ -259,7 +326,7 @@ export function FeedPage() {
             ))}
           </div>
         ) : items.length === 0 ? (
-          <div className="border border-dashed border-gray-300 rounded-md py-10 text-center">
+          <div className="c-card border-dashed py-10 text-center">
             <span className="text-sm text-gray-500">
               {feedMode === 'friends'
                 ? 'У вас пока нет друзей с достижениями'
@@ -267,9 +334,9 @@ export function FeedPage() {
             </span>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             {items.map((item) => (
-              <div key={item.id} className="border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+              <article key={item.id} className="c-card">
                 <div className="flex gap-3">
                   {/* Avatar */}
                   <UserAvatar userId={item.userId} name={item.userName} avatar={item.userAvatar} />
@@ -281,7 +348,7 @@ export function FeedPage() {
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <Link
                             to={`/profile/${item.userId}`}
-                            className="text-sm font-semibold text-gray-900 hover:text-indigo-600 transition-colors dark:text-white dark:hover:text-indigo-400"
+                            className="text-sm font-semibold text-gray-900 hover:text-brand transition-colors dark:text-white"
                           >
                             {item.userName}
                           </Link>
@@ -295,11 +362,11 @@ export function FeedPage() {
                       </div>
 
                       <div className="flex-shrink-0">
-                        <ReactionBar achievementId={item.id} disabled={!user} size="sm" />
+                        <span className="c-lvl">{item.category}</span>
                       </div>
                     </div>
 
-                    <h2 className="text-base font-semibold text-gray-900 mt-2 dark:text-white">{item.title}</h2>
+                    <h2 className="c-title text-base font-semibold text-gray-900 mt-2 dark:text-white">{item.title}</h2>
                     <p className="text-sm text-gray-600 mt-0.5 dark:text-gray-300">{item.description}</p>
 
                     {item.proofType === 'url' && item.proofValue && (
@@ -319,9 +386,26 @@ export function FeedPage() {
                         className="mt-2 h-28 w-auto rounded object-cover"
                       />
                     )}
+
+                    {/* Verdict bar */}
+                    <div className="mt-4">
+                      <VerdictBar achievementId={item.id} />
+                      <VoteButtons achievementId={item.id} disabled={!user} />
+                    </div>
+
+                    {/* Card footer */}
+                    <div className="c-card-foot mt-4">
+                      <span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <ReactionBar achievementId={item.id} disabled={!user} size="sm" />
+                      </span>
+                      <span className="spacer">↗ Поделиться</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
 
             {hasMore && (
@@ -335,13 +419,13 @@ export function FeedPage() {
         )}
       </main>
 
-      {/* Sidebar — hidden on mobile/tablet */}
+      {/* Sidebar */}
       <aside className="w-72 flex-shrink-0 hidden lg:block">
         <div className="sticky top-24 space-y-6">
           {/* Budget — only for logged in users */}
           {user && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3 dark:text-white">Бюджет</h3>
+              <h3 className="c-panel-title text-sm font-semibold text-gray-900 mb-3 dark:text-white">Бюджет</h3>
               <BudgetWidget />
             </div>
           )}
@@ -354,8 +438,8 @@ export function FeedPage() {
           )}
 
           {/* Category filters */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3 dark:text-white">Фильтры</h3>
+          <div className="c-panel">
+            <h3 className="c-panel-title text-sm font-semibold text-gray-900 mb-3 dark:text-white">Фильтры</h3>
             <div className="space-y-2">
               {FILTERS.map((f) => (
                 <label
@@ -380,9 +464,9 @@ export function FeedPage() {
             </div>
           </div>
 
-          {/* Challenge banner — dismissible */}
+          {/* Challenge banner */}
           {!isDismissed && (
-            <div className="relative border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="c-panel relative">
               <button
                 type="button"
                 onClick={dismiss}
@@ -397,6 +481,54 @@ export function FeedPage() {
               <p className="text-xs text-gray-400 mt-2">Можно отключить в настройках</p>
             </div>
           )}
+
+          {/* Leaderboard */}
+          <div className="c-panel">
+            <h3 className="c-panel-title text-sm font-semibold text-gray-900 mb-3 dark:text-white">👑 Короли недели</h3>
+            <div className="c-lb-item">
+              <span className="c-lb-rank top">1</span>
+              <span className="c-lb-av">СР</span>
+              <span className="c-lb-name">София Р.</span>
+              <span className="c-lb-score">14.9k</span>
+            </div>
+            <div className="c-lb-item">
+              <span className="c-lb-rank top">2</span>
+              <span className="c-lb-av">МВ</span>
+              <span className="c-lb-name">Макс Ветров</span>
+              <span className="c-lb-score">13.2k</span>
+            </div>
+            <div className="c-lb-item">
+              <span className="c-lb-rank top">3</span>
+              <span className="c-lb-av">АК</span>
+              <span className="c-lb-name">Алина Кей</span>
+              <span className="c-lb-score">12.4k</span>
+            </div>
+            <div className="c-lb-item">
+              <span className="c-lb-rank">4</span>
+              <span className="c-lb-av">ДН</span>
+              <span className="c-lb-name">Дэн Новак</span>
+              <span className="c-lb-score">10.1k</span>
+            </div>
+            <div className="c-lb-item">
+              <span className="c-lb-rank">5</span>
+              <span className="c-lb-av">ЛП</span>
+              <span className="c-lb-name">Лена П.</span>
+              <span className="c-lb-score">9.7k</span>
+            </div>
+          </div>
+
+          {/* Trending */}
+          <div className="c-panel">
+            <h3 className="c-panel-title text-sm font-semibold text-gray-900 mb-3 dark:text-white"># В тренде</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="c-tag-pill">#спорт</span>
+              <span className="c-tag-pill">#стартап</span>
+              <span className="c-tag-pill">#музыка</span>
+              <span className="c-tag-pill">#учёба</span>
+              <span className="c-tag-pill">#кодинг</span>
+              <span className="c-tag-pill">#искусство</span>
+            </div>
+          </div>
         </div>
       </aside>
     </div>
