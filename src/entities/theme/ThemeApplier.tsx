@@ -9,6 +9,13 @@ export function ThemeApplier() {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
 
     const apply = () => {
+      if (theme === 'acid') {
+        root.setAttribute('data-theme', 'acid')
+        root.classList.add('dark')
+        return
+      }
+
+      root.removeAttribute('data-theme')
       const isDark = theme === 'dark' || (theme === 'system' && mq.matches)
       root.classList.toggle('dark', isDark)
     }

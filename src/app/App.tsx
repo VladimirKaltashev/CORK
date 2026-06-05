@@ -14,11 +14,12 @@ import { LeaderboardPage } from '@/pages/LeaderboardPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { ChallengesPage } from '@/pages/ChallengesPage'
 import { ChallengeDetailPage } from '@/pages/ChallengeDetailPage'
+import { DesignPreviewPage } from '@/pages/DesignPreviewPage'
 import { ThemeApplier, useThemeStore } from '@/entities/theme'
 
-function themeToColorMode(theme: 'light' | 'dark' | 'system'): 'day' | 'night' | 'auto' {
+function themeToColorMode(theme: 'light' | 'dark' | 'system' | 'acid'): 'day' | 'night' | 'auto' {
   if (theme === 'light') return 'day'
-  if (theme === 'dark') return 'night'
+  if (theme === 'dark' || theme === 'acid') return 'night'
   return 'auto'
 }
 
@@ -55,6 +56,8 @@ export function App() {
               <Route element={<ProtectedRoute requiredRole="admin" />}>
                 <Route path="/admin" element={<AdminPage />} />
               </Route>
+
+              <Route path="/design-preview" element={<DesignPreviewPage />} />
 
               <Route path="*" element={<NotFoundPage />} />
             </Route>

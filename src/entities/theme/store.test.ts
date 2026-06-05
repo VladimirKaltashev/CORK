@@ -17,6 +17,9 @@ describe('useThemeStore', () => {
 
     useThemeStore.getState().setTheme('light')
     expect(useThemeStore.getState().theme).toBe('light')
+
+    useThemeStore.getState().setTheme('acid')
+    expect(useThemeStore.getState().theme).toBe('acid')
   })
 
   it('persist пишет в localStorage с ключом cork_theme', () => {
