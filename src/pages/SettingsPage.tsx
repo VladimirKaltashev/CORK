@@ -1,12 +1,23 @@
 import { useThemeStore, type Theme } from '@/entities/theme'
 import { SunIcon, MoonIcon, SystemIcon } from '@/shared/ui'
 
+function AcidIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+      <line x1="8" y1="12" x2="16" y2="12" />
+      <line x1="12" y1="8" x2="12" y2="16" />
+    </svg>
+  )
+}
+
 type IconComponent = typeof SunIcon
 
 const THEMES: { value: Theme; Icon: IconComponent; label: string; description: string }[] = [
   { value: 'light',  Icon: SunIcon,    label: 'Светлая',   description: 'Всегда светлая' },
   { value: 'dark',   Icon: MoonIcon,   label: 'Тёмная',    description: 'Всегда тёмная' },
   { value: 'system', Icon: SystemIcon, label: 'Системная', description: 'Как в настройках ОС' },
+  { value: 'acid',   Icon: AcidIcon,   label: 'Acid Pop',  description: 'Cyber Terminal / HUD' },
 ]
 
 export function SettingsPage() {

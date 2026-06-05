@@ -4,6 +4,7 @@ import { useAuthStore } from '@/entities/auth'
 import { useFriendsStore } from '@/entities/friends'
 import { useProfileStore } from '@/entities/profile'
 import { useOnboardingStore } from '@/features/onboarding'
+import { useCreateAchievementDialog } from '@/entities/achievements/createDialog'
 import { showToast } from '@/shared/lib/api'
 
 function getInitials(name: string): string {
@@ -105,6 +106,20 @@ export function Header() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>
+
+          {/* Create achievement + button */}
+          {token && (
+            <button
+              type="button"
+              onClick={() => useCreateAchievementDialog.getState().open()}
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+              aria-label="Создать достижение"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+          )}
 
           {token ? (
             <div ref={dropdownRef} className="relative">
