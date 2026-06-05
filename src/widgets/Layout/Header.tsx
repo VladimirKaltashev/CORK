@@ -5,6 +5,7 @@ import { useFriendsStore } from '@/entities/friends'
 import { useProfileStore } from '@/entities/profile'
 import { useOnboardingStore } from '@/features/onboarding'
 import { useCreateAchievementDialog } from '@/entities/achievements/createDialog'
+import { useThemeStore } from '@/entities/theme'
 import { showToast } from '@/shared/lib/api'
 
 function getInitials(name: string): string {
@@ -20,6 +21,7 @@ function navClass({ isActive }: { isActive: boolean }) {
 }
 
 export function Header() {
+  const theme = useThemeStore((s) => s.theme)
   const [menuOpen, setMenuOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -28,6 +30,7 @@ export function Header() {
   const { loadFriendships, pendingIncomingCount } = useFriendsStore()
   const { loadProfile, getProfile } = useProfileStore()
   const startOnboarding = useOnboardingStore((s) => s.start)
+  const openCreateDialog = useCreateAchievementDialog((s) => s.open)
   const pendingCount = token && user ? pendingIncomingCount() : 0
   const profile = user ? getProfile(user.id) : undefined
   const avatar = profile?.avatar ?? null
@@ -57,6 +60,141 @@ export function Header() {
     navigate('/login')
     setMenuOpen(false)
     setDropdownOpen(false)
+  }
+
+  if (theme === 'acid') {
+    return (
+      <header className="header-acid">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <NavLink to="/feed" className="brand-name">
+            <span>CORK</span>
+          </NavLink>
+
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-4 sm:flex">
+            <NavLink to="/feed" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Лента</NavLink>
+            {token && (
+              <NavLink to="/friends" className={({ isActive }) => `nav-link relative ${isActive ? 'active' : ''}`}>
+                Друзья
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1 -right-2 w-4 h-4 flex items-center justify-center text-[10px] font-bold" style={{ background: 'var(--ap-clown)', color: '#fff' }}>
+                    {pendingCount}
+                  </span>
+                )}
+              </NavLink>
+            )}
+            <NavLink to="/leaderboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Рейтинг</NavLink>
+            <NavLink to="/challenges" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Челленджи</NavLink>
+            {token && user?.role === 'admin' && (
+              <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Модерация</NavLink>
+            )}
+
+            {/* Search */}
+            <button
+              type="button"
+              onClick={() => navigate('/search')}
+              className="icon-btn"
+              aria-label="Поиск"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+
+            {/* Create */}
+            {token && (
+              <button
+                type="button"
+                onClick={openCreateDialog}
+                className="ap-notch-btn"
+                aria-label="Создать достижение"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            )}
+
+            {token ? (
+              <div ref={dropdownRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setDropdownOpen((v) => !v)}
+                  className="avatar"
+                  aria-label="Меню профиля"
+                >
+                  {avatar ? (
+                    <img src={avatar} alt={name} className="w-full h-full object-cover" />
+                  ) : (
+                    getInitials(name)
+                  )}
+                </button>
+
+                {dropdownOpen && (
+                  <div className="dropdown">
+                    <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--ap-border-light)' }}>
+                      <p className="text-xs font-medium truncate" style={{ color: 'var(--ap-text)' }}>{name}</p>
+                    </div>
+                    <NavLink to="/profile/me" onClick={() => setDropdownOpen(false)}>Мой профиль</NavLink>
+                    <NavLink to="/settings" onClick={() => setDropdownOpen(false)}>Настройки</NavLink>
+                    <button type="button" onClick={() => { setDropdownOpen(false); startOnboarding() }}>Подсказки</button>
+                    <div className="separator" />
+                    <button type="button" onClick={handleLogout} className="danger">Выйти</button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <NavLink to="/login" className="nav-link">Войти</NavLink>
+                <NavLink to="/register" className="ap-btn-primary" style={{ padding: '8px 14px', fontSize: '12px' }}>Регистрация</NavLink>
+              </div>
+            )}
+          </nav>
+
+          {/* Mobile burger */}
+          <button
+            type="button"
+            className="flex items-center justify-center p-2 text-[var(--ap-text-dim)] sm:hidden"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <span className="text-xl">{menuOpen ? '✕' : '☰'}</span>
+          </button>
+        </div>
+
+        {/* Mobile nav */}
+        {menuOpen && (
+          <nav className="ap-mobile-nav sm:hidden">
+            <NavLink to="/feed" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Лента</NavLink>
+            {token && (
+              <NavLink to="/friends" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>
+                Друзья
+                {pendingCount > 0 && <span className="ml-1 text-[var(--ap-clown)]">({pendingCount})</span>}
+              </NavLink>
+            )}
+            <NavLink to="/leaderboard" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Рейтинг</NavLink>
+            <NavLink to="/challenges" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Челленджи</NavLink>
+            {token && user?.role === 'admin' && (
+              <NavLink to="/admin" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Модерация</NavLink>
+            )}
+            {token && (
+              <>
+                <NavLink to="/profile/me" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Мой профиль</NavLink>
+                <NavLink to="/settings" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Настройки</NavLink>
+              </>
+            )}
+            <div className="separator" />
+            {token ? (
+              <button type="button" onClick={handleLogout} className="text-[var(--ap-clown)]">Выйти</button>
+            ) : (
+              <>
+                <NavLink to="/login" onClick={() => setMenuOpen(false)}>Войти</NavLink>
+                <NavLink to="/register" onClick={() => setMenuOpen(false)}>Регистрация</NavLink>
+              </>
+            )}
+          </nav>
+        )}
+      </header>
+    )
   }
 
   return (
@@ -106,20 +244,6 @@ export function Header() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>
-
-          {/* Create achievement + button */}
-          {token && (
-            <button
-              type="button"
-              onClick={() => useCreateAchievementDialog.getState().open()}
-              className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
-              aria-label="Создать достижение"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
-          )}
 
           {token ? (
             <div ref={dropdownRef} className="relative">
