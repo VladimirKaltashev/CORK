@@ -34,7 +34,7 @@ export function SettingsPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Тема интерфейса</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {THEMES.map(({ value, Icon, label, description }) => {
             const active = value === theme
             return (
