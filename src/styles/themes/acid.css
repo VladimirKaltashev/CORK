@@ -23,6 +23,7 @@
   --cork-brand-ink:   #071005;
   --cork-king:        #c6ff3d;
   --cork-clown:       #ff2d78;
+  --cork-success:     var(--cork-brand);
 
   /* ── Borders & Frames ── */
   --cork-border:      rgba(198, 255, 61, 0.22);
@@ -175,6 +176,17 @@
 
 [data-theme="acid"] .cork-create-btn:hover {
   box-shadow: 0 8px 20px -8px var(--cork-glow);
+}
+
+/* ── Brand ink overrides ── */
+[data-theme="acid"] .cork-btn-primary,
+[data-theme="acid"] .cork-create-btn {
+  color: var(--cork-brand-ink) !important;
+}
+
+[data-theme="acid"] .cork-tab.active,
+[data-theme="acid"] .cork-tabs .active {
+  color: var(--cork-brand-ink) !important;
 }
 
 /* ── Header brand ── */

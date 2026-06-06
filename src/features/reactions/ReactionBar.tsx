@@ -31,28 +31,31 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md' }: Re
   const total = crowns + clowns
   const kingPct = total === 0 ? 50 : (crowns / total) * 100
   const clownPct = total === 0 ? 50 : (clowns / total) * 100
+  const barHeight = isSm ? '28px' : '36px'
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Verdict bar */}
+      {/* Verdict bar — always full width, even at 0/0 */}
       <div className="cork-verdict-bar">
-        <div className="cork-verdict-track" style={{ height: isSm ? '28px' : '36px' }}>
-          {crowns > 0 && (
-            <div className="cork-verdict-king" style={{ width: `${kingPct}%` }}>
-              <span className="flex items-center gap-1">
-                <CrownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
-                {crowns}
-              </span>
-            </div>
-          )}
-          {clowns > 0 && (
-            <div className="cork-verdict-clown" style={{ width: `${clownPct}%`, marginLeft: crowns > 0 ? 'auto' : undefined }}>
-              <span className="flex items-center gap-1">
-                {clowns}
-                <ClownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
-              </span>
-            </div>
-          )}
+        <div className="cork-verdict-track" style={{ height: barHeight }}>
+          <div
+            className="cork-verdict-king"
+            style={{ width: `${kingPct}%`, display: 'flex' }}
+          >
+            <span className="flex items-center gap-1">
+              <CrownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
+              {crowns}
+            </span>
+          </div>
+          <div
+            className="cork-verdict-clown"
+            style={{ width: `${clownPct}%`, display: 'flex', marginLeft: 'auto' }}
+          >
+            <span className="flex items-center gap-1">
+              {clowns}
+              <ClownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
+            </span>
+          </div>
         </div>
       </div>
 

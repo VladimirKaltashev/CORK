@@ -313,27 +313,21 @@ export function FeedPage() {
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <Link
-                            to={`/profile/${item.userId}`}
-                            className="cork-link"
-                            style={{ fontSize: '14px', fontWeight: 600 }}
-                          >
-                            {item.userName}
-                          </Link>
-                          <span className="cork-meta">·</span>
-                          <span className="cork-meta">{formatRelativeTime(item.createdAt)}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="cork-meta">{item.category}</span>
-                          <span className="cork-meta">· {formatAchievementDate(item.eventDate, item.year)}</span>
-                        </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Link
+                          to={`/profile/${item.userId}`}
+                          className="cork-link"
+                          style={{ fontSize: '14px', fontWeight: 600 }}
+                        >
+                          {item.userName}
+                        </Link>
+                        <span className="cork-meta">·</span>
+                        <span className="cork-meta">{formatRelativeTime(item.createdAt)}</span>
                       </div>
-
-                      <div className="flex-shrink-0">
-                        <ReactionBar achievementId={item.id} disabled={!user} size="sm" />
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="cork-meta">{item.category}</span>
+                        <span className="cork-meta">· {formatAchievementDate(item.eventDate, item.year)}</span>
                       </div>
                     </div>
 
@@ -361,6 +355,11 @@ export function FeedPage() {
                         style={{ borderRadius: 'var(--cork-radius-btn)', border: '1px solid var(--cork-border-light)' }}
                       />
                     )}
+
+                    {/* Verdict bar + buttons — full width under content */}
+                    <div className="mt-3">
+                      <ReactionBar achievementId={item.id} disabled={!user} size="sm" />
+                    </div>
                   </div>
                 </div>
               </div>

@@ -25,7 +25,7 @@ function StatusBadge({ status }: { status: AchievementStatus }) {
     return (
       <CheckIcon
         className="ml-auto w-5 h-5"
-        style={{ color: 'var(--cork-king)' }}
+        style={{ color: 'var(--cork-success)' }}
         aria-label="Подтверждено"
       />
     )

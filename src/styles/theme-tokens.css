@@ -23,6 +23,7 @@
   --cork-brand-ink:   #ffffff;
   --cork-king:        #d97706;
   --cork-clown:       #ef4444;
+  --cork-success:     #22c55e;
 
   /* ── Borders & Frames ── */
   --cork-border:      #e5e7eb;
@@ -66,6 +67,7 @@
   --cork-brand-ink:   #ffffff;
   --cork-king:        #fbbf24;
   --cork-clown:       #f87171;
+  --cork-success:     #22c55e;
   --cork-border:      #374151;
   --cork-border-light:#4b5563;
   --cork-frame:       #818cf8;

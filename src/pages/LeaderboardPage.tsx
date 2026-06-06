@@ -75,7 +75,7 @@ export function LeaderboardPage() {
             type="button"
             onClick={() => setBoard('kings')}
             className={`cork-tab inline-flex items-center gap-1.5 ${board === 'kings' ? 'active' : ''}`}
-            style={board === 'kings' ? { background: 'var(--cork-king)', color: '#fff', borderColor: 'transparent' } : {}}
+            style={board === 'kings' ? { background: 'var(--cork-king)', color: 'var(--cork-brand-ink)', borderColor: 'transparent' } : {}}
           >
             <CrownIcon className="w-4 h-4" />
             Короли
@@ -84,7 +84,7 @@ export function LeaderboardPage() {
             type="button"
             onClick={() => setBoard('clowns')}
             className={`cork-tab inline-flex items-center gap-1.5 ${board === 'clowns' ? 'active' : ''}`}
-            style={board === 'clowns' ? { background: 'var(--cork-clown)', color: '#fff', borderColor: 'transparent' } : {}}
+            style={board === 'clowns' ? { background: 'var(--cork-clown)', color: 'var(--cork-brand-ink)', borderColor: 'transparent' } : {}}
           >
             <ClownIcon className="w-4 h-4" />
             Клоуны

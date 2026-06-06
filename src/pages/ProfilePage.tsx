@@ -243,7 +243,8 @@ export function ProfilePage() {
             <button
               type="button"
               onClick={openCreateDialog}
-              className="cork-btn-primary"
+              className="cork-btn cork-btn-primary"
+              style={{ textTransform: 'none', letterSpacing: 'normal' }}
             >
               + Добавить
             </button>

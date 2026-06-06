@@ -31,7 +31,7 @@ describe('ReactionBar', () => {
   it('renders with zero counts', () => {
     render(<ReactionBar achievementId="a1" />)
     const zeros = screen.getAllByText('0')
-    expect(zeros.length).toBe(2)
+    expect(zeros.length).toBe(4) // 2 in verdict bar + 2 in buttons
   })
 
   it('renders active crown', () => {
