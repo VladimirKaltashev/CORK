@@ -32,28 +32,32 @@ export function CreatePostForm() {
     } catch { /* обрабатывается interceptor */ }
   }
 
+  const inputBase = 'w-full resize-none rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-[var(--cork-brand)]'
+  const inputStyle = { background: 'var(--cork-surface-2)', color: 'var(--cork-text)' }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3" noValidate>
       <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Текст поста</label>
+        <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--cork-text-dim)' }}>Текст поста</label>
         <textarea
           {...register('content')}
           rows={4}
           placeholder="Чем поделитесь?"
           className={cn(
-            'w-full resize-none rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white',
-            errors.content ? 'border-red-400' : 'border-gray-300 dark:border-gray-600',
+            inputBase,
+            errors.content ? 'border-red-400' : 'border-gray-300',
           )}
+          style={inputStyle}
         />
         <div className="mt-1 flex justify-between">
           {errors.content
             ? <p className="text-xs text-red-500">{errors.content.message}</p>
             : <span />}
-          <span className="text-xs text-gray-400">{content.length}/500</span>
+          <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>{content.length}/500</span>
         </div>
       </div>
       <button type="submit" disabled={isSubmitting}
-        className="rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60 transition-colors">
+        className="cork-btn-primary">
         {isSubmitting ? 'Публикация...' : 'Опубликовать'}
       </button>
     </form>

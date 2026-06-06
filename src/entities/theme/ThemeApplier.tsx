@@ -11,7 +11,7 @@ export function ThemeApplier() {
     const apply = () => {
       if (theme === 'acid') {
         root.setAttribute('data-theme', 'acid')
-        root.classList.add('dark')
+        // НЕ добавляем class="dark" — Acid Pop управляет всем через CSS-переменные
         return
       }
 

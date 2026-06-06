@@ -32,9 +32,10 @@ export function FeedList() {
             className={cn(
               'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
               filter === value
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
+                ? 'bg-[var(--cork-brand)] text-white'
+                : 'hover:bg-[var(--cork-surface-3)]',
             )}
+            style={filter === value ? {} : { background: 'var(--cork-surface-3)', color: 'var(--cork-text-dim)' }}
           >
             {label}
           </button>
@@ -52,7 +53,7 @@ export function FeedList() {
       </div>
 
       {items.length === 0 && !isLoading && (
-        <p className="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
+        <p className="py-12 text-center text-sm" style={{ color: 'var(--cork-text-mute)' }}>
           Ничего не найдено
         </p>
       )}
@@ -62,7 +63,7 @@ export function FeedList() {
           type="button"
           onClick={() => fetchFeed()}
           disabled={isLoading}
-          className="w-full rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+          className="cork-btn w-full"
         >
           {isLoading ? 'Загрузка...' : 'Загрузить ещё'}
         </button>

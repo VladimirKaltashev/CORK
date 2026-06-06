@@ -1,44 +1,30 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/entities/auth'
-import { useFriendsStore } from '@/entities/friends'
 import { useProfileStore } from '@/entities/profile'
 import { useOnboardingStore } from '@/features/onboarding'
 import { useCreateAchievementDialog } from '@/entities/achievements/createDialog'
-import { useThemeStore } from '@/entities/theme'
 import { showToast } from '@/shared/lib/api'
 
 function getInitials(name: string): string {
   return name.split(' ').map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase() || '?'
 }
 
-function navClass({ isActive }: { isActive: boolean }) {
-  return `text-sm font-medium transition-colors ${
-    isActive
-      ? 'text-indigo-600 dark:text-indigo-400'
-      : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-  }`
-}
-
 export function Header() {
-  const theme = useThemeStore((s) => s.theme)
   const [menuOpen, setMenuOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { token, user, logout } = useAuthStore()
   const navigate = useNavigate()
-  const { loadFriendships, pendingIncomingCount } = useFriendsStore()
   const { loadProfile, getProfile } = useProfileStore()
   const startOnboarding = useOnboardingStore((s) => s.start)
   const openCreateDialog = useCreateAchievementDialog((s) => s.open)
-  const pendingCount = token && user ? pendingIncomingCount() : 0
   const profile = user ? getProfile(user.id) : undefined
   const avatar = profile?.avatar ?? null
   const name = user?.name ?? ''
 
   useEffect(() => {
     if (token && user) {
-      loadFriendships(user.id)
       loadProfile(user.id)
     }
   }, [token, user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -62,370 +48,131 @@ export function Header() {
     setDropdownOpen(false)
   }
 
-  if (theme === 'acid') {
-    return (
-      <header className="header-acid">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <NavLink to="/feed" className="brand-name">
-            <span>CORK</span>
-          </NavLink>
-
-          {/* Desktop nav */}
-          <nav className="hidden items-center gap-4 sm:flex">
-            <NavLink to="/feed" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Лента</NavLink>
-            {token && (
-              <NavLink to="/friends" className={({ isActive }) => `nav-link relative ${isActive ? 'active' : ''}`}>
-                Друзья
-                {pendingCount > 0 && (
-                  <span className="absolute -top-1 -right-2 w-4 h-4 flex items-center justify-center text-[10px] font-bold" style={{ background: 'var(--ap-clown)', color: '#fff' }}>
-                    {pendingCount}
-                  </span>
-                )}
-              </NavLink>
-            )}
-            <NavLink to="/leaderboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Рейтинг</NavLink>
-            <NavLink to="/challenges" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Челленджи</NavLink>
-            {token && user?.role === 'admin' && (
-              <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Модерация</NavLink>
-            )}
-
-            {/* Search */}
-            <button
-              type="button"
-              onClick={() => navigate('/search')}
-              className="icon-btn"
-              aria-label="Поиск"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-
-            {/* Create */}
-            {token && (
-              <button
-                type="button"
-                onClick={openCreateDialog}
-                className="ap-notch-btn"
-                aria-label="Создать достижение"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
-            )}
-
-            {token ? (
-              <div ref={dropdownRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setDropdownOpen((v) => !v)}
-                  className="avatar"
-                  aria-label="Меню профиля"
-                >
-                  {avatar ? (
-                    <img src={avatar} alt={name} className="w-full h-full object-cover" />
-                  ) : (
-                    getInitials(name)
-                  )}
-                </button>
-
-                {dropdownOpen && (
-                  <div className="dropdown">
-                    <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--ap-border-light)' }}>
-                      <p className="text-xs font-medium truncate" style={{ color: 'var(--ap-text)' }}>{name}</p>
-                    </div>
-                    <NavLink to="/profile/me" onClick={() => setDropdownOpen(false)}>Мой профиль</NavLink>
-                    <NavLink to="/settings" onClick={() => setDropdownOpen(false)}>Настройки</NavLink>
-                    <button type="button" onClick={() => { setDropdownOpen(false); startOnboarding() }}>Подсказки</button>
-                    <div className="separator" />
-                    <button type="button" onClick={handleLogout} className="danger">Выйти</button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <NavLink to="/login" className="nav-link">Войти</NavLink>
-                <NavLink to="/register" className="ap-btn-primary" style={{ padding: '8px 14px', fontSize: '12px' }}>Регистрация</NavLink>
-              </div>
-            )}
-          </nav>
-
-          {/* Mobile burger */}
-          <button
-            type="button"
-            className="flex items-center justify-center p-2 text-[var(--ap-text-dim)] sm:hidden"
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            <span className="text-xl">{menuOpen ? '✕' : '☰'}</span>
-          </button>
-        </div>
-
-        {/* Mobile nav */}
-        {menuOpen && (
-          <nav className="ap-mobile-nav sm:hidden">
-            <NavLink to="/feed" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Лента</NavLink>
-            {token && (
-              <NavLink to="/friends" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>
-                Друзья
-                {pendingCount > 0 && <span className="ml-1 text-[var(--ap-clown)]">({pendingCount})</span>}
-              </NavLink>
-            )}
-            <NavLink to="/leaderboard" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Рейтинг</NavLink>
-            <NavLink to="/challenges" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Челленджи</NavLink>
-            {token && user?.role === 'admin' && (
-              <NavLink to="/admin" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Модерация</NavLink>
-            )}
-            {token && (
-              <>
-                <NavLink to="/profile/me" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Мой профиль</NavLink>
-                <NavLink to="/settings" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Настройки</NavLink>
-              </>
-            )}
-            <div className="separator" />
-            {token ? (
-              <button type="button" onClick={handleLogout} className="text-[var(--ap-clown)]">Выйти</button>
-            ) : (
-              <>
-                <NavLink to="/login" onClick={() => setMenuOpen(false)}>Войти</NavLink>
-                <NavLink to="/register" onClick={() => setMenuOpen(false)}>Регистрация</NavLink>
-              </>
-            )}
-          </nav>
-        )}
-      </header>
-    )
-  }
-
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <NavLink to="/feed" className="text-lg font-bold tracking-wider text-gray-900 dark:text-white">
-          CORK
+    <header className="cork-header">
+      <div className="cork-header__inner">
+        {/* Brand */}
+        <NavLink to="/feed" className="cork-header__brand">
+          <span>CORK</span>
         </NavLink>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-6 sm:flex">
-          <NavLink to="/feed" className={navClass} data-onboard="feed">Лента</NavLink>
-          {token && (
-            <NavLink
-              to="/friends"
-              data-onboard="friends"
-              className={({ isActive }) =>
-                `relative text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'text-indigo-600 dark:text-indigo-400'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-                }`
-              }
-            >
-              Друзья
-              {pendingCount > 0 && (
-                <span className="absolute -top-1.5 -right-3 inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold">
-                  {pendingCount}
-                </span>
-              )}
-            </NavLink>
-          )}
-          <NavLink to="/leaderboard" data-onboard="leaderboard" className={navClass}>Рейтинг</NavLink>
-          <NavLink to="/challenges" className={navClass}>Челленджи</NavLink>
-          {token && user?.role === 'admin' && (
-            <NavLink to="/admin" className={navClass}>Модерация</NavLink>
-          )}
+        {/* Desktop nav — center */}
+        <nav className="cork-header__nav">
+          <NavLink to="/feed" className={({ isActive }) => `cork-nav-link ${isActive ? 'active' : ''}`}>
+            Арена
+          </NavLink>
+          <NavLink to="/challenges" className={({ isActive }) => `cork-nav-link ${isActive ? 'active' : ''}`}>
+            Челленджи
+          </NavLink>
+          <NavLink to="/leaderboard" className={({ isActive }) => `cork-nav-link ${isActive ? 'active' : ''}`}>
+            Рейтинг
+          </NavLink>
+          <NavLink to="/profile/me" className={({ isActive }) => `cork-nav-link ${isActive ? 'active' : ''}`}>
+            Профиль
+          </NavLink>
+        </nav>
 
-          {/* Search icon - available for all users */}
+        {/* Desktop actions — right */}
+        <div className="cork-header__actions">
+          {/* Search */}
           <button
             type="button"
             onClick={() => navigate('/search')}
-            className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="cork-icon-btn"
             aria-label="Поиск"
           >
-            <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>
+
+          {/* Create + */}
+          {token && (
+            <button
+              type="button"
+              onClick={openCreateDialog}
+              className="cork-create-btn"
+              aria-label="Создать достижение"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+          )}
 
           {token ? (
             <div ref={dropdownRef} className="relative">
               <button
                 type="button"
                 onClick={() => setDropdownOpen((v) => !v)}
-                data-onboard="profile"
-                className="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden ring-2 ring-gray-200 hover:ring-indigo-400 transition-all focus:outline-none"
+                className="cork-avatar"
                 aria-label="Меню профиля"
               >
                 {avatar ? (
-                  <img src={avatar} alt={name} className="w-full h-full object-cover" />
+                  <img src={avatar} alt={name} className="w-full h-full object-cover" style={{ borderRadius: 'var(--cork-radius-pill)' }} />
                 ) : (
-                  <div className="w-full h-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold select-none">
-                    {getInitials(name)}
-                  </div>
+                  getInitials(name)
                 )}
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 rounded-md border border-gray-200 bg-white shadow-lg z-50 dark:border-gray-700 dark:bg-gray-800">
-                  <div className="px-4 py-2.5 border-b border-gray-100 dark:border-gray-700">
-                    <p className="text-xs font-medium text-gray-900 dark:text-white truncate">{name}</p>
+                <div className="dropdown">
+                  <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--cork-border-light)' }}>
+                    <p className="text-xs font-medium truncate" style={{ color: 'var(--cork-text)' }}>{name}</p>
                   </div>
-                  <NavLink
-                    to="/profile/me"
-                    onClick={() => setDropdownOpen(false)}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors dark:text-gray-300 dark:hover:bg-gray-700"
-                  >
-                    Мой профиль
-                  </NavLink>
-                  <NavLink
-                    to="/settings"
-                    onClick={() => setDropdownOpen(false)}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors dark:text-gray-300 dark:hover:bg-gray-700"
-                  >
-                    Настройки
-                  </NavLink>
-                  <button
-                    type="button"
-                    onClick={() => { setDropdownOpen(false); startOnboarding() }}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors dark:text-gray-300 dark:hover:bg-gray-700"
-                  >
-                    Подсказки
-                  </button>
-                  <div className="border-t border-gray-100 mt-1 dark:border-gray-700">
-                    <button
-                      type="button"
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors dark:hover:bg-red-900/20"
-                    >
-                      Выйти
-                    </button>
-                  </div>
+                  <NavLink to="/profile/me" onClick={() => setDropdownOpen(false)}>Мой профиль</NavLink>
+                  <NavLink to="/settings" onClick={() => setDropdownOpen(false)}>Настройки</NavLink>
+                  {token && user?.role === 'admin' && (
+                    <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>Модерация</NavLink>
+                  )}
+                  <button type="button" onClick={() => { setDropdownOpen(false); startOnboarding() }}>Подсказки</button>
+                  <div className="separator" />
+                  <button type="button" onClick={handleLogout} className="danger">Выйти</button>
                 </div>
               )}
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <NavLink
-                to="/login"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-              >
-                Войти
-              </NavLink>
-              <NavLink
-                to="/register"
-                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
-              >
-                Регистрация
-              </NavLink>
+              <NavLink to="/login" className="cork-nav-link">Войти</NavLink>
+              <NavLink to="/register" className="cork-btn-primary" style={{ padding: '8px 14px', fontSize: '12px' }}>Регистрация</NavLink>
             </div>
           )}
-        </nav>
+        </div>
 
-        {/* Mobile burger */}
-        <button
-          type="button"
-          className="flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 sm:hidden"
-          aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          <span className="text-xl">{menuOpen ? '✕' : '☰'}</span>
-        </button>
+        {/* Mobile actions — hamburger only */}
+        <div className="cork-header__mobile">
+          <button
+            type="button"
+            className="cork-icon-btn"
+            aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <span className="text-xl">{menuOpen ? '✕' : '☰'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Mobile nav */}
       {menuOpen && (
-        <nav className="flex flex-col border-t border-gray-200 bg-white px-4 py-3 sm:hidden dark:border-gray-800 dark:bg-gray-900">
-          <NavLink
-            to="/feed"
-            onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
-          >
-            Лента
-          </NavLink>
-          {token && (
-            <NavLink
-              to="/friends"
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-2 py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`
-              }
-            >
-              Друзья
-              {pendingCount > 0 && (
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold">
-                  {pendingCount}
-                </span>
-              )}
-            </NavLink>
-          )}
-          <NavLink
-            to="/leaderboard"
-            onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
-          >
-            Рейтинг
-          </NavLink>
-          <NavLink
-            to="/challenges"
-            onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
-          >
-            Челленджи
-          </NavLink>
+        <nav className="cork-mobile-nav">
+          <NavLink to="/feed" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Арена</NavLink>
+          <NavLink to="/challenges" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Челленджи</NavLink>
+          <NavLink to="/leaderboard" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Рейтинг</NavLink>
+          <NavLink to="/profile/me" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Профиль</NavLink>
           {token && user?.role === 'admin' && (
-            <NavLink
-              to="/admin"
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
-            >
-              Модерация
-            </NavLink>
+            <NavLink to="/admin" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Модерация</NavLink>
           )}
-          {token && (
-            <>
-              <NavLink
-                to="/profile/me"
-                onClick={() => setMenuOpen(false)}
-                className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
-              >
-                Мой профиль
-              </NavLink>
-              <NavLink
-                to="/settings"
-                onClick={() => setMenuOpen(false)}
-                className={({ isActive }) => `block py-2 text-sm font-medium ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}
-              >
-                Настройки
-              </NavLink>
-            </>
-          )}
-
+          <div className="separator" />
           {token ? (
-            <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-1 dark:border-gray-700">
-              {user && <span className="text-xs text-gray-500 truncate dark:text-gray-400">{name}</span>}
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="text-sm font-medium text-red-500 dark:text-red-400"
-              >
-                Выйти
-              </button>
-            </div>
+            <>
+              <NavLink to="/settings" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Настройки</NavLink>
+              <button type="button" onClick={handleLogout} className="text-[var(--cork-clown)]">Выйти</button>
+            </>
           ) : (
-            <div className="flex flex-col gap-2 pt-2">
-              <NavLink
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-gray-600 dark:text-gray-300"
-              >
-                Войти
-              </NavLink>
-              <NavLink
-                to="/register"
-                onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-indigo-600 dark:text-indigo-400"
-              >
-                Регистрация
-              </NavLink>
-            </div>
+            <>
+              <NavLink to="/login" onClick={() => setMenuOpen(false)}>Войти</NavLink>
+              <NavLink to="/register" onClick={() => setMenuOpen(false)}>Регистрация</NavLink>
+            </>
           )}
         </nav>
       )}

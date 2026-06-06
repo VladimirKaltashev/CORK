@@ -19,7 +19,7 @@ function ContactLink({ href, label, children }: { href: string; label?: string; 
       target="_blank"
       rel="noopener noreferrer"
       title={label}
-      className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+      className="cork-link inline-flex items-center gap-1 text-xs"
     >
       {children}
     </a>
@@ -30,17 +30,17 @@ function ScoreBlock({ crowns, clowns }: { crowns: number; clowns: number }) {
   if (crowns === 0 && clowns === 0) return null
   const ratio = clowns === 0 ? null : (crowns / clowns).toFixed(1)
   return (
-    <div className="flex items-center gap-4 rounded-md border border-gray-300 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+    <div className="cork-panel flex items-center gap-4">
       <div className="flex items-center gap-1.5">
         <CrownIcon className="w-7 h-7" />
-        <span className="text-xl font-bold text-amber-700 tabular-nums dark:text-amber-400">{crowns}</span>
+        <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--cork-king)' }}>{crowns}</span>
       </div>
       <div className="flex items-center gap-1.5">
         <ClownIcon className="w-7 h-7" />
-        <span className="text-xl font-bold text-red-600 tabular-nums dark:text-red-400">{clowns}</span>
+        <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--cork-clown)' }}>{clowns}</span>
       </div>
-      <div className="ml-auto text-sm text-gray-500 dark:text-gray-400">
-        {ratio !== null ? <>ratio <span className="font-semibold text-gray-700 tabular-nums dark:text-gray-200">{ratio}</span></> : <span className="text-gray-400 dark:text-gray-500">пока без клоунов</span>}
+      <div className="ml-auto text-sm" style={{ color: 'var(--cork-text-dim)' }}>
+        {ratio !== null ? <>ratio <span className="font-semibold tabular-nums" style={{ color: 'var(--cork-text)' }}>{ratio}</span></> : <span style={{ color: 'var(--cork-text-mute)' }}>пока без клоунов</span>}
       </div>
     </div>
   )
@@ -95,13 +95,13 @@ export function ProfilePage() {
 
   if (!profileId || profileStore.isLoading) {
     return (
-      <div className="p-4 text-center text-gray-500">Загрузка...</div>
+      <div className="p-4 text-center" style={{ color: 'var(--cork-text-mute)' }}>Загрузка...</div>
     )
   }
 
   if (!liveProfile) {
     return (
-      <div className="p-4 text-center text-gray-500">Профиль не найден</div>
+      <div className="p-4 text-center" style={{ color: 'var(--cork-text-mute)' }}>Профиль не найден</div>
     )
   }
 
@@ -120,7 +120,7 @@ export function ProfilePage() {
     <div className="mx-auto max-w-2xl py-4 px-3 flex flex-col gap-4">
 
       {/* Header card */}
-      <div className="border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+      <div className="cork-card">
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
             <AvatarUpload
@@ -134,7 +134,7 @@ export function ProfilePage() {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h1 className="text-2xl font-bold text-gray-900 leading-tight dark:text-white">{liveProfile.name}</h1>
+              <h1 className="text-2xl font-bold leading-tight" style={{ color: 'var(--cork-text)' }}>{liveProfile.name}</h1>
               <div className="flex gap-2 flex-shrink-0">
                 {isOwn ? (
                   <Button onClick={() => setShowEdit(true)}>Редактировать</Button>
@@ -151,7 +151,7 @@ export function ProfilePage() {
                     </Button>
                   )
                   if (rel.direction === 'outgoing' && rel.record.status === 'pending')
-                    return <span className="text-sm text-gray-400 self-center">Запрос отправлен</span>
+                    return <span className="text-sm self-center" style={{ color: 'var(--cork-text-mute)' }}>Запрос отправлен</span>
                   if (rel.direction === 'incoming' && rel.record.status === 'pending')
                     return (
                       <Button variant="primary" disabled={friendBusy} onClick={async () => {
@@ -176,8 +176,8 @@ export function ProfilePage() {
                 })()}
               </div>
             </div>
-            <p className="text-sm text-gray-500 mt-1">На сайте с {registeredFormatted}</p>
-            <p className="text-xs text-gray-400 mt-0.5">ID: {profileId}</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--cork-text-dim)' }}>На сайте с {registeredFormatted}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--cork-text-mute)' }}>ID: {profileId}</p>
 
             {hasContacts && (
               <div className="flex flex-wrap gap-3 mt-2">
@@ -219,13 +219,13 @@ export function ProfilePage() {
 
       {/* Bio block */}
       {liveProfile.bio ? (
-        <div className="border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 dark:text-gray-400">О себе</h2>
-          <p className="text-sm text-gray-800 whitespace-pre-wrap dark:text-gray-200">{liveProfile.bio}</p>
+        <div className="cork-card">
+          <h2 className="text-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--cork-text-mute)' }}>О себе</h2>
+          <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--cork-text)' }}>{liveProfile.bio}</p>
         </div>
       ) : isOwn ? (
-        <div className="border border-dashed border-gray-300 rounded-md py-4 px-4 flex items-center justify-between">
-          <span className="text-sm text-gray-400">Расскажите о себе</span>
+        <div className="border border-dashed rounded-md py-4 px-4 flex items-center justify-between" style={{ borderColor: 'var(--cork-border)' }}>
+          <span className="text-sm" style={{ color: 'var(--cork-text-mute)' }}>Расскажите о себе</span>
           <Button size="small" onClick={() => setShowEdit(true)}>Добавить описание</Button>
         </div>
       ) : null}
@@ -233,17 +233,17 @@ export function ProfilePage() {
       {/* Achievements */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold" style={{ color: 'var(--cork-text)' }}>
             Достижения
             {achievements.length > 0 && (
-              <span className="text-sm font-normal text-gray-400 ml-1">({achievements.length})</span>
+              <span className="text-sm font-normal ml-1" style={{ color: 'var(--cork-text-mute)' }}>({achievements.length})</span>
             )}
           </h2>
           {isOwn && (
             <button
               type="button"
               onClick={openCreateDialog}
-              className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
+              className="cork-btn-primary"
             >
               + Добавить
             </button>
@@ -251,10 +251,10 @@ export function ProfilePage() {
         </div>
 
         {achLoading ? (
-          <div className="py-5 text-center text-sm text-gray-500">Загрузка...</div>
+          <div className="py-5 text-center text-sm" style={{ color: 'var(--cork-text-mute)' }}>Загрузка...</div>
         ) : achievements.length === 0 ? (
-          <div className="border border-dashed border-gray-300 rounded-md py-6 text-center">
-            <span className="text-sm text-gray-500">
+          <div className="cork-empty">
+            <span className="text-sm">
               {isOwn ? 'Нет достижений. Добавьте первое!' : 'Достижений пока нет'}
             </span>
           </div>

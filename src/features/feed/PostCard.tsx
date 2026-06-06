@@ -46,32 +46,32 @@ export function PostCard({ id, author, data, createdAt }: Props) {
     }
   }
 
+  const likeStyle = isLiked ? { color: '#f43f5e' } : { color: 'var(--cork-text-mute)' }
+
   return (
-    <article className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <article className="cork-card" style={{ padding: '16px' }}>
       <div className="flex items-center gap-2 mb-2">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold" style={{ background: 'var(--cork-brand-2)', color: 'var(--cork-text)' }}>
           {author.name[0]}
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-900 dark:text-white">{author.name}</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">{date}</p>
+          <p className="text-sm font-medium" style={{ color: 'var(--cork-text)' }}>{author.name}</p>
+          <p className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>{date}</p>
         </div>
       </div>
 
-      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{data.content}</p>
+      <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--cork-text)' }}>{data.content}</p>
 
-      <div className="mt-3 flex items-center gap-4 border-t border-gray-100 pt-3 dark:border-gray-700">
+      <div className="mt-3 flex items-center gap-4 border-t pt-3" style={{ borderColor: 'var(--cork-border-light)' }}>
         <button
           type="button"
           onClick={handleLike}
           disabled={!user}
           className={cn(
             'flex items-center gap-1.5 text-sm transition-colors',
-            isLiked
-              ? 'text-rose-500 dark:text-rose-400'
-              : 'text-gray-400 hover:text-rose-500 dark:text-gray-500 dark:hover:text-rose-400',
             !user && 'cursor-default opacity-50',
           )}
+          style={likeStyle}
         >
           {isLiked ? '❤️' : '🤍'}
           <span>{data.likes.length}</span>
@@ -80,7 +80,8 @@ export function PostCard({ id, author, data, createdAt }: Props) {
         <button
           type="button"
           onClick={() => setShowComments((v) => !v)}
-          className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-indigo-500 transition-colors dark:text-gray-500 dark:hover:text-indigo-400"
+          className="flex items-center gap-1.5 text-sm transition-colors"
+          style={{ color: 'var(--cork-text-mute)' }}
         >
           💬 <span>{data.comments.length}</span>
         </button>
@@ -89,9 +90,9 @@ export function PostCard({ id, author, data, createdAt }: Props) {
       {showComments && (
         <div className="mt-3 space-y-2">
           {data.comments.map((c) => (
-            <div key={c.id} className="flex gap-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-700/50">
-              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 shrink-0">{c.author.name}:</span>
-              <span className="text-xs text-gray-600 dark:text-gray-400">{c.content}</span>
+            <div key={c.id} className="flex gap-2 rounded-lg p-2" style={{ background: 'var(--cork-surface-2)' }}>
+              <span className="text-xs font-semibold shrink-0" style={{ color: 'var(--cork-text-dim)' }}>{c.author.name}:</span>
+              <span className="text-xs" style={{ color: 'var(--cork-text-dim)' }}>{c.content}</span>
             </div>
           ))}
 
@@ -102,13 +103,14 @@ export function PostCard({ id, author, data, createdAt }: Props) {
                 onChange={(e) => setCommentText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleComment() }}
                 placeholder="Написать комментарий..."
-                className="flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs outline-none focus:border-indigo-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="flex-1 rounded-lg border px-3 py-1.5 text-xs outline-none focus:border-[var(--cork-brand)]"
+                style={{ background: 'var(--cork-surface-2)', color: 'var(--cork-text)', borderColor: 'var(--cork-border)' }}
               />
               <button
                 type="button"
                 onClick={handleComment}
                 disabled={isCommenting || !commentText.trim()}
-                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="cork-btn-primary text-xs px-3 py-1.5"
               >
                 Отправить
               </button>

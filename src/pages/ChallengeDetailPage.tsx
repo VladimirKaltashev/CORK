@@ -28,8 +28,8 @@ export function ChallengeDetailPage() {
   if (!currentChallenge) {
     return (
       <div className="max-w-4xl mx-auto p-4 text-center">
-        <div className="animate-pulse h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
-        <p className="text-gray-500 mt-4">Загрузка челленджа...</p>
+        <div className="cork-skeleton h-4 rounded w-1/2 mx-auto"></div>
+        <p className="mt-4" style={{ color: 'var(--cork-text-mute)' }}>Загрузка челленджа...</p>
       </div>
     )
   }
@@ -37,13 +37,19 @@ export function ChallengeDetailPage() {
   const isActive = currentChallenge.status === 'active'
   const isCompleted = currentChallenge.status === 'completed'
 
+  const statusStyle = isActive
+    ? { background: 'rgba(34,197,94,0.15)', color: 'var(--cork-king)' }
+    : isCompleted
+      ? { background: 'var(--cork-surface-3)', color: 'var(--cork-text-dim)' }
+      : { background: 'rgba(234,179,8,0.15)', color: '#d97706' }
+
   return (
-    <div className="max-w-4xl mx-auto p-4 dark:text-white">
+    <div className="max-w-4xl mx-auto p-4" style={{ color: 'var(--cork-text)' }}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold mb-2">{currentChallenge.title}</h1>
-        <p className="text-gray-600 dark:text-gray-300">{currentChallenge.description}</p>
+        <p style={{ color: 'var(--cork-text-dim)' }}>{currentChallenge.description}</p>
 
-        <div className="flex gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex gap-4 mt-3 text-sm" style={{ color: 'var(--cork-text-dim)' }}>
           {currentChallenge.category && (
             <span className="flex items-center gap-1">
               <CategoryIcon category={currentChallenge.category} className="w-4 h-4" />
@@ -55,9 +61,8 @@ export function ChallengeDetailPage() {
             {new Date(currentChallenge.endsAt).toLocaleDateString('ru')}
           </span>
           <span
-            className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-              isActive ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400' : isCompleted ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
-            }`}
+            className="px-2 py-0.5 rounded-full text-xs font-bold"
+            style={statusStyle}
           >
             {isActive ? 'Активный' : isCompleted ? <><CheckIcon className="inline w-3 h-3 mr-1" />Завершён</> : <><HourglassIcon className="inline w-3 h-3 mr-1" />Ожидает</>}
           </span>
@@ -67,7 +72,7 @@ export function ChallengeDetailPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           {isActive && (
-            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 dark:bg-gray-800 dark:border-gray-700">
+            <div className="cork-card mb-6">
               <SubmissionForm
                 proofConfig={currentChallenge.proofConfig}
                 onSubmit={async (data) => {
@@ -80,7 +85,7 @@ export function ChallengeDetailPage() {
           <div>
             <h3 className="font-bold text-lg mb-3">Сабмиты</h3>
             {submissions.length === 0 ? (
-              <p className="text-gray-500 text-center py-4 dark:text-gray-400">Пока нет доказательств</p>
+              <p className="text-center py-4" style={{ color: 'var(--cork-text-dim)' }}>Пока нет доказательств</p>
             ) : (
               <div className="space-y-3">
                 {submissions.map((sub) => (

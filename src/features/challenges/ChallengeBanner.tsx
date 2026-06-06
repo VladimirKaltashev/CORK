@@ -24,12 +24,19 @@ export function ChallengeBanner() {
   if (!activeChallenge) return null
 
   return (
-    <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-4 mb-6 shadow-lg dark:from-green-700 dark:to-emerald-800">
+    <div
+      className="p-4 mb-6 shadow-lg"
+      style={{
+        borderRadius: 'var(--cork-radius-card)',
+        background: 'linear-gradient(135deg, var(--cork-brand), var(--cork-brand-hover))',
+        color: 'var(--cork-bg)',
+      }}
+    >
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-bold text-lg"><CupIcon className="inline w-5 h-5 mr-1" />Идёт челлендж: {activeChallenge.title}</h2>
-          <p className="text-sm text-white/90 mt-1">{activeChallenge.description}</p>
-          <div className="flex gap-3 mt-2 text-sm text-white/80">
+          <p className="text-sm mt-1" style={{ opacity: 0.9 }}>{activeChallenge.description}</p>
+          <div className="flex gap-3 mt-2 text-sm" style={{ opacity: 0.8 }}>
             {activeChallenge.category && (
               <span className="flex items-center gap-1">
                 <CategoryIcon category={activeChallenge.category} className="w-4 h-4" />
@@ -44,7 +51,12 @@ export function ChallengeBanner() {
         </div>
         <a
           href={`/challenges/${activeChallenge.id}`}
-          className="bg-white text-green-600 px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition"
+          className="px-4 py-2 font-bold text-sm transition"
+          style={{
+            borderRadius: 'var(--cork-radius-btn)',
+            background: 'var(--cork-surface)',
+            color: 'var(--cork-brand)',
+          }}
         >
           Участвовать
         </a>

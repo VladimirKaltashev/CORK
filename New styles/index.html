@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="royal">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cork — Clown or King · 5 дизайн-систем</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Unbounded:wght@600;700;800;900&family=Rubik:wght@400;500;600;700;800&family=Russo+One&family=Fredoka:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================================
+   CORK · Clown or King — 5 РАЗНЫХ ДИЗАЙН-СИСТЕМ (не только цвет!)
+   Каждая тема меняет: шрифты, форму элементов (радиусы/срезы), границы,
+   поверхности (плоско / стекло / клей / терминал), тени и декор.
+   Переключение — один атрибут [data-theme] на <html>.
+   ============================================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+img { display: block; max-width: 100%; }
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+:root {
+  --maxw: 1180px;
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --t: background-color .5s var(--ease), border-color .5s var(--ease),
+       color .35s var(--ease), box-shadow .5s var(--ease),
+       border-radius .5s var(--ease);
+}
+
+/* ============================================================================
+   1 · ROYAL GOLD — «Editorial Luxe»  (журнал мод: serif, острые углы, линейки)
+   ============================================================================ */
+[data-theme="royal"] {
+  --bg:#0a0907; --glow-a:rgba(232,185,78,.14); --glow-b:rgba(120,72,16,.16);
+  --surface:#121110; --surface-2:#1a1815; --surface-3:#221f1a;
+  --border:rgba(232,205,150,.14); --frame:rgba(232,185,78,.26); --bw:1px;
+  --text:#f4efe4; --text-dim:#b6ad99; --text-mute:#7c7361;
+  --brand:#e8b94e; --brand-2:#c9962f; --brand-ink:#1a1306;
+  --king:#e8b94e; --clown:#df6a52;
+  --grad:linear-gradient(135deg,#f3d488,#d29a32); --grad-king:linear-gradient(135deg,#f3d488,#cf9d33); --grad-clown:linear-gradient(135deg,#e98a73,#d05a44);
+  --glow:rgba(232,185,78,.30); --shadow:none; --ink:#1a1815;
+  --font-d:'Playfair Display',Georgia,serif; --font-b:'Manrope',system-ui,sans-serif;
+  --r-card:3px; --r-btn:2px; --r-media:2px; --r-badge:2px; --r-pill:2px; --hd-tt:none;
+}
+/* 2 · NEON CARNIVAL — «Neo-Brutalism» (стикеры: толстые рамки, жёсткие тени, CAPS) */
+[data-theme="carnival"] {
+  --bg:#150a23; --glow-a:rgba(255,61,154,.20); --glow-b:rgba(0,229,255,.16);
+  --surface:#22123c; --surface-2:#2b1750; --surface-3:#341b60;
+  --border:rgba(244,235,254,.18); --frame:#f4ebfe; --bw:2.5px;
+  --text:#f7eeff; --text-dim:#c3aede; --text-mute:#8a76a4;
+  --brand:#ff3d9a; --brand-2:#00e5ff; --brand-ink:#16041f;
+  --king:#ffd23f; --clown:#ff3d9a;
+  --grad:linear-gradient(135deg,#ff3d9a,#b14dff,#00e5ff); --grad-king:linear-gradient(135deg,#ffe26b,#ffb302); --grad-clown:linear-gradient(135deg,#ff7ac0,#ff3d9a);
+  --glow:rgba(255,61,154,.45); --shadow:6px 6px 0 0 var(--brand-2); --ink:#0a0414;
+  --font-d:'Unbounded',system-ui,sans-serif; --font-b:'Manrope',system-ui,sans-serif;
+  --r-card:12px; --r-btn:10px; --r-media:12px; --r-badge:8px; --r-pill:999px; --hd-tt:uppercase;
+}
+/* 3 · MIDNIGHT VIOLET — «Aurora Glass» (матовое стекло, blur, мягкие радиусы) */
+[data-theme="violet"] {
+  --bg:#0b0a14; --glow-a:rgba(139,92,246,.30); --glow-b:rgba(0,180,255,.20);
+  --surface:rgba(255,255,255,.045); --surface-2:rgba(255,255,255,.06); --surface-3:rgba(255,255,255,.09);
+  --border:rgba(255,255,255,.10); --frame:rgba(255,255,255,.16); --bw:1px;
+  --text:#efeaff; --text-dim:#b2aacb; --text-mute:#7d7699;
+  --brand:#a78bfa; --brand-2:#6d5cff; --brand-ink:#140a2e;
+  --king:#c8b3ff; --clown:#ff7aa8;
+  --grad:linear-gradient(135deg,#a78bfa,#7c5cff,#c026d3); --grad-king:linear-gradient(135deg,#d6c6ff,#a78bfa); --grad-clown:linear-gradient(135deg,#ffa6c2,#ff7aa8);
+  --glow:rgba(139,92,246,.45); --shadow:0 30px 60px -28px rgba(90,50,180,.7); --ink:#140a2e;
+  --font-d:'Rubik',system-ui,sans-serif; --font-b:'Rubik',system-ui,sans-serif;
+  --r-card:26px; --r-btn:999px; --r-media:20px; --r-badge:999px; --r-pill:999px; --hd-tt:none;
+}
+/* 4 · ACID POP — «Cyber Terminal» (моноширинный, сетка, скобки, сегменты) */
+[data-theme="acid"] {
+  --bg:#070908; --glow-a:rgba(198,255,61,.12); --glow-b:rgba(255,45,120,.12);
+  --surface:#0c0f0d; --surface-2:#101410; --surface-3:#151b14;
+  --border:rgba(198,255,61,.22); --frame:rgba(198,255,61,.40); --bw:1px;
+  --text:#e9f1e3; --text-dim:#9cae90; --text-mute:#5f6e54;
+  --brand:#c6ff3d; --brand-2:#ff2d78; --brand-ink:#0c1604;
+  --king:#c6ff3d; --clown:#ff2d78;
+  --grad:linear-gradient(135deg,#d6ff4d,#8cff5c); --grad-king:linear-gradient(135deg,#d6ff4d,#aef03a); --grad-clown:linear-gradient(135deg,#ff6aa3,#ff2d78);
+  --glow:rgba(198,255,61,.40); --shadow:none; --ink:#0c1604;
+  --font-d:'Russo One',system-ui,sans-serif; --font-b:'JetBrains Mono',ui-monospace,monospace;
+  --r-card:0px; --r-btn:0px; --r-media:0px; --r-badge:0px; --r-pill:0px; --hd-tt:uppercase;
+}
+/* 5 · HOLO SUNSET — «Soft Bubble» (клей: огромные радиусы, без границ, мягкие тени) */
+[data-theme="holo"] {
+  --bg:#120c1c; --glow-a:rgba(255,126,157,.18); --glow-b:rgba(155,123,255,.18);
+  --surface:#1d1531; --surface-2:#251a3a; --surface-3:#2f2247;
+  --border:rgba(255,255,255,.05); --frame:transparent; --bw:0px;
+  --text:#f6eeff; --text-dim:#c4b8d6; --text-mute:#8c7ea4;
+  --brand:#ff7e9d; --brand-2:#9b7bff; --brand-ink:#2c0d1c;
+  --king:#ffc46c; --clown:#5fe0d4;
+  --grad:linear-gradient(120deg,#ff8f6b,#ff5e9c,#9b7bff); --grad-king:linear-gradient(135deg,#ffd79b,#ffab54); --grad-clown:linear-gradient(135deg,#9af0e8,#5fe0d4);
+  --glow:rgba(255,94,138,.35); --shadow:0 22px 46px -20px rgba(120,40,120,.55); --ink:#2c0d1c;
+  --font-d:'Fredoka',system-ui,sans-serif; --font-b:'Nunito',system-ui,sans-serif;
+  --r-card:34px; --r-btn:999px; --r-media:26px; --r-badge:999px; --r-pill:999px; --hd-tt:none;
+}
+
+/* ---------- База страницы ---------- */
+body { font-family:var(--font-b); background:var(--bg); color:var(--text); line-height:1.55; min-height:100vh; position:relative; overflow-x:hidden; transition:var(--t); }
+body::before, body::after { content:""; position:fixed; z-index:0; pointer-events:none; width:60vw; height:60vw; border-radius:50%; filter:blur(90px); transition:background .6s var(--ease); }
+body::before { top:-18vw; right:-12vw; background:radial-gradient(circle,var(--glow-a),transparent 65%); }
+body::after  { bottom:-22vw; left:-14vw; background:radial-gradient(circle,var(--glow-b),transparent 65%); }
+.wrap { position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 22px; }
+
+/* ---------- Топбар ---------- */
+.topbar { position:sticky; top:0; z-index:50; backdrop-filter:blur(18px) saturate(140%); background:color-mix(in srgb,var(--bg) 74%,transparent); border-bottom:1px solid var(--border); transition:var(--t); }
+.topbar-inner { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 22px; max-width:var(--maxw); margin:0 auto; }
+.brand { display:flex; align-items:center; gap:11px; }
+.brand-mark { width:38px; height:38px; border-radius:var(--r-badge); display:grid; place-items:center; font-size:19px; background:var(--grad); color:var(--brand-ink); box-shadow:0 8px 22px -6px var(--glow); transition:var(--t); }
+.brand-name { font-family:var(--font-d); font-weight:800; font-size:21px; letter-spacing:-.5px; text-transform:var(--hd-tt); }
+.brand-name span { background:var(--grad); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.brand-sub { font-size:11px; color:var(--text-mute); letter-spacing:3px; text-transform:uppercase; margin-top:-3px; }
+.topbar-theme { font-size:12px; color:var(--text-dim); display:flex; align-items:center; gap:9px; text-align:right; }
+.topbar-theme b { color:var(--text); }
+.topbar-theme small { display:block; color:var(--text-mute); font-size:10.5px; }
+.topbar-dot { width:9px; height:9px; border-radius:50%; background:var(--grad); box-shadow:0 0 12px var(--glow); }
+
+/* ---------- Hero ---------- */
+.hero { padding:60px 0 26px; text-align:center; }
+.eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); border:1px solid var(--frame); padding:8px 16px; border-radius:var(--r-pill); background:var(--surface); transition:var(--t); }
+.hero h1 { font-family:var(--font-d); font-weight:800; line-height:1.02; font-size:clamp(36px,7vw,76px); letter-spacing:-1.5px; margin:22px 0 8px; text-transform:var(--hd-tt); }
+.hero h1 b { background:var(--grad); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; font-weight:800; }
+.hero p { max-width:620px; margin:0 auto; color:var(--text-dim); font-size:clamp(15px,2vw,18px); }
+
+/* ---------- Переключатель тем ---------- */
+.themebar { margin:34px 0 10px; }
+.themebar-label { text-align:center; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--text-mute); margin-bottom:16px; }
+.theme-rail { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; }
+.theme-chip { display:flex; align-items:center; gap:12px; padding:11px 16px 11px 12px; border-radius:var(--r-pill); border:1px solid var(--frame); background:var(--surface); transition:transform .2s var(--ease),border-color .3s,background .3s,box-shadow .3s; position:relative; }
+.theme-chip:hover { transform:translateY(-2px); }
+.theme-chip.is-active { box-shadow:0 0 0 1px var(--brand),0 14px 30px -16px var(--glow); }
+.theme-chip.is-active::after { content:"✓"; position:absolute; top:-7px; right:-7px; width:22px; height:22px; display:grid; place-items:center; border-radius:50%; font-size:12px; font-weight:800; background:var(--grad); color:var(--brand-ink); box-shadow:0 4px 12px -2px var(--glow); }
+.swatch { width:36px; height:36px; border-radius:9px; flex-shrink:0; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
+.theme-chip .meta { text-align:left; line-height:1.2; }
+.theme-chip .meta b { font-size:14px; font-weight:700; display:block; }
+.theme-chip .meta small { font-size:11px; color:var(--text-mute); }
+.sw-royal    { background:linear-gradient(135deg,#e8b94e 50%,#0a0907 50%); }
+.sw-carnival { background:linear-gradient(135deg,#ff3d9a 50%,#00e5ff 50%); }
+.sw-violet   { background:linear-gradient(135deg,#a78bfa 50%,#0b0a14 50%); }
+.sw-acid     { background:linear-gradient(135deg,#c6ff3d 50%,#ff2d78 50%); }
+.sw-holo     { background:linear-gradient(120deg,#ff8f6b,#ff5e9c,#9b7bff); }
+
+/* ---------- Панель «Дизайн-ДНК» (обновляется под активную тему) ---------- */
+.dna { margin:22px auto 0; max-width:980px; display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
+.dna-cell { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-badge); padding:12px 12px; transition:var(--t); }
+.dna-cell .k { font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--text-mute); margin-bottom:5px; }
+.dna-cell .v { font-size:12.5px; font-weight:700; line-height:1.3; }
+@media (max-width:760px){ .dna { grid-template-columns:repeat(2,1fr); } }
+
+/* ---------- Секции ---------- */
+.section { padding:44px 0; }
+.section-head { display:flex; align-items:baseline; justify-content:space-between; gap:14px; margin-bottom:22px; flex-wrap:wrap; }
+.section-head h2 { font-family:var(--font-d); font-weight:700; font-size:clamp(22px,3.4vw,30px); letter-spacing:-.4px; text-transform:var(--hd-tt); }
+.section-head p { color:var(--text-mute); font-size:14px; }
+
+/* ============================================================================
+   ЖИВОЙ ИНТЕРФЕЙС
+   ============================================================================ */
+.app { border:var(--bw) solid var(--frame); border-radius:var(--r-card); overflow:hidden; background:var(--surface); box-shadow:var(--shadow); transition:var(--t); position:relative; }
+.app-nav { display:flex; align-items:center; gap:18px; padding:14px 20px; border-bottom:1px solid var(--border); background:color-mix(in srgb,var(--surface) 60%,var(--bg)); position:relative; z-index:2; }
+.app-nav .brand-mark { width:32px; height:32px; font-size:16px; }
+.app-links { display:flex; gap:4px; margin-left:6px; }
+.app-links a { font-size:13.5px; font-weight:600; color:var(--text-dim); padding:8px 14px; border-radius:var(--r-pill); transition:.2s; }
+.app-links a.active { color:var(--text); background:var(--surface-2); }
+.app-links a:hover { color:var(--text); }
+.app-search { margin-left:auto; display:flex; align-items:center; gap:9px; background:var(--surface-3); border:1px solid var(--border); border-radius:var(--r-pill); padding:8px 15px; color:var(--text-mute); font-size:13px; min-width:190px; }
+.icon-btn { width:38px; height:38px; border-radius:var(--r-badge); display:grid; place-items:center; background:var(--surface-2); border:1px solid var(--border); font-size:16px; transition:.2s; position:relative; }
+.icon-btn:hover { transform:translateY(-1px); }
+.avatar { width:38px; height:38px; border-radius:var(--r-badge); background:var(--grad); display:grid; place-items:center; font-weight:800; color:var(--brand-ink); font-size:14px; }
+.badge-dot { position:absolute; top:6px; right:6px; width:8px; height:8px; border-radius:50%; background:var(--clown); box-shadow:0 0 0 2px var(--surface); }
+
+.app-body { display:grid; grid-template-columns:1fr 320px; gap:20px; padding:22px; position:relative; z-index:2; }
+@media (max-width:860px){ .app-body { grid-template-columns:1fr; } .app-aside { order:-1; } }
+
+.feed-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.feed-head h3 { font-family:var(--font-d); font-weight:600; font-size:19px; text-transform:var(--hd-tt); }
+.feed-tabs { display:flex; gap:6px; }
+.feed-tabs button { font-size:12.5px; font-weight:600; color:var(--text-dim); padding:7px 13px; border-radius:var(--r-pill); border:1px solid transparent; transition:.2s; }
+.feed-tabs button.active { color:var(--brand); border-color:var(--frame); background:var(--surface-2); }
+
+/* Карточка достижения */
+.card { background:var(--surface-2); border:var(--bw) solid var(--frame); border-radius:var(--r-card); padding:20px; margin-bottom:18px; box-shadow:var(--shadow); transition:var(--t),transform .25s var(--ease); position:relative; }
+.card:hover { transform:translateY(-3px); }
+.card-top { display:flex; align-items:center; gap:12px; margin-bottom:15px; }
+.card-top .av { width:44px; height:44px; border-radius:var(--r-badge); background:var(--surface-3); display:grid; place-items:center; font-weight:800; font-size:16px; color:var(--text); border:1px solid var(--border); }
+.card-top .who { line-height:1.25; }
+.card-top .who b { font-size:14.5px; font-weight:700; }
+.card-top .who small { color:var(--text-mute); font-size:12.5px; }
+.lvl { margin-left:auto; font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; padding:6px 12px; border-radius:var(--r-pill); background:var(--surface-3); border:1px solid var(--frame); color:var(--brand); }
+.card h4 { font-family:var(--font-d); font-weight:600; font-size:20px; letter-spacing:-.2px; margin-bottom:7px; text-transform:var(--hd-tt); }
+.card .desc { color:var(--text-dim); font-size:14px; margin-bottom:16px; }
+.media { height:150px; border-radius:var(--r-media); margin-bottom:16px; background:var(--grad); position:relative; overflow:hidden; }
+.media::after { content:""; position:absolute; inset:0; background:radial-gradient(120% 100% at 100% 0,rgba(255,255,255,.18),transparent 50%),linear-gradient(0deg,rgba(0,0,0,.35),transparent); }
+.media .tag { position:absolute; left:14px; bottom:12px; z-index:1; font-size:12px; font-weight:700; color:#fff; text-shadow:0 1px 6px rgba(0,0,0,.5); }
+.sticker { display:none; position:absolute; top:12px; right:12px; z-index:3; }
+
+/* Виджет голосования «Шут или Король» */
+.verdict { margin-top:4px; }
+.verdict-bar { --pct:72%; height:46px; border-radius:var(--r-btn); overflow:hidden; display:flex; border:var(--bw) solid var(--frame); position:relative; background:var(--surface-3); transition:var(--t); }
+.verdict-bar .king-fill { width:var(--pct); background:var(--grad-king); transition:width .6s var(--ease); }
+.verdict-bar .clown-fill { flex:1; background:var(--grad-clown); transition:width .6s var(--ease); }
+.verdict-bar .lbl { position:absolute; top:0; bottom:0; display:flex; align-items:center; gap:6px; font-weight:800; font-size:13px; color:rgba(0,0,0,.66); padding:0 14px; }
+.verdict-bar .lbl.king { left:0; }
+.verdict-bar .lbl.clown { right:0; }
+.vote-row { display:flex; gap:10px; margin-top:12px; }
+.vote-btn { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:13px; border-radius:var(--r-btn); font-weight:700; font-size:14px; border:var(--bw) solid var(--frame); background:var(--surface-3); transition:.18s var(--ease); }
+.vote-btn:hover { transform:translateY(-2px); }
+.vote-btn:active { transform:translateY(0) scale(.98); }
+.vote-btn .emo { font-size:18px; }
+.card-foot { display:flex; align-items:center; gap:18px; margin-top:15px; color:var(--text-mute); font-size:13px; }
+.card-foot span { display:inline-flex; align-items:center; gap:6px; }
+.card-foot .spacer { margin-left:auto; }
+
+/* Сайдбар */
+.app-aside { display:flex; flex-direction:column; gap:18px; }
+.panel { background:var(--surface-2); border:var(--bw) solid var(--frame); border-radius:var(--r-card); padding:18px; box-shadow:var(--shadow); transition:var(--t); position:relative; }
+.panel h5 { font-family:var(--font-d); font-weight:600; font-size:14px; letter-spacing:.2px; margin-bottom:14px; display:flex; align-items:center; gap:8px; text-transform:var(--hd-tt); }
+.me { text-align:center; }
+.me .big-av { width:66px; height:66px; border-radius:var(--r-badge); margin:2px auto 12px; background:var(--grad); display:grid; place-items:center; font-weight:800; font-size:24px; color:var(--brand-ink); box-shadow:0 12px 30px -12px var(--glow); }
+.me b { font-size:16px; }
+.me .handle { color:var(--text-mute); font-size:13px; margin-bottom:14px; }
+.stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.stat { background:var(--surface-3); border:1px solid var(--border); border-radius:var(--r-badge); padding:11px 6px; }
+.stat b { display:block; font-family:var(--font-d); font-size:17px; background:var(--grad); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.stat small { font-size:10.5px; color:var(--text-mute); letter-spacing:.3px; }
+.lb-item { display:flex; align-items:center; gap:11px; padding:9px 0; border-bottom:1px solid var(--border); }
+.lb-item:last-child { border-bottom:none; }
+.lb-rank { width:24px; font-family:var(--font-d); font-weight:700; font-size:14px; color:var(--text-mute); text-align:center; }
+.lb-rank.top { color:var(--king); }
+.lb-av { width:34px; height:34px; border-radius:var(--r-badge); background:var(--surface-3); border:1px solid var(--border); display:grid; place-items:center; font-weight:800; font-size:13px; }
+.lb-name { font-size:13.5px; font-weight:600; flex:1; }
+.lb-score { font-size:12.5px; font-weight:700; color:var(--brand); }
+.tags { display:flex; flex-wrap:wrap; gap:8px; }
+.tag-pill { font-size:12.5px; font-weight:600; padding:7px 13px; border-radius:var(--r-pill); background:var(--surface-3); border:1px solid var(--border); color:var(--text-dim); transition:.2s; }
+.tag-pill:hover { color:var(--text); transform:translateY(-1px); }
+
+/* ============================================================================
+   БИБЛИОТЕКА КОМПОНЕНТОВ
+   ============================================================================ */
+.kit { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; }
+.kit-card { background:var(--surface); border:var(--bw) solid var(--frame); border-radius:var(--r-card); padding:20px; box-shadow:var(--shadow); transition:var(--t); position:relative; }
+.kit-card h6 { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-mute); margin-bottom:15px; }
+.row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:12px; }
+.row:last-child { margin-bottom:0; }
+.btn { padding:11px 20px; border-radius:var(--r-btn); font-weight:700; font-size:13.5px; transition:.18s var(--ease); border:var(--bw) solid var(--frame); }
+.btn:hover { transform:translateY(-2px); }
+.btn-primary { background:var(--grad); color:var(--brand-ink); border-color:transparent; box-shadow:0 12px 26px -12px var(--glow); }
+.btn-soft { background:var(--surface-2); color:var(--text); }
+.btn-ghost { color:var(--text-dim); background:transparent; }
+.btn-ghost:hover { color:var(--text); }
+.chip { font-size:12.5px; font-weight:700; padding:7px 14px; border-radius:var(--r-pill); }
+.chip-king { background:var(--grad-king); color:#241a05; }
+.chip-clown { background:var(--grad-clown); color:#2a0414; }
+.chip-out { border:1px solid var(--frame); color:var(--brand); background:var(--surface-2); }
+.lvlbadge { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:700; padding:7px 14px; border-radius:var(--r-pill); background:var(--surface-2); border:1px solid var(--border); }
+.lvlbadge .dot { width:8px; height:8px; border-radius:50%; background:var(--grad); }
+.field { display:flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-btn); padding:12px 15px; color:var(--text-mute); font-size:13.5px; }
+.toggle { width:50px; height:28px; border-radius:999px; background:var(--surface-3); border:1px solid var(--border); position:relative; transition:.25s; }
+.toggle.on { background:var(--grad); border-color:transparent; }
+.toggle .knob { position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:.25s var(--ease); }
+.toggle.on .knob { left:25px; }
+.progress { height:9px; border-radius:999px; background:var(--surface-3); overflow:hidden; flex:1; min-width:120px; }
+.progress i { display:block; height:100%; width:68%; background:var(--grad); border-radius:999px; }
+.type-row { padding:10px 0; border-bottom:1px solid var(--border); }
+.type-row:last-child { border:none; }
+.type-row .t-display { font-family:var(--font-d); font-weight:800; font-size:26px; letter-spacing:-.4px; text-transform:var(--hd-tt); }
+.type-row .t-h { font-family:var(--font-d); font-weight:600; font-size:18px; }
+.type-row .t-body { font-size:14px; color:var(--text-dim); }
+.type-row .t-cap { font-size:11.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-mute); }
+
+.foot { padding:48px 0 70px; text-align:center; color:var(--text-mute); font-size:13px; border-top:1px solid var(--border); margin-top:30px; }
+.foot b { color:var(--text-dim); }
+
+@media (max-width:620px){ .app-search,.app-links { display:none; } .hero { padding:40px 0 18px; } }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ПЕР-ТЕМНЫЕ ПЕРЕОПРЕДЕЛЕНИЯ — здесь живёт ХАРАКТЕР каждой дизайн-системы
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ───── 1 · ROYAL GOLD — Editorial Luxe ────────────────────────────────────── */
+[data-theme="royal"] .brand-sub { letter-spacing:4px; }
+[data-theme="royal"] .hero h1 { font-style:italic; }              /* журнальный курсивный масштаб */
+[data-theme="royal"] .eyebrow,
+[data-theme="royal"] .feed-tabs button,
+[data-theme="royal"] .vote-btn,
+[data-theme="royal"] .btn { text-transform:uppercase; letter-spacing:.16em; font-size:11.5px; }
+[data-theme="royal"] .lvl { background:transparent; border:none; border-left:2px solid var(--brand); border-radius:0; padding-left:10px; }
+[data-theme="royal"] .card { border-left:none; border-right:none; border-top:1px solid var(--frame); border-bottom:1px solid var(--frame); border-radius:0; padding:26px 4px; background:transparent; }
+[data-theme="royal"] .card:hover { transform:none; background:color-mix(in srgb,var(--surface) 50%,transparent); }
+[data-theme="royal"] .card h4 { font-size:26px; }
+/* тонкий благородный вердикт-бар + крупные serif-числа над ним */
+[data-theme="royal"] .verdict { padding-top:36px; }
+[data-theme="royal"] .verdict-bar { height:6px; border:none; border-radius:0; background:var(--surface-3); }
+[data-theme="royal"] .verdict-bar .lbl { top:-34px; bottom:auto; padding:0; color:var(--text); font-family:var(--font-d); font-size:26px; font-weight:700; }
+[data-theme="royal"] .verdict-bar .lbl.king { color:var(--king); }
+[data-theme="royal"] .verdict-bar .lbl.clown { color:var(--clown); }
+[data-theme="royal"] .vote-btn { background:transparent; border:1px solid var(--frame); border-radius:0; }
+[data-theme="royal"] .vote-btn.king:hover  { background:var(--king); color:var(--brand-ink); }
+[data-theme="royal"] .vote-btn.clown:hover { background:var(--clown); color:#fff; }
+[data-theme="royal"] .panel { background:transparent; border:1px solid var(--frame); border-radius:0; }
+[data-theme="royal"] .stat,[data-theme="royal"] .lb-av,[data-theme="royal"] .tag-pill { border-radius:0; }
+
+/* ───── 2 · NEON CARNIVAL — Neo-Brutalism / стикеры ────────────────────────── */
+[data-theme="carnival"] .card:hover,
+[data-theme="carnival"] .kit-card:hover { transform:translate(-2px,-2px); box-shadow:9px 9px 0 0 var(--brand-2); }
+[data-theme="carnival"] .panel { box-shadow:5px 5px 0 0 var(--brand); }
+[data-theme="carnival"] .panel:nth-child(2) { box-shadow:5px 5px 0 0 var(--brand-2); }
+[data-theme="carnival"] .lvl { background:var(--king); color:#1a1304; border:2.5px solid var(--frame); box-shadow:3px 3px 0 var(--ink); transform:rotate(3deg); }
+[data-theme="carnival"] .vote-btn { border-width:2.5px; box-shadow:4px 4px 0 var(--ink); font-weight:800; }
+[data-theme="carnival"] .vote-btn:hover { transform:translate(-1px,-1px); box-shadow:6px 6px 0 var(--ink); }
+[data-theme="carnival"] .vote-btn:active { transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink); }
+[data-theme="carnival"] .vote-btn.king { background:var(--king); color:#1a1304; }
+[data-theme="carnival"] .vote-btn.clown { background:var(--clown); color:#fff; }
+[data-theme="carnival"] .verdict-bar { border-width:2.5px; box-shadow:4px 4px 0 var(--ink); }
+[data-theme="carnival"] .verdict-bar .lbl { font-size:15px; font-weight:800; }
+[data-theme="carnival"] .btn-primary { box-shadow:4px 4px 0 var(--ink); }
+[data-theme="carnival"] .btn:hover { transform:translate(-1px,-1px); }
+[data-theme="carnival"] .sticker { display:block; background:var(--brand-2); color:#04222a; font-family:var(--font-d); font-weight:800; font-size:12px; padding:8px 12px; border:2.5px solid var(--ink); border-radius:8px; transform:rotate(8deg); box-shadow:3px 3px 0 var(--ink); }
+[data-theme="carnival"] .feed-tabs button.active { box-shadow:3px 3px 0 var(--ink); }
+
+/* ───── 3 · MIDNIGHT VIOLET — Aurora Glass ─────────────────────────────────── */
+[data-theme="violet"] .app { background:#0d0b1a; }
+[data-theme="violet"] .app::before,[data-theme="violet"] .app::after { content:""; position:absolute; z-index:0; width:460px; height:460px; border-radius:50%; filter:blur(80px); opacity:.55; pointer-events:none; }
+[data-theme="violet"] .app::before { top:-120px; right:-60px; background:radial-gradient(circle,#7c5cff,transparent 70%); }
+[data-theme="violet"] .app::after  { bottom:-160px; left:-40px; background:radial-gradient(circle,#c026d3,transparent 70%); }
+[data-theme="violet"] .card,[data-theme="violet"] .panel,[data-theme="violet"] .kit-card,[data-theme="violet"] .app-nav { backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); }
+/* стеклянный блик сверху */
+[data-theme="violet"] .card::before,[data-theme="violet"] .panel::before { content:""; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(160deg,rgba(255,255,255,.14),transparent 42%); pointer-events:none; }
+[data-theme="violet"] .verdict-bar { box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),0 8px 20px -8px var(--glow); }
+[data-theme="violet"] .vote-btn:hover { box-shadow:0 10px 26px -10px var(--glow); border-color:var(--brand); }
+[data-theme="violet"] .vote-btn.king:hover  { background:color-mix(in srgb,var(--king) 22%,transparent); }
+[data-theme="violet"] .vote-btn.clown:hover { background:color-mix(in srgb,var(--clown) 22%,transparent); }
+
+/* ───── 4 · ACID POP — Cyber Terminal / HUD ────────────────────────────────── */
+[data-theme="acid"] .app { background:var(--bg); background-image:linear-gradient(rgba(198,255,61,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(198,255,61,.045) 1px,transparent 1px); background-size:26px 26px; }
+[data-theme="acid"] .app::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px); mix-blend-mode:overlay; }
+[data-theme="acid"] .card,[data-theme="acid"] .panel,[data-theme="acid"] .kit-card { background:color-mix(in srgb,var(--surface-2) 86%,transparent); }
+/* угловые HUD-скобки */
+[data-theme="acid"] .card::before,[data-theme="acid"] .panel::before,[data-theme="acid"] .kit-card::before { content:""; position:absolute; top:-1px; left:-1px; width:14px; height:14px; border-top:2px solid var(--brand); border-left:2px solid var(--brand); }
+[data-theme="acid"] .card::after,[data-theme="acid"] .panel::after,[data-theme="acid"] .kit-card::after { content:""; position:absolute; bottom:-1px; right:-1px; width:14px; height:14px; border-bottom:2px solid var(--brand); border-right:2px solid var(--brand); }
+/* терминальные префиксы */
+[data-theme="acid"] .feed-head h3::before { content:"// "; color:var(--brand); }
+[data-theme="acid"] .card h4::before { content:"> "; color:var(--brand); }
+[data-theme="acid"] .panel h5::before { content:"["; color:var(--brand); margin-right:2px; }
+[data-theme="acid"] .panel h5::after { content:"]"; color:var(--brand); margin-left:auto; }
+[data-theme="acid"] .hero h1::after { content:"_"; color:var(--brand); animation:blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { opacity:0; } }
+/* сегментный вердикт-бар (как эквалайзер) */
+[data-theme="acid"] .verdict-bar { height:30px; }
+[data-theme="acid"] .verdict-bar::after { content:""; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(90deg,transparent 0 11px,var(--surface) 11px 13px); }
+[data-theme="acid"] .verdict-bar .lbl { font-family:var(--font-b); font-size:12px; z-index:1; }
+[data-theme="acid"] .vote-btn,[data-theme="acid"] .btn { text-transform:uppercase; letter-spacing:.1em; clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px)); }
+[data-theme="acid"] .vote-btn.king:hover  { background:var(--king); color:var(--brand-ink); }
+[data-theme="acid"] .vote-btn.clown:hover { background:var(--clown); color:#fff; }
+[data-theme="acid"] .lvl,[data-theme="acid"] .lb-score,[data-theme="acid"] .stat small,[data-theme="acid"] .card-foot { font-family:var(--font-b); }
+
+/* ───── 5 · HOLO SUNSET — Soft Bubble / клей ───────────────────────────────── */
+[data-theme="holo"] .card,[data-theme="holo"] .panel,[data-theme="holo"] .kit-card { box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.06); }
+[data-theme="holo"] .card:hover { transform:translateY(-4px); box-shadow:0 30px 55px -22px rgba(120,40,120,.6); }
+[data-theme="holo"] .vote-btn { padding:16px; font-weight:800; }
+[data-theme="holo"] .vote-btn.king { background:var(--grad-king); color:#3a2407; border-color:transparent; }
+[data-theme="holo"] .vote-btn.clown { background:var(--grad-clown); color:#06302c; border-color:transparent; }
+[data-theme="holo"] .vote-btn:hover { transform:translateY(-3px) scale(1.015); }
+[data-theme="holo"] .verdict-bar { height:54px; }
+[data-theme="holo"] .verdict-bar .lbl { font-size:15px; font-weight:800; }
+[data-theme="holo"] .lvl { background:var(--grad); color:var(--brand-ink); border:none; }
+[data-theme="holo"] .stat { background:var(--surface-3); }
+[data-theme="holo"] .app-search,[data-theme="holo"] .field { border-radius:999px; }
+</style>
+</head>
+<body>
+
+<!-- ТОПБАР -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">♚</div>
+      <div>
+        <div class="brand-name"><span>cork</span></div>
+        <div class="brand-sub">clown or king</div>
+      </div>
+    </div>
+    <div class="topbar-theme">
+      <span class="topbar-dot"></span>
+      <span>Тема: <b id="curTheme">Royal Gold</b><small id="curSys">Editorial Luxe</small></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <span class="eyebrow">◆ 5 разных дизайн-систем · не только цвет</span>
+    <h1>Выставляй победы.<br>Вердикт: <b>Шут или Король</b>.</h1>
+    <p>Соцсеть, где достижения 16–25-летних идут на народное голосование. Каждая тема — это отдельный визуальный язык: свой шрифт, форма элементов, границы, поверхности и тени.</p>
+  </section>
+
+  <!-- ПЕРЕКЛЮЧАТЕЛЬ ТЕМ -->
+  <section class="themebar">
+    <div class="themebar-label">— выбери дизайн-систему —</div>
+    <div class="theme-rail" id="rail">
+      <button class="theme-chip is-active" data-set="royal">
+        <span class="swatch sw-royal"></span>
+        <span class="meta"><b>Royal Gold</b><small>Editorial Luxe · serif</small></span>
+      </button>
+      <button class="theme-chip" data-set="carnival">
+        <span class="swatch sw-carnival"></span>
+        <span class="meta"><b>Neon Carnival</b><small>Neo-Brutalism · стикеры</small></span>
+      </button>
+      <button class="theme-chip" data-set="violet">
+        <span class="swatch sw-violet"></span>
+        <span class="meta"><b>Midnight Violet</b><small>Aurora Glass · стекло</small></span>
+      </button>
+      <button class="theme-chip" data-set="acid">
+        <span class="swatch sw-acid"></span>
+        <span class="meta"><b>Acid Pop</b><small>Cyber Terminal · HUD</small></span>
+      </button>
+      <button class="theme-chip" data-set="holo">
+        <span class="swatch sw-holo"></span>
+        <span class="meta"><b>Holo Sunset</b><small>Soft Bubble · клей</small></span>
+      </button>
+    </div>
+
+    <!-- ДИЗАЙН-ДНК активной темы -->
+    <div class="dna" id="dna"></div>
+  </section>
+
+  <!-- ЖИВОЙ ИНТЕРФЕЙС -->
+  <section class="section">
+    <div class="section-head">
+      <h2>Живой интерфейс</h2>
+      <p>каждый элемент меняет форму и стиль, а не только цвет</p>
+    </div>
+
+    <div class="app">
+      <nav class="app-nav">
+        <div class="brand-mark">♚</div>
+        <div class="app-links">
+          <a class="active">Лента</a><a>Рейтинг</a><a>Друзья</a><a>Вызовы</a>
+        </div>
+        <div class="app-search">🔍 Поиск достижений…</div>
+        <button class="icon-btn">🔔<span class="badge-dot"></span></button>
+        <button class="icon-btn">＋</button>
+        <div class="avatar">АК</div>
+      </nav>
+
+      <div class="app-body">
+        <div class="feed">
+          <div class="feed-head">
+            <h3>Лента достижений</h3>
+            <div class="feed-tabs">
+              <button class="active">🔥 Топ</button><button>🆕 Свежее</button><button>👥 Друзья</button>
+            </div>
+          </div>
+
+          <article class="card" data-king="78">
+            <div class="card-top">
+              <div class="av">МВ</div>
+              <div class="who"><b>Макс Ветров</b><br><small>2 часа назад · #спорт</small></div>
+              <span class="lvl">👑 Атлет</span>
+            </div>
+            <h4>Пробежал первый марафон 🏃‍♂️</h4>
+            <p class="desc">42.2 км за 3:58. Полгода назад не мог осилить и пять километров без остановки. Это было больно, но я дошёл.</p>
+            <div class="media"><span class="tag">📍 Московский марафон · 42.2 km</span><span class="sticker">🔥 ХИТ ДНЯ</span></div>
+            <div class="verdict">
+              <div class="verdict-bar" style="--pct:78%">
+                <div class="king-fill"></div><div class="clown-fill"></div>
+                <span class="lbl king">👑 78%</span><span class="lbl clown">22% 🤡</span>
+              </div>
+              <div class="vote-row">
+                <button class="vote-btn king"  onclick="vote(this,'king')"><span class="emo">👑</span> Король</button>
+                <button class="vote-btn clown" onclick="vote(this,'clown')"><span class="emo">🤡</span> Шут</button>
+              </div>
+            </div>
+            <div class="card-foot"><span>🗳 4 812 голосов</span><span>💬 214</span><span class="spacer">↗ Поделиться</span></div>
+          </article>
+
+          <article class="card" data-king="54">
+            <div class="card-top">
+              <div class="av">АК</div>
+              <div class="who"><b>Алина Кей</b><br><small>5 часов назад · #стартап</small></div>
+              <span class="lvl">🚀 Основатель</span>
+            </div>
+            <h4>Запустила свой первый стартап 🚀</h4>
+            <p class="desc">Собрала MVP за две недели на коленке. Первые 100 пользователей пришли за выходные — без рекламы, только сарафан в универе.</p>
+            <div class="verdict">
+              <div class="verdict-bar" style="--pct:54%">
+                <div class="king-fill"></div><div class="clown-fill"></div>
+                <span class="lbl king">👑 54%</span><span class="lbl clown">46% 🤡</span>
+              </div>
+              <div class="vote-row">
+                <button class="vote-btn king"  onclick="vote(this,'king')"><span class="emo">👑</span> Король</button>
+                <button class="vote-btn clown" onclick="vote(this,'clown')"><span class="emo">🤡</span> Шут</button>
+              </div>
+            </div>
+            <div class="card-foot"><span>🗳 2 109 голосов</span><span>💬 96</span><span class="spacer">↗ Поделиться</span></div>
+          </article>
+        </div>
+
+        <aside class="app-aside">
+          <div class="panel me">
+            <div class="big-av">АК</div>
+            <b>Алина Кей</b>
+            <div class="handle">@alina · Основатель</div>
+            <div class="stats">
+              <div class="stat"><b>12.4k</b><small>KING SCORE</small></div>
+              <div class="stat"><b>38</b><small>ПОБЕД</small></div>
+              <div class="stat"><b>#3</b><small>В РЕЙТИНГЕ</small></div>
+            </div>
+          </div>
+          <div class="panel">
+            <h5>👑 Короли недели</h5>
+            <div class="lb-item"><span class="lb-rank top">1</span><span class="lb-av">СР</span><span class="lb-name">София Р.</span><span class="lb-score">14.9k</span></div>
+            <div class="lb-item"><span class="lb-rank top">2</span><span class="lb-av">МВ</span><span class="lb-name">Макс Ветров</span><span class="lb-score">13.2k</span></div>
+            <div class="lb-item"><span class="lb-rank top">3</span><span class="lb-av">АК</span><span class="lb-name">Алина Кей</span><span class="lb-score">12.4k</span></div>
+            <div class="lb-item"><span class="lb-rank">4</span><span class="lb-av">ДН</span><span class="lb-name">Дэн Новак</span><span class="lb-score">10.1k</span></div>
+            <div class="lb-item"><span class="lb-rank">5</span><span class="lb-av">ЛП</span><span class="lb-name">Лена П.</span><span class="lb-score">9.7k</span></div>
+          </div>
+          <div class="panel">
+            <h5># В тренде</h5>
+            <div class="tags">
+              <span class="tag-pill">#спорт</span><span class="tag-pill">#стартап</span><span class="tag-pill">#музыка</span><span class="tag-pill">#учёба</span><span class="tag-pill">#кодинг</span><span class="tag-pill">#искусство</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- БИБЛИОТЕКА КОМПОНЕНТОВ -->
+  <section class="section">
+    <div class="section-head">
+      <h2>Компоненты системы</h2>
+      <p>кнопки · бейджи · поля · типографика — в стиле активной темы</p>
+    </div>
+    <div class="kit">
+      <div class="kit-card">
+        <h6>Кнопки</h6>
+        <div class="row">
+          <button class="btn btn-primary">Выставить победу</button>
+          <button class="btn btn-soft">Подписаться</button>
+        </div>
+        <div class="row">
+          <button class="btn btn-ghost">Ещё</button>
+          <button class="btn btn-ghost">Поделиться</button>
+        </div>
+        <div class="row"><div class="progress"><i></i></div><small style="color:var(--text-mute)">68%</small></div>
+        <div class="row">
+          <div class="toggle on" onclick="this.classList.toggle('on')"><span class="knob"></span></div>
+          <small style="color:var(--text-dim)">Анонимное голосование</small>
+        </div>
+      </div>
+      <div class="kit-card">
+        <h6>Бейджи и статусы</h6>
+        <div class="row">
+          <span class="chip chip-king">👑 Король</span><span class="chip chip-clown">🤡 Шут</span><span class="chip chip-out">⚡ Хит дня</span>
+        </div>
+        <div class="row"><span class="lvlbadge"><span class="dot"></span> Новичок</span><span class="lvlbadge"><span class="dot"></span> Атлет</span></div>
+        <div class="row"><span class="lvlbadge"><span class="dot"></span> Легенда</span><span class="lvlbadge"><span class="dot"></span> Основатель</span></div>
+        <div class="row" style="margin-top:6px"><div class="field" style="flex:1">🔍 Поиск по достижениям…</div></div>
+      </div>
+      <div class="kit-card">
+        <h6>Типографика</h6>
+        <div class="type-row"><div class="t-display">Король дня</div></div>
+        <div class="type-row"><div class="t-h">Заголовок достижения</div></div>
+        <div class="type-row"><div class="t-body">Основной текст описания, в котором участник рассказывает свою историю победы.</div></div>
+        <div class="type-row"><div class="t-cap">метка · 16–25 · cork</div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <b>Cork — Clown or King</b> · 5 дизайн-систем: Editorial Luxe · Neo-Brutalism · Aurora Glass · Cyber Terminal · Soft Bubble<br>
+    Шрифты: Playfair Display · Unbounded · Rubik · Russo One + JetBrains Mono · Fredoka + Nunito — все с кириллицей
+  </footer>
+
+</main>
+
+<script>
+/* ---- Конфиг тем: имя + дизайн-система + ДНК (6 параметров) ---- */
+const THEMES = {
+  royal:    { name:'Royal Gold',     sys:'Editorial Luxe',
+    dna:{ 'Шрифт':'Playfair Display · serif', 'Форма':'Острые углы · 2px', 'Границы':'Тонкие линейки', 'Поверхность':'Плоско, много воздуха', 'Тени':'Нет', 'Характер':'Журнал мод, премиум' } },
+  carnival: { name:'Neon Carnival',  sys:'Neo-Brutalism',
+    dna:{ 'Шрифт':'Unbounded · CAPS', 'Форма':'Чанки · 12px', 'Границы':'Толстые 2.5px', 'Поверхность':'Блоки цвета', 'Тени':'Жёсткие офсетные', 'Характер':'Стикеры, громко, фан' } },
+  violet:   { name:'Midnight Violet', sys:'Aurora Glass',
+    dna:{ 'Шрифт':'Rubik · чистый', 'Форма':'Мягкие · 26px', 'Границы':'Прозрачное стекло', 'Поверхность':'Матовое стекло, blur', 'Тени':'Мягкое свечение', 'Характер':'Vision Pro, soft-tech' } },
+  acid:     { name:'Acid Pop',       sys:'Cyber Terminal',
+    dna:{ 'Шрифт':'Russo One + Mono', 'Форма':'Срезы · 0px', 'Границы':'Скобки [ ] + сетка', 'Поверхность':'Терминал, сканлайны', 'Тени':'Плоско, резко', 'Характер':'Хакер, HUD, esports' } },
+  holo:     { name:'Holo Sunset',    sys:'Soft Bubble',
+    dna:{ 'Шрифт':'Fredoka · круглый', 'Форма':'Очень круглые · 34px', 'Границы':'Без границ', 'Поверхность':'Мягкая глина, пастель', 'Тени':'Мягкие диффузные', 'Характер':'Уютный лайфстайл' } },
+};
+
+function renderDNA(key){
+  const dna = THEMES[key].dna;
+  document.getElementById('dna').innerHTML = Object.entries(dna)
+    .map(([k,v]) => `<div class="dna-cell"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+}
+function setTheme(key){
+  document.documentElement.setAttribute('data-theme', key);
+  document.getElementById('curTheme').textContent = THEMES[key].name;
+  document.getElementById('curSys').textContent = THEMES[key].sys;
+  document.querySelectorAll('.theme-chip').forEach(c => c.classList.toggle('is-active', c.dataset.set === key));
+  renderDNA(key);
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+document.getElementById('rail').addEventListener('click', e => {
+  const chip = e.target.closest('.theme-chip');
+  if (chip) setTheme(chip.dataset.set);
+});
+
+/* ---- Демо-голосование ---- */
+function vote(btn, side){
+  const card = btn.closest('.card');
+  let pct = Math.max(4, Math.min(96, (+card.dataset.king) + (side==='king'?3:-3)));
+  card.dataset.king = pct;
+  card.querySelector('.verdict-bar').style.setProperty('--pct', pct+'%');
+  card.querySelector('.lbl.king').textContent  = '👑 '+pct+'%';
+  card.querySelector('.lbl.clown').textContent = (100-pct)+'% 🤡';
+  btn.animate([{transform:'scale(1)'},{transform:'scale(.93)'},{transform:'scale(1)'}],{duration:220,easing:'ease'});
+}
+
+renderDNA('royal');
+</script>
+</body>
+</html>

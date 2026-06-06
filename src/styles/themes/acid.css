@@ -1,0 +1,413 @@
+/*******************************************************************************
+ * ACID THEME — Acid Pop overrides
+ * Only applies when [data-theme="acid"] is active on <html>
+ * Overrides theme-tokens variables and adds Acid-specific decorations
+ ******************************************************************************/
+
+[data-theme="acid"] {
+  /* ── Surfaces ── */
+  --cork-bg:          #070908;
+  --cork-surface:     #0c0f0d;
+  --cork-surface-2:   #101410;
+  --cork-surface-3:   #151b14;
+
+  /* ── Text ── */
+  --cork-text:        #e9f1e3;
+  --cork-text-dim:    #9cae90;
+  --cork-text-mute:   #5f6e54;
+
+  /* ── Brand ── */
+  --cork-brand:       #c6ff3d;
+  --cork-brand-hover: #d6ff4d;
+  --cork-brand-2:     #c6ff3d;
+  --cork-king:        #c6ff3d;
+  --cork-clown:       #ff2d78;
+
+  /* ── Borders & Frames ── */
+  --cork-border:      rgba(198, 255, 61, 0.22);
+  --cork-border-light: rgba(198, 255, 61, 0.12);
+  --cork-frame:       #c6ff3d;
+  --cork-frame-light: rgba(198, 255, 61, 0.4);
+
+  /* ── Radii ── */
+  --cork-radius-card: 0;
+  --cork-radius-btn:  0;
+  --cork-radius-pill: 0;
+
+  /* ── Typography ── */
+  --cork-font-display: 'Russo One', system-ui, sans-serif;
+  --cork-font-body:    'JetBrains Mono', ui-monospace, monospace;
+
+  /* ── Shadows ── */
+  --cork-shadow:       none;
+  --cork-shadow-lg:    none;
+  --cork-glow:         rgba(198, 255, 61, 0.35);
+
+  /* ── Backdrop ── */
+  --cork-backdrop:    rgba(7, 9, 8, 0.85);
+}
+
+/* ── Grid Background ── */
+[data-theme="acid"] body {
+  background-color: var(--cork-bg) !important;
+  color: var(--cork-text) !important;
+  font-family: var(--cork-font-body) !important;
+  background-image:
+    linear-gradient(rgba(198, 255, 61, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(198, 255, 61, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scanlines Overlay ── */
+[data-theme="acid"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+  opacity: 0.25;
+}
+
+/* ── Glow Blobs ── */
+[data-theme="acid"] body::before {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  width: 60vw;
+  height: 60vw;
+  border-radius: 50%;
+  filter: blur(90px);
+  top: -18vw;
+  right: -12vw;
+  background: radial-gradient(circle, rgba(198, 255, 61, 0.12), transparent 65%);
+}
+
+/* ── Card with HUD corners ── */
+[data-theme="acid"] .cork-card {
+  border-radius: 0;
+}
+
+[data-theme="acid"] .cork-card::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 14px;
+  height: 14px;
+  border-top: 2px solid var(--cork-frame);
+  border-left: 2px solid var(--cork-frame);
+  pointer-events: none;
+}
+
+[data-theme="acid"] .cork-card::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 14px;
+  height: 14px;
+  border-bottom: 2px solid var(--cork-frame);
+  border-right: 2px solid var(--cork-frame);
+  pointer-events: none;
+}
+
+[data-theme="acid"] .cork-card:hover::before,
+[data-theme="acid"] .cork-card:hover::after {
+  border-color: var(--cork-brand-hover);
+}
+
+/* ── Panel with HUD corners ── */
+[data-theme="acid"] .cork-panel {
+  border-radius: 0;
+}
+
+[data-theme="acid"] .cork-panel::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid var(--cork-frame);
+  border-left: 2px solid var(--cork-frame);
+  pointer-events: none;
+}
+
+[data-theme="acid"] .cork-panel::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 12px;
+  height: 12px;
+  border-bottom: 2px solid var(--cork-frame);
+  border-right: 2px solid var(--cork-frame);
+  pointer-events: none;
+}
+
+/* ── Notched buttons ── */
+[data-theme="acid"] .cork-btn,
+[data-theme="acid"] .cork-btn-primary,
+[data-theme="acid"] .cork-btn-ghost {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  border-radius: 0;
+}
+
+[data-theme="acid"] .cork-btn:hover {
+  transform: translateY(-2px);
+}
+
+[data-theme="acid"] .cork-btn-primary {
+  box-shadow: 0 10px 24px -10px var(--cork-glow);
+}
+
+/* ── Notched create button ── */
+[data-theme="acid"] .cork-create-btn {
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+}
+
+[data-theme="acid"] .cork-create-btn:hover {
+  box-shadow: 0 8px 20px -8px var(--cork-glow);
+}
+
+/* ── Header brand ── */
+[data-theme="acid"] .cork-header__brand {
+  letter-spacing: -0.5px;
+}
+
+/* ── Avatar ── */
+[data-theme="acid"] .cork-avatar {
+  border-radius: 0;
+  color: var(--cork-bg);
+}
+
+/* ── Verdict bar ── */
+[data-theme="acid"] .cork-verdict-track {
+  border-radius: 0;
+}
+
+[data-theme="acid"] .cork-verdict-king {
+  color: var(--cork-bg);
+}
+
+/* ── Tabs ── */
+[data-theme="acid"] .cork-tab {
+  border-radius: 0;
+}
+
+/* ── Mobile nav ── */
+[data-theme="acid"] .cork-mobile-nav {
+  border-top: 1px solid var(--cork-border);
+}
+
+/* ── Selection ── */
+[data-theme="acid"] ::selection {
+  background: var(--cork-brand);
+  color: var(--cork-bg);
+}
+
+/* ── Scrollbar ── */
+[data-theme="acid"] ::-webkit-scrollbar-track {
+  background: var(--cork-bg);
+}
+
+[data-theme="acid"] ::-webkit-scrollbar-thumb {
+  background: var(--cork-border);
+}
+
+[data-theme="acid"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--cork-brand);
+}
+
+/* ── Typography ── */
+[data-theme="acid"] .cork-head,
+[data-theme="acid"] .cork-title,
+[data-theme="acid"] .cork-section-title {
+  text-transform: uppercase;
+}
+
+/* ── User card ── */
+[data-theme="acid"] .cork-user-card {
+  border-radius: 0;
+}
+
+/* ── Stat ── */
+[data-theme="acid"] .cork-stat {
+  border-radius: 0;
+}
+
+/* ── Empty state ── */
+[data-theme="acid"] .cork-empty {
+  border-radius: 0;
+}
+
+/* ── Card foot ── */
+[data-theme="acid"] .cork-card-foot {
+  font-size: 12px;
+}
+
+/* ── Smooth scroll ── */
+[data-theme="acid"] html {
+  scroll-behavior: smooth;
+}
+
+/* ── Focus ring ── */
+[data-theme="acid"] :focus-visible {
+  outline: 2px solid var(--cork-brand);
+  outline-offset: 2px;
+}
+
+/* ── Transition for all interactive elements ── */
+[data-theme="acid"] .cork-card,
+[data-theme="acid"] .cork-panel,
+[data-theme="acid"] .cork-btn,
+[data-theme="acid"] .cork-tag,
+[data-theme="acid"] .cork-filter,
+[data-theme="acid"] .cork-link,
+[data-theme="acid"] .cork-icon-btn,
+[data-theme="acid"] .cork-create-btn {
+  transition: all 0.2s ease;
+}
+
+/* ── Active state glow ── */
+[data-theme="acid"] .cork-btn.active {
+  box-shadow: 0 0 20px -4px var(--cork-glow);
+}
+
+/* ── Layout wrapper ── */
+[data-theme="acid"] #root {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Cork page (force acid bg) ── */
+[data-theme="acid"] .cork-page {
+  background: var(--cork-bg);
+  color: var(--cork-text);
+  font-family: var(--cork-font-body);
+}
+
+/* ── Cork shell (force acid padding) ── */
+[data-theme="acid"] .cork-shell {
+  padding: 24px 16px;
+}
+
+/* ── Cork header backdrop ── */
+[data-theme="acid"] .cork-header {
+  backdrop-filter: blur(18px) saturate(140%);
+  background: var(--cork-backdrop);
+  border-bottom: 1px solid var(--cork-border);
+}
+
+/* ── Minimal Tailwind overrides ── */
+/* Only for components not yet migrated to cork-* classes */
+[data-theme="acid"] .bg-white {
+  background-color: var(--cork-surface) !important;
+}
+
+[data-theme="acid"] .bg-gray-50 {
+  background-color: var(--cork-bg) !important;
+}
+
+[data-theme="acid"] .bg-gray-100 {
+  background-color: var(--cork-surface-2) !important;
+}
+
+[data-theme="acid"] .bg-gray-200 {
+  background-color: var(--cork-surface-3) !important;
+}
+
+[data-theme="acid"] .bg-gray-800 {
+  background-color: var(--cork-surface) !important;
+}
+
+[data-theme="acid"] .bg-gray-900 {
+  background-color: var(--cork-bg) !important;
+}
+
+[data-theme="acid"] .text-gray-900 {
+  color: var(--cork-text) !important;
+}
+
+[data-theme="acid"] .text-gray-700 {
+  color: var(--cork-text-dim) !important;
+}
+
+[data-theme="acid"] .text-gray-600 {
+  color: var(--cork-text-dim) !important;
+}
+
+[data-theme="acid"] .text-gray-500 {
+  color: var(--cork-text-dim) !important;
+}
+
+[data-theme="acid"] .text-gray-400 {
+  color: var(--cork-text-mute) !important;
+}
+
+[data-theme="acid"] .text-white {
+  color: var(--cork-text) !important;
+}
+
+[data-theme="acid"] .border-gray-300 {
+  border-color: var(--cork-border) !important;
+}
+
+[data-theme="acid"] .border-gray-200 {
+  border-color: var(--cork-border-light) !important;
+}
+
+[data-theme="acid"] .border-gray-100 {
+  border-color: var(--cork-border-light) !important;
+}
+
+[data-theme="acid"] .border-gray-700 {
+  border-color: var(--cork-border) !important;
+}
+
+[data-theme="acid"] .border-gray-800 {
+  border-color: var(--cork-border) !important;
+}
+
+/* ── Animate pulse override ── */
+[data-theme="acid"] .animate-pulse {
+  background-color: var(--cork-surface-3) !important;
+  animation: cork-pulse 1.5s ease-in-out infinite;
+}
+
+[data-theme="acid"] .animate-pulse > div {
+  background-color: var(--cork-surface-2) !important;
+}
+
+/* ── Primer Button overrides ── */
+[data-theme="acid"] [data-component="Button"] {
+  background-color: var(--cork-brand) !important;
+  color: var(--cork-bg) !important;
+  border: none !important;
+  border-radius: var(--cork-radius-btn) !important;
+  font-family: var(--cork-font-body) !important;
+}
+
+[data-theme="acid"] [data-component="Button"]:hover {
+  background-color: var(--cork-brand-hover) !important;
+}
+
+/* ── Input overrides ── */
+[data-theme="acid"] input,
+[data-theme="acid"] textarea,
+[data-theme="acid"] select {
+  background-color: var(--cork-surface-2);
+  color: var(--cork-text);
+  border-color: var(--cork-border);
+}
+
+[data-theme="acid"] input::placeholder,
+[data-theme="acid"] textarea::placeholder {
+  color: var(--cork-text-mute);
+}

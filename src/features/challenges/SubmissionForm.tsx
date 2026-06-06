@@ -67,13 +67,16 @@ export function SubmissionForm({ proofConfig, onSubmit }: SubmissionFormProps) {
     }
   }
 
+  const inputBase = 'w-full rounded-lg border p-2 text-sm outline-none transition focus:ring-2 focus:ring-[var(--cork-brand)]'
+  const inputStyle = { background: 'var(--cork-surface-2)', color: 'var(--cork-text)', borderColor: 'var(--cork-border)' }
+
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-      <h3 className="font-bold text-lg">Добавить прогресс</h3>
+      <h3 className="font-bold text-lg" style={{ color: 'var(--cork-text)' }}>Добавить прогресс</h3>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Тип доказательства</label>
-        <select {...register('proofType')} className="w-full rounded-lg border border-gray-300 p-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+        <label className="block text-sm font-medium mb-1" style={{ color: 'var(--cork-text-dim)' }}>Тип доказательства</label>
+        <select {...register('proofType')} className={inputBase} style={inputStyle}>
           {availableProofTypes.includes('text') && <option value="text">Текст</option>}
           {availableProofTypes.includes('photo') && <option value="photo">Фото</option>}
           {availableProofTypes.includes('url') && <option value="url">Ссылка</option>}
@@ -82,10 +85,11 @@ export function SubmissionForm({ proofConfig, onSubmit }: SubmissionFormProps) {
 
       {proofType === 'text' && (
         <div>
-          <label className="block text-sm font-medium mb-1">Описание</label>
+          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--cork-text-dim)' }}>Описание</label>
           <textarea
             {...register('description')}
-            className="w-full rounded-lg border border-gray-300 p-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            className={inputBase}
+            style={inputStyle}
             rows={3}
             placeholder="Что вы сделали?"
           />
@@ -95,11 +99,12 @@ export function SubmissionForm({ proofConfig, onSubmit }: SubmissionFormProps) {
 
       {proofType === 'photo' && (
         <div>
-          <label className="block text-sm font-medium mb-1">Фото / Скриншот (URL)</label>
+          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--cork-text-dim)' }}>Фото / Скриншот (URL)</label>
           <input
             {...register('proofValue')}
             type="url"
-            className="w-full rounded-lg border border-gray-300 p-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            className={inputBase}
+            style={inputStyle}
             placeholder="https://example.com/proof.jpg"
           />
           {errors.proofValue && <p className="text-red-500 text-sm">{errors.proofValue.message}</p>}
@@ -108,11 +113,12 @@ export function SubmissionForm({ proofConfig, onSubmit }: SubmissionFormProps) {
 
       {proofType === 'url' && (
         <div>
-          <label className="block text-sm font-medium mb-1">Ссылка</label>
+          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--cork-text-dim)' }}>Ссылка</label>
           <input
             {...register('proofValue')}
             type="url"
-            className="w-full rounded-lg border border-gray-300 p-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            className={inputBase}
+            style={inputStyle}
             placeholder="https://strava.com/activities/..."
           />
           {errors.proofValue && <p className="text-red-500 text-sm">{errors.proofValue.message}</p>}
@@ -121,14 +127,15 @@ export function SubmissionForm({ proofConfig, onSubmit }: SubmissionFormProps) {
 
       {hasField('value') && (
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--cork-text-dim)' }}>
             {proofConfig.valueLabel ?? 'Значение'}
             {proofConfig.valueRequired && <span className="text-red-500">*</span>}
           </label>
           <input
             {...register('value', { valueAsNumber: true })}
             type="number"
-            className="w-full rounded-lg border border-gray-300 p-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            className={inputBase}
+            style={inputStyle}
             placeholder="Например, 45"
           />
           {errors.value && <p className="text-red-500 text-sm">{errors.value.message}</p>}
@@ -138,7 +145,7 @@ export function SubmissionForm({ proofConfig, onSubmit }: SubmissionFormProps) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 disabled:opacity-50"
+        className="cork-btn-primary"
       >
         {isSubmitting ? 'Отправка...' : 'Отправить'}
       </button>

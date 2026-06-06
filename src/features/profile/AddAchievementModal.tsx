@@ -117,17 +117,19 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/50 p-3 sm:p-6" onClick={onClose}>
       <div
-        className="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col dark:bg-gray-800"
+        className="w-full max-w-xl overflow-hidden max-h-[92vh] flex flex-col"
+        style={{ background: 'var(--cork-surface)', borderRadius: 'var(--cork-radius-card)', boxShadow: 'var(--cork-shadow-lg)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-          <span className="text-sm text-gray-500 dark:text-gray-400">Новое достижение</span>
+        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--cork-border-light)' }}>
+          <span className="text-sm" style={{ color: 'var(--cork-text-mute)' }}>Новое достижение</span>
           <button
             type="button"
             onClick={onClose}
             aria-label="Закрыть"
-            className="text-gray-400 hover:text-gray-700 transition-colors dark:text-gray-500 dark:hover:text-gray-300"
+            className="transition-colors"
+            style={{ color: 'var(--cork-text-mute)' }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -139,9 +141,9 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
         <div className="flex-1 overflow-y-auto px-4 py-4">
           <div className="flex gap-3">
             {avatar ? (
-              <img src={avatar} alt={name} className="w-11 h-11 rounded-full object-cover ring-1 ring-gray-200 flex-shrink-0" />
+              <img src={avatar} alt={name} className="w-11 h-11 object-cover flex-shrink-0" style={{ borderRadius: 'var(--cork-radius-pill)', border: '1px solid var(--cork-border)' }} />
             ) : (
-              <div className="w-11 h-11 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold ring-1 ring-gray-200 flex-shrink-0 select-none">
+              <div className="w-11 h-11 flex items-center justify-center text-sm font-semibold flex-shrink-0 select-none" style={{ background: 'var(--cork-surface-3)', color: 'var(--cork-brand)', borderRadius: 'var(--cork-radius-pill)' }}>
                 {getInitials(name)}
               </div>
             )}
@@ -154,7 +156,8 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                 onKeyDown={handleKeyDown}
                 rows={4}
                 placeholder="Чем поделишься? Например: «Выиграл городскую олимпиаду по физике, 1 место»"
-                className="w-full resize-none border-0 outline-none text-base text-gray-900 placeholder-gray-400 bg-transparent leading-relaxed dark:text-white dark:placeholder-gray-500"
+                className="w-full resize-none border-0 outline-none text-base leading-relaxed bg-transparent"
+                style={{ color: 'var(--cork-text)' }}
               />
             </div>
           </div>
@@ -162,12 +165,13 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
           {/* Proof preview / picker */}
           {proofType === 'photo' && proofValue && (
             <div className="mt-3 relative inline-block">
-              <img src={proofValue} alt="preview" className="max-h-48 rounded-lg border border-gray-200 object-cover" />
+              <img src={proofValue} alt="preview" className="max-h-48 object-cover" style={{ borderRadius: 'var(--cork-radius-card)', border: '1px solid var(--cork-border)' }} />
               <button
                 type="button"
                 onClick={() => setProofValue(undefined)}
                 aria-label="Убрать фото"
-                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
+                className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center transition-colors"
+                style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', borderRadius: 'var(--cork-radius-pill)' }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <path d="M6 6l12 12M6 18L18 6" />
@@ -176,20 +180,21 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
             </div>
           )}
           {proofType === 'url' && (
-            <div className="mt-3 flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 dark:border-gray-700 dark:bg-gray-900/30">
-              <span className="text-gray-400 text-sm">🔗</span>
+            <div className="mt-3 flex items-center gap-2 px-3 py-2" style={{ borderRadius: 'var(--cork-radius-card)', border: '1px solid var(--cork-border)', background: 'var(--cork-surface-2)' }}>
+              <span className="text-sm" style={{ color: 'var(--cork-text-mute)' }}>🔗</span>
               <input
                 type="url"
                 placeholder="https://..."
                 value={proofValue ?? ''}
                 onChange={(e) => setProofValue(e.target.value)}
-                className="flex-1 border-0 outline-none text-sm text-gray-900 placeholder-gray-400 bg-transparent dark:text-white dark:placeholder-gray-500"
+                className="flex-1 border-0 outline-none text-sm bg-transparent"
+                style={{ color: 'var(--cork-text)' }}
               />
               <button
                 type="button"
                 onClick={() => handleProofTypeChange('none')}
                 aria-label="Убрать ссылку"
-                className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                style={{ color: 'var(--cork-text-mute)' }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <path d="M6 6l12 12M6 18L18 6" />
@@ -208,11 +213,15 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                     key={c.value}
                     type="button"
                     onClick={() => setCategory(c.value)}
-                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs ring-1 transition-colors ${
-                      active
-                        ? 'bg-indigo-50 text-indigo-700 ring-indigo-300 font-semibold dark:bg-indigo-900/40 dark:text-indigo-200 dark:ring-indigo-500'
-                        : 'bg-white text-gray-600 ring-gray-200 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-600'
-                    }`}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs transition-colors"
+                    style={{
+                      borderRadius: 'var(--cork-radius-pill)',
+                      border: '1px solid',
+                      borderColor: active ? 'var(--cork-brand)' : 'var(--cork-border)',
+                      background: active ? 'var(--cork-surface-2)' : 'var(--cork-surface)',
+                      color: active ? 'var(--cork-brand)' : 'var(--cork-text-dim)',
+                      fontWeight: active ? 600 : 400,
+                    }}
                   >
                     <CategoryIcon category={c.value} className="w-3.5 h-3.5" />
                     <span>{c.label}</span>
@@ -224,7 +233,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-900/40">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--cork-border-light)', background: 'var(--cork-surface-2)' }}>
           <div className="flex items-center gap-1">
             <ToolbarButton
               active={proofType === 'photo'}
@@ -256,10 +265,10 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
               </svg>
             </ToolbarButton>
 
-            <div className="mx-1 h-6 w-px bg-gray-200" />
+            <div className="mx-1 h-6 w-px" style={{ background: 'var(--cork-border)' }} />
 
             {eventDate === null ? (
-              <div className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-600 dark:text-gray-300">
+              <div className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs" style={{ color: 'var(--cork-text-dim)' }}>
                 <CalendarIcon className="w-4 h-4" />
                 <input
                   type="number"
@@ -270,18 +279,20 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                     const v = parseInt(e.target.value, 10)
                     if (!isNaN(v)) setYear(Math.max(MIN_YEAR, Math.min(currentYear, v)))
                   }}
-                  className="w-14 bg-transparent border-0 outline-none text-xs text-gray-700 font-medium tabular-nums dark:text-gray-200"
+                  className="w-14 bg-transparent border-0 outline-none text-xs font-medium tabular-nums"
+                  style={{ color: 'var(--cork-text)' }}
                 />
                 <button
                   type="button"
                   onClick={() => setEventDate(`${year}-01-01`)}
-                  className="ml-1 text-indigo-600 hover:text-indigo-700 font-medium dark:text-indigo-400 dark:hover:text-indigo-300"
+                  className="ml-1 font-medium"
+                  style={{ color: 'var(--cork-brand)' }}
                 >
                   + дата
                 </button>
               </div>
             ) : (
-              <div className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-700 dark:text-gray-200">
+              <div className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs" style={{ color: 'var(--cork-text)' }}>
                 <CalendarIcon className="w-4 h-4" />
                 <input
                   type="date"
@@ -294,14 +305,15 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                     setEventDate(v)
                     setYear(parseInt(v.slice(0, 4), 10))
                   }}
-                  className="bg-transparent border-0 outline-none text-xs text-gray-700 font-medium dark:text-gray-200 dark:[color-scheme:dark]"
+                  className="bg-transparent border-0 outline-none text-xs font-medium"
+                  style={{ color: 'var(--cork-text)' }}
                 />
                 <button
                   type="button"
                   onClick={() => setEventDate(null)}
                   aria-label="Только год"
                   title="Только год"
-                  className="ml-0.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                  style={{ color: 'var(--cork-text-mute)' }}
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <path d="M6 6l12 12M6 18L18 6" />
@@ -320,14 +332,20 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <span className={`text-xs tabular-nums ${countLeft < 50 ? 'text-amber-600' : 'text-gray-400'}`}>
+            <span className="text-xs tabular-nums" style={{ color: countLeft < 50 ? 'var(--cork-brand-2)' : 'var(--cork-text-mute)' }}>
               {countLeft}
             </span>
             <button
               type="button"
               onClick={handleSubmit}
               disabled={!canSubmit}
-              className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed"
+              className="px-4 py-1.5 text-sm font-semibold shadow-sm transition-colors"
+              style={{
+                borderRadius: 'var(--cork-radius-pill)',
+                background: canSubmit ? 'var(--cork-brand)' : 'var(--cork-surface-3)',
+                color: canSubmit ? 'var(--cork-bg)' : 'var(--cork-text-mute)',
+                cursor: canSubmit ? 'pointer' : 'not-allowed',
+              }}
             >
               {submitting ? 'Отправка...' : 'Опубликовать'}
             </button>
@@ -355,11 +373,12 @@ function ToolbarButton({
       onClick={onClick}
       title={title}
       aria-label={title}
-      className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
-        active
-          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-          : 'text-gray-500 hover:bg-white hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200'
-      }`}
+      className="inline-flex items-center justify-center w-8 h-8 transition-colors"
+      style={{
+        borderRadius: 'var(--cork-radius-btn)',
+        background: active ? 'var(--cork-surface-3)' : 'transparent',
+        color: active ? 'var(--cork-brand)' : 'var(--cork-text-mute)',
+      }}
     >
       {children}
     </button>

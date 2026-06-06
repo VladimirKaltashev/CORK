@@ -37,7 +37,7 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md' }: Re
         cost={1}
         disabled={disabled || pending}
         onClick={() => handleClick('crown')}
-        activeClass="bg-amber-50 text-amber-700 ring-amber-300 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-500/60"
+        kind="crown"
         iconClass={iconClass}
         padding={padding}
       />
@@ -48,12 +48,12 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md' }: Re
         cost={2}
         disabled={disabled || pending}
         onClick={() => handleClick('clown')}
-        activeClass="bg-red-50 text-red-700 ring-red-300 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-500/60"
+        kind="clown"
         iconClass={iconClass}
         padding={padding}
       />
       {disabled && (
-        <span className="text-xs text-gray-400 ml-1" title="Войдите, чтобы голосовать">
+        <span className="text-xs ml-1" style={{ color: 'var(--cork-text-mute)' }} title="Войдите, чтобы голосовать">
           Войти
         </span>
       )}
@@ -68,7 +68,7 @@ interface ReactionButtonProps {
   cost: number
   disabled: boolean
   onClick: () => void
-  activeClass: string
+  kind: 'crown' | 'clown'
   iconClass: string
   padding: string
 }
@@ -80,20 +80,37 @@ function ReactionButton({
   cost,
   disabled,
   onClick,
-  activeClass,
+  kind,
   iconClass,
   padding,
 }: ReactionButtonProps) {
-  const base = `inline-flex items-center gap-1 rounded-full ring-1 transition-colors disabled:opacity-50 ${padding}`
-  const cls = active
-    ? `${base} ${activeClass}`
-    : `${base} ring-gray-200 text-gray-600 hover:bg-gray-50 dark:ring-gray-600 dark:text-gray-300 dark:hover:bg-gray-700`
+  const base = `inline-flex items-center gap-1 ring-1 transition-colors disabled:opacity-50 ${padding}`
+  const activeStyle = active
+    ? {
+        background: kind === 'crown' ? 'rgba(198, 255, 61, 0.15)' : 'rgba(255, 45, 120, 0.15)',
+        color: kind === 'crown' ? 'var(--cork-king)' : 'var(--cork-clown)',
+        borderColor: kind === 'crown' ? 'var(--cork-king)' : 'var(--cork-clown)',
+        ring: kind === 'crown' ? 'var(--cork-king)' : 'var(--cork-clown)',
+      }
+    : {
+        background: 'transparent',
+        color: 'var(--cork-text-dim)',
+        borderColor: 'var(--cork-border-light)',
+        ring: 'var(--cork-border-light)',
+      }
+
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={cls}
+      className={base}
+      style={{
+        borderRadius: 'var(--cork-radius-pill)',
+        background: activeStyle.background,
+        color: activeStyle.color,
+        '--tw-ring-color': activeStyle.ring,
+      } as React.CSSProperties}
       title={active ? 'Снять реакцию' : `Стоит ${cost} ${cost === 1 ? 'голос' : 'голоса'}`}
     >
       <Icon className={iconClass} />

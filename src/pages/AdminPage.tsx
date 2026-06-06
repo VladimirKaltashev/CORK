@@ -33,13 +33,14 @@ function RejectModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={onClose}>
       <div
-        className="w-full max-w-md bg-white rounded-md border border-gray-300 p-4"
+        className="w-full max-w-md rounded-md p-4"
+        style={{ background: 'var(--cork-surface)', border: '1px solid var(--cork-border)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">Отклонить достижение</h2>
-        <p className="text-sm text-gray-500 mb-4">«{achievement.title}»</p>
+        <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--cork-text)' }}>Отклонить достижение</h2>
+        <p className="text-sm mb-4" style={{ color: 'var(--cork-text-mute)' }}>«{achievement.title}»</p>
         <form onSubmit={handleSubmit}>
           <FormControl required>
             <FormControl.Label>Причина отклонения</FormControl.Label>
@@ -165,11 +166,11 @@ export function AdminPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl py-6 px-3 dark:text-white">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4 dark:text-white">Админ-панель</h1>
+    <div className="mx-auto max-w-3xl py-6 px-3" style={{ color: 'var(--cork-text)' }}>
+      <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--cork-text)' }}>Админ-панель</h1>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-1 mb-6 border-b" style={{ borderColor: 'var(--cork-border)' }}>
         {(['achievements', 'challenges'] as const).map((tab) => (
           <button
             key={tab}
@@ -180,9 +181,10 @@ export function AdminPage() {
             }}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-[var(--cork-brand)] text-[var(--cork-brand)]'
+                : 'border-transparent hover:text-[var(--cork-text)]'
             }`}
+            style={activeTab === tab ? {} : { color: 'var(--cork-text-dim)' }}
           >
             {tab === 'achievements' ? 'Достижения' : 'Челленджи'}
           </button>
@@ -191,39 +193,41 @@ export function AdminPage() {
 
       {activeTab === 'achievements' ? (
         <>
-          <h2 className="text-lg font-bold text-gray-900 mb-4 dark:text-white">
+          <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--cork-text)' }}>
             Модерация достижений
             {!isLoading && (
-              <span className="text-base font-normal text-gray-400 ml-2">({pending.length} на проверке)</span>
+              <span className="text-base font-normal ml-2" style={{ color: 'var(--cork-text-mute)' }}>({pending.length} на проверке)</span>
             )}
           </h2>
 
           {isLoading ? (
-            <div className="py-10 text-center text-sm text-gray-500">Загрузка...</div>
+            <div className="py-10 text-center text-sm" style={{ color: 'var(--cork-text-mute)' }}>Загрузка...</div>
           ) : pending.length === 0 ? (
-            <div className="border border-dashed border-gray-300 rounded-md py-10 text-center dark:border-gray-700">
-              <span className="text-sm text-gray-500 dark:text-gray-400">Нет достижений на проверке</span>
+            <div className="cork-empty">
+              <span className="text-sm">Нет достижений на проверке</span>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               {pending.map((ach) => (
-                <div key={ach.id} className="border border-gray-300 rounded-md bg-white p-4 dark:bg-gray-800 dark:border-gray-700">
+                <div key={ach.id} className="cork-card">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <CategoryIcon category={ach.category} className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                        <span className="text-xs text-gray-400 uppercase tracking-wide dark:text-gray-400">{ach.category}</span>
-                        <span className="text-xs text-gray-400 dark:text-gray-400">· {ach.year}</span>
+                        <span style={{ color: 'var(--cork-text-dim)' }}>
+                          <CategoryIcon category={ach.category} className="w-5 h-5" />
+                        </span>
+                        <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--cork-text-mute)' }}>{ach.category}</span>
+                        <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>· {ach.year}</span>
                       </div>
-                      <h2 className="text-base font-semibold text-gray-900 dark:text-white">{ach.title}</h2>
-                      <p className="text-sm text-gray-600 mt-1 dark:text-gray-300">{ach.description}</p>
+                      <h2 className="text-base font-semibold" style={{ color: 'var(--cork-text)' }}>{ach.title}</h2>
+                      <p className="text-sm mt-1" style={{ color: 'var(--cork-text-dim)' }}>{ach.description}</p>
 
                       {ach.proofType === 'url' && ach.proofValue && (
                         <a
                           href={ach.proofValue}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="mt-2 inline-block text-xs text-blue-600 hover:underline"
+                          className="cork-link text-xs mt-2 inline-block"
                         >
                           Доказательство (ссылка) →
                         </a>
@@ -236,7 +240,7 @@ export function AdminPage() {
                         />
                       )}
                       {ach.proofType === 'none' && (
-                        <span className="mt-2 inline-block text-xs text-gray-400 dark:text-gray-500">Доказательства нет</span>
+                        <span className="mt-2 inline-block text-xs" style={{ color: 'var(--cork-text-mute)' }}>Доказательства нет</span>
                       )}
                     </div>
 
@@ -256,10 +260,10 @@ export function AdminPage() {
         </>
       ) : (
         <>
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Управление челленджами</h2>
+          <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--cork-text)' }}>Управление челленджами</h2>
 
           {isLoadingChallenges ? (
-            <div className="py-10 text-center text-sm text-gray-500 dark:text-gray-400">Загрузка...</div>
+            <div className="py-10 text-center text-sm" style={{ color: 'var(--cork-text-mute)' }}>Загрузка...</div>
           ) : (
             <>
               {/* Challenges list */}
@@ -267,23 +271,22 @@ export function AdminPage() {
                 {challenges.map((challenge) => (
                   <div
                     key={challenge.id}
-                    className={`border rounded-md bg-white p-4 cursor-pointer transition dark:bg-gray-800 ${
-                      selectedChallenge === challenge.id
-                        ? 'border-indigo-500 ring-1 ring-indigo-500'
-                        : 'border-gray-300 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-500'
+                    className={`cork-card cursor-pointer transition ${
+                      selectedChallenge === challenge.id ? 'ring-1' : ''
                     }`}
+                    style={selectedChallenge === challenge.id ? { borderColor: 'var(--cork-brand)', boxShadow: '0 0 0 1px var(--cork-brand)' } : {}}
                     onClick={() => loadSubmissionsForChallenge(challenge.id)}
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-bold dark:text-white">{challenge.title}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <h3 className="font-bold" style={{ color: 'var(--cork-text)' }}>{challenge.title}</h3>
+                        <p className="text-sm" style={{ color: 'var(--cork-text-dim)' }}>
                           {challenge.status} · {challenge.goalType} ·{' '}
                           {new Date(challenge.startsAt).toLocaleDateString('ru')} –{' '}
                           {new Date(challenge.endsAt).toLocaleDateString('ru')}
                         </p>
                       </div>
-                      <span className="text-sm text-gray-400 dark:text-gray-500">{challenge.category ?? 'Без категории'}</span>
+                      <span className="text-sm" style={{ color: 'var(--cork-text-mute)' }}>{challenge.category ?? 'Без категории'}</span>
                     </div>
                   </div>
                 ))}
@@ -292,9 +295,9 @@ export function AdminPage() {
               {/* Submissions for selected challenge */}
               {selectedChallenge && (
                 <div>
-                  <h3 className="font-bold text-md mb-3 dark:text-white">Сабмиты</h3>
+                  <h3 className="font-bold text-md mb-3" style={{ color: 'var(--cork-text)' }}>Сабмиты</h3>
                   {allSubmissions.length === 0 ? (
-                    <p className="text-gray-500 text-center py-4 dark:text-gray-400">Нет сабмитов</p>
+                    <p className="text-center py-4" style={{ color: 'var(--cork-text-dim)' }}>Нет сабмитов</p>
                   ) : (
                     <div className="space-y-3">
                       {allSubmissions.map((sub) => (

@@ -24,7 +24,8 @@ function StatusBadge({ status }: { status: AchievementStatus }) {
   if (status === 'verified') {
     return (
       <CheckIcon
-        className="ml-auto w-5 h-5 text-green-600 dark:text-green-400"
+        className="ml-auto w-5 h-5"
+        style={{ color: 'var(--cork-king)' }}
         aria-label="Подтверждено"
       />
     )
@@ -33,6 +34,7 @@ function StatusBadge({ status }: { status: AchievementStatus }) {
     return (
       <HourglassIcon
         className="ml-auto w-5 h-5"
+        style={{ color: 'var(--cork-text-mute)' }}
         aria-label="На проверке"
       />
     )
@@ -40,6 +42,7 @@ function StatusBadge({ status }: { status: AchievementStatus }) {
   return (
     <CrossMarkIcon
       className="ml-auto w-5 h-5"
+      style={{ color: 'var(--cork-clown)' }}
       aria-label="Отклонено"
     />
   )
@@ -79,23 +82,23 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
       : achievement.description
 
   return (
-    <div className="border border-gray-300 rounded-md bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+    <div className="cork-card" style={{ padding: '12px' }}>
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 text-gray-700 dark:text-gray-300">
+        <div className="mt-0.5" style={{ color: 'var(--cork-text-dim)' }}>
           <CategoryIcon category={achievement.category} className="w-7 h-7" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1 mb-1">
             <Label variant={meta.variant}>{meta.label}</Label>
-            <span className="text-xs text-gray-500">{formatAchievementDate(getEventDate(achievement.meta), achievement.year)}</span>
+            <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>{formatAchievementDate(getEventDate(achievement.meta), achievement.year)}</span>
             <StatusBadge status={achievement.status} />
           </div>
-          <p className="font-semibold text-gray-900 m-0 dark:text-white">{achievement.title}</p>
+          <p className="font-semibold m-0" style={{ color: 'var(--cork-text)' }}>{achievement.title}</p>
           {descTruncated && (
-            <p className="text-sm text-gray-600 mt-0.5 m-0 dark:text-gray-300">{descTruncated}</p>
+            <p className="text-sm mt-0.5 m-0" style={{ color: 'var(--cork-text-dim)' }}>{descTruncated}</p>
           )}
           {achievement.status === 'rejected' && achievement.rejectionReason && (
-            <p className="text-xs text-red-500 mt-1 m-0">Причина: {achievement.rejectionReason}</p>
+            <p className="text-xs mt-1 m-0" style={{ color: 'var(--cork-clown)' }}>Причина: {achievement.rejectionReason}</p>
           )}
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {proofHref && (
@@ -103,7 +106,7 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
                 href={proofHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-blue-600 hover:underline"
+                className="cork-link text-xs"
               >
                 Открыть доказательство
               </a>
@@ -124,14 +127,15 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
       </div>
 
       {showRejectForm && (
-        <div className="mt-3 border-t border-gray-200 pt-3">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Причина отклонения (необязательно)</label>
+        <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--cork-border-light)' }}>
+          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--cork-text-dim)' }}>Причина отклонения (необязательно)</label>
           <textarea
             value={rejectionReason}
             onChange={(e) => setRejectionReason(e.target.value)}
             rows={2}
             placeholder="Укажите причину..."
-            className="w-full border border-gray-300 rounded px-2 py-1 text-sm resize-none"
+            className="w-full rounded px-2 py-1 text-sm resize-none"
+            style={{ border: '1px solid var(--cork-border)', background: 'var(--cork-surface)', color: 'var(--cork-text)' }}
           />
           <div className="flex gap-2 mt-2">
             <Button size="small" onClick={() => setShowRejectForm(false)}>Отмена</Button>

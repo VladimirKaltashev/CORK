@@ -8,28 +8,29 @@ interface SubmissionCardProps {
 
 export function SubmissionCard({ submission, onDelete, isAdmin }: SubmissionCardProps) {
   return (
-    <div className="rounded-lg border border-gray-200 p-3 bg-white dark:bg-gray-800 dark:border-gray-700">
+    <div className="cork-card" style={{ padding: '12px' }}>
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-sm">{submission.userName ?? 'Аноним'}</span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="font-bold text-sm" style={{ color: 'var(--cork-text)' }}>{submission.userName ?? 'Аноним'}</span>
+          <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>
             {new Date(submission.submittedAt).toLocaleDateString('ru')}
           </span>
         </div>
         {isAdmin && onDelete && (
           <button
             onClick={() => onDelete(submission.id)}
-            className="text-red-500 text-sm hover:text-red-700"
+            className="text-sm hover:underline"
+            style={{ color: 'var(--cork-clown)' }}
           >
             Удалить
           </button>
         )}
       </div>
 
-      <p className="mt-1 text-sm">{submission.description}</p>
+      <p className="mt-1 text-sm" style={{ color: 'var(--cork-text)' }}>{submission.description}</p>
 
       {submission.value !== null && submission.value !== undefined && (
-        <span className="inline-block mt-1 bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded dark:bg-green-900/40 dark:text-green-400">
+        <span className="inline-block mt-1 text-xs font-bold px-2 py-1 rounded" style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--cork-king)' }}>
           +{submission.value}
         </span>
       )}
@@ -50,7 +51,7 @@ export function SubmissionCard({ submission, onDelete, isAdmin }: SubmissionCard
               href={submission.proofValue}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-500 text-sm underline"
+              className="cork-link text-sm"
             >
               Ссылка на доказательство
             </a>

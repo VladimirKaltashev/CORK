@@ -34,7 +34,7 @@ function FriendButton({ targetId }: { targetId: string }) {
           catch { /* shown by store */ }
           finally { setBusy(false) }
         }}
-        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
+        className="cork-btn-primary text-sm px-3 py-1"
       >
         {busy ? '...' : 'Добавить'}
       </button>
@@ -42,7 +42,7 @@ function FriendButton({ targetId }: { targetId: string }) {
   }
 
   if (rel.direction === 'outgoing' && rel.record.status === 'pending') {
-    return <span className="text-xs text-gray-400">Запрос отправлен</span>
+    return <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>Запрос отправлен</span>
   }
 
   if (rel.direction === 'incoming' && rel.record.status === 'pending') {
@@ -55,7 +55,7 @@ function FriendButton({ targetId }: { targetId: string }) {
           try { await acceptRequest(rel.record.id) }
           finally { setBusy(false) }
         }}
-        className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
+        className="cork-btn-primary text-sm px-3 py-1"
       >
         {busy ? '...' : 'Принять'}
       </button>
@@ -72,7 +72,7 @@ function FriendButton({ targetId }: { targetId: string }) {
           try { await removeRecord(rel.record.id) }
           finally { setBusy(false) }
         }}
-        className="text-sm px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+        className="cork-btn text-sm px-3 py-1"
       >
         {busy ? '...' : 'Удалить'}
       </button>
@@ -111,7 +111,7 @@ export function SearchPage() {
 
   return (
     <div className="mx-auto max-w-2xl py-6 px-3">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">Поиск пользователей</h1>
+      <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--cork-text)' }}>Поиск пользователей</h1>
 
       <TextInput
         block
@@ -122,26 +122,26 @@ export function SearchPage() {
       />
 
       {isSearching && (
-        <div className="py-4 text-center text-sm text-gray-500">Поиск...</div>
+        <div className="py-4 text-center text-sm" style={{ color: 'var(--cork-text-mute)' }}>Поиск...</div>
       )}
 
       {!isSearching && query.trim() && results.length === 0 && (
-        <div className="py-4 text-center text-sm text-gray-500">Никого не найдено</div>
+        <div className="py-4 text-center text-sm" style={{ color: 'var(--cork-text-mute)' }}>Никого не найдено</div>
       )}
 
       {results.length > 0 && (
         <div className="flex flex-col gap-2">
           {results.map((u) => (
-            <div key={u.id} className="flex items-center justify-between gap-3 border border-gray-300 rounded-md bg-white p-3">
+            <div key={u.id} className="cork-user-card">
               <Link to={`/profile/${u.id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity">
                 {u.avatar ? (
-                  <img src={u.avatar} alt={u.name} className="w-10 h-10 rounded-full object-cover ring-1 ring-gray-200 flex-shrink-0" />
+                  <img src={u.avatar} alt={u.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" style={{ boxShadow: '0 0 0 1px var(--cork-border)' }} />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                  <div className="cork-avatar w-10 h-10" style={{ background: 'var(--cork-brand-2)', color: 'var(--cork-text)' }}>
                     {getInitials(u.name)}
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-900 truncate">{u.name}</span>
+                <span className="text-sm font-medium truncate" style={{ color: 'var(--cork-text)' }}>{u.name}</span>
               </Link>
               <FriendButton targetId={u.id} />
             </div>

@@ -1,0 +1,75 @@
+/*******************************************************************************
+ * THEME TOKENS — Universal CSS variables for all CORK themes
+ * Define base (light) values; .dark overrides for dark theme;
+ * [data-theme="acid"] overrides in themes/acid.css
+ ******************************************************************************/
+
+:root {
+  /* ── Surfaces ── */
+  --cork-bg:          #f9fafb;
+  --cork-surface:     #ffffff;
+  --cork-surface-2:   #f3f4f6;
+  --cork-surface-3:   #e5e7eb;
+
+  /* ── Text ── */
+  --cork-text:        #111827;
+  --cork-text-dim:    #6b7280;
+  --cork-text-mute:   #9ca3af;
+
+  /* ── Brand ── */
+  --cork-brand:       #4f46e5;
+  --cork-brand-hover: #4338ca;
+  --cork-brand-2:     #f59e0b;
+  --cork-king:        #d97706;
+  --cork-clown:       #ef4444;
+
+  /* ── Borders & Frames ── */
+  --cork-border:      #e5e7eb;
+  --cork-border-light:#f3f4f6;
+  --cork-frame:       #4f46e5;
+  --cork-frame-light: #c7d2fe;
+
+  /* ── Radii ── */
+  --cork-radius-card: 0.5rem;
+  --cork-radius-btn:  0.375rem;
+  --cork-radius-pill: 9999px;
+
+  /* ── Typography ── */
+  --cork-font-display: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --cork-font-body:    system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* ── Shadows ── */
+  --cork-shadow:       0 1px 3px rgba(0,0,0,0.1);
+  --cork-shadow-lg:    0 4px 12px rgba(0,0,0,0.08);
+  --cork-glow:         rgba(79, 70, 229, 0.15);
+
+  /* ── Timing ── */
+  --cork-ease: cubic-bezier(.22, .61, .36, 1);
+
+  /* ── Misc ── */
+  --cork-backdrop: rgba(255,255,255,0.85);
+}
+
+/* ── Dark overrides ── */
+.dark {
+  --cork-bg:          #111827;
+  --cork-surface:     #1f2937;
+  --cork-surface-2:   #374151;
+  --cork-surface-3:   #4b5563;
+  --cork-text:        #f3f4f6;
+  --cork-text-dim:    #9ca3af;
+  --cork-text-mute:   #6b7280;
+  --cork-brand:       #818cf8;
+  --cork-brand-hover: #a5b4fc;
+  --cork-brand-2:     #fbbf24;
+  --cork-king:        #fbbf24;
+  --cork-clown:       #f87171;
+  --cork-border:      #374151;
+  --cork-border-light:#4b5563;
+  --cork-frame:       #818cf8;
+  --cork-frame-light: #6366f1;
+  --cork-backdrop:    rgba(17,24,39,0.85);
+  --cork-shadow:      0 1px 3px rgba(0,0,0,0.4);
+  --cork-shadow-lg:   0 4px 12px rgba(0,0,0,0.3);
+  --cork-glow:        rgba(129, 140, 248, 0.15);
+}

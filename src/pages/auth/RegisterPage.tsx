@@ -35,24 +35,28 @@ export function RegisterPage() {
     }
   }
 
+  const inputBase = 'w-full rounded-md border px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-[var(--cork-brand)]'
+  const inputStyle = { background: 'var(--cork-surface)', color: 'var(--cork-text)' }
+
   return (
     <div className="mx-auto mt-12 w-full max-w-sm">
-      <h1 className="mb-6 text-center text-2xl font-bold text-gray-900 dark:text-white">Регистрация</h1>
+      <h1 className="mb-6 text-center text-2xl font-bold" style={{ color: 'var(--cork-text)' }}>Регистрация</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         {FIELDS.map(({ name, label, type, autoComplete }) => (
           <div key={name}>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
+            <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--cork-text-dim)' }}>{label}</label>
             <input
               {...register(name)}
               type={type}
               autoComplete={autoComplete}
               className={cn(
-                'w-full rounded-md border px-3 py-2 text-sm outline-none transition bg-white text-gray-900 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500',
+                inputBase,
                 errors[name]
-                  ? 'border-red-400 focus:ring-red-400 dark:border-red-500'
-                  : 'border-gray-300 dark:border-gray-700',
+                  ? 'border-red-400 focus:ring-red-400'
+                  : 'border-gray-300',
               )}
+              style={inputStyle}
             />
             {errors[name] && <p className="mt-1 text-xs text-red-500">{errors[name]?.message}</p>}
           </div>
@@ -61,15 +65,15 @@ export function RegisterPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 rounded-md bg-indigo-600 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+          className="cork-btn-primary mt-2"
         >
           {isSubmitting ? 'Создание...' : 'Зарегистрироваться'}
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+      <p className="mt-4 text-center text-sm" style={{ color: 'var(--cork-text-dim)' }}>
         Уже есть аккаунт?{' '}
-        <Link to={ROUTES.LOGIN} className="text-indigo-600 hover:underline dark:text-indigo-400">
+        <Link to={ROUTES.LOGIN} className="cork-link">
           Войти
         </Link>
       </p>

@@ -36,35 +36,37 @@ export function CreateAchievementForm() {
     } catch { /* обрабатывается interceptor */ }
   }
 
+  const inputBase = 'w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-[var(--cork-brand)]'
+  const inputStyle = { background: 'var(--cork-surface-2)', color: 'var(--cork-text)' }
   const inputClass = (hasError: boolean) => cn(
-    'w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white',
-    hasError ? 'border-red-400' : 'border-gray-300 dark:border-gray-600',
+    inputBase,
+    hasError ? 'border-red-400' : 'border-gray-300',
   )
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3" noValidate>
       <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Название</label>
-        <input {...register('title')} type="text" placeholder="Победитель ВсОШ" className={inputClass(!!errors.title)} />
+        <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--cork-text-dim)' }}>Название</label>
+        <input {...register('title')} type="text" placeholder="Победитель ВсОШ" className={inputClass(!!errors.title)} style={inputStyle} />
         {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>}
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Олимпиада</label>
-        <input {...register('olympiadName')} type="text" placeholder="ВсОШ 2026" className={inputClass(!!errors.olympiadName)} />
+        <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--cork-text-dim)' }}>Олимпиада</label>
+        <input {...register('olympiadName')} type="text" placeholder="ВсОШ 2026" className={inputClass(!!errors.olympiadName)} style={inputStyle} />
         {errors.olympiadName && <p className="mt-1 text-xs text-red-500">{errors.olympiadName.message}</p>}
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Место</label>
-        <input {...register('place', { valueAsNumber: true })} type="number" min="1" placeholder="1" className={inputClass(!!errors.place)} />
+        <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--cork-text-dim)' }}>Место</label>
+        <input {...register('place', { valueAsNumber: true })} type="number" min="1" placeholder="1" className={inputClass(!!errors.place)} style={inputStyle} />
         {errors.place && <p className="mt-1 text-xs text-red-500">{errors.place.message}</p>}
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Описание</label>
-        <input {...register('description')} type="text" placeholder="Первое место по математике" className={inputClass(!!errors.description)} />
+        <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--cork-text-dim)' }}>Описание</label>
+        <input {...register('description')} type="text" placeholder="Первое место по математике" className={inputClass(!!errors.description)} style={inputStyle} />
         {errors.description && <p className="mt-1 text-xs text-red-500">{errors.description.message}</p>}
       </div>
       <button type="submit" disabled={isSubmitting}
-        className="mt-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60 transition-colors">
+        className="cork-btn-primary mt-1">
         {isSubmitting ? 'Создание...' : 'Добавить достижение'}
       </button>
     </form>

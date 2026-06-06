@@ -13,15 +13,15 @@ export function ChallengeLeaderboard() {
     }
   }, [currentChallenge?.id, loadLeaderboard])
 
-  if (isLoading) return <div className="text-center py-4">Загрузка лидерборда...</div>
-  if (!leaderboard.length) return <div className="text-center py-4 text-gray-500">Пока нет участников</div>
+  if (isLoading) return <div className="text-center py-4" style={{ color: 'var(--cork-text-mute)' }}>Загрузка лидерборда...</div>
+  if (!leaderboard.length) return <div className="text-center py-4" style={{ color: 'var(--cork-text-mute)' }}>Пока нет участников</div>
 
   return (
-    <div className="rounded-xl border border-gray-200 overflow-hidden dark:border-gray-700 dark:bg-gray-800">
-      <h3 className="font-bold text-lg px-4 py-3 bg-gray-50 border-b flex items-center gap-2 dark:bg-gray-900 dark:border-gray-700 dark:text-white"><CupIcon className="w-5 h-5" />Лидерборд</h3>
+    <div className="rounded-xl overflow-hidden" style={{ background: 'var(--cork-surface)', border: '1px solid var(--cork-border)' }}>
+      <h3 className="font-bold text-lg px-4 py-3 border-b flex items-center gap-2" style={{ background: 'var(--cork-surface-2)', borderColor: 'var(--cork-border)', color: 'var(--cork-text)' }}><CupIcon className="w-5 h-5" />Лидерборд</h3>
       <table className="w-full">
         <thead>
-          <tr className="text-left text-sm text-gray-500 dark:text-gray-400">
+          <tr className="text-left text-sm" style={{ color: 'var(--cork-text-dim)' }}>
             <th className="px-4 py-2 w-12">#</th>
             <th className="px-4 py-2">Игрок</th>
             <th className="px-4 py-2 text-right">Прогресс</th>
@@ -30,13 +30,13 @@ export function ChallengeLeaderboard() {
         </thead>
         <tbody>
           {leaderboard.map((row, index) => (
-            <tr key={row.userId} className="border-t hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50">
+            <tr key={row.userId} className="border-t transition-colors" style={{ borderColor: 'var(--cork-border-light)' }}>
               <td className="px-4 py-2 font-bold">
                 {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
               </td>
               <td className="px-4 py-2">{row.userId === user?.id ? 'Вы' : row.userName}</td>
               <td className="px-4 py-2 text-right font-bold">{row.totalProgress}</td>
-              <td className="px-4 py-2 text-right text-gray-500 dark:text-gray-400">{row.submissionCount}</td>
+              <td className="px-4 py-2 text-right" style={{ color: 'var(--cork-text-mute)' }}>{row.submissionCount}</td>
             </tr>
           ))}
         </tbody>

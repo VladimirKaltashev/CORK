@@ -20,17 +20,23 @@ export function BudgetWidget({ variant = 'compact' }: BudgetWidgetProps) {
 
   if (!token) return null
 
-  const lowColor =
+  const lowStyle =
     remaining === 0
-      ? 'text-red-600 bg-red-50 ring-red-200 dark:text-red-300 dark:bg-red-900/30 dark:ring-red-700'
+      ? { color: 'var(--cork-clown)', background: 'rgba(255, 45, 120, 0.1)', ring: 'var(--cork-clown)' }
       : remaining <= 2
-        ? 'text-amber-700 bg-amber-50 ring-amber-200 dark:text-amber-300 dark:bg-amber-900/30 dark:ring-amber-700'
-        : 'text-gray-700 bg-gray-50 ring-gray-200 dark:text-gray-200 dark:bg-gray-700 dark:ring-gray-600'
+        ? { color: 'var(--cork-brand-2)', background: 'rgba(198, 255, 61, 0.1)', ring: 'var(--cork-brand-2)' }
+        : { color: 'var(--cork-text)', background: 'var(--cork-surface-3)', ring: 'var(--cork-border-light)' }
 
   if (variant === 'compact') {
     return (
       <div
-        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ${lowColor}`}
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium ring-1"
+        style={{
+          borderRadius: 'var(--cork-radius-pill)',
+          color: lowStyle.color,
+          background: lowStyle.background,
+          '--tw-ring-color': lowStyle.ring,
+        } as React.CSSProperties}
         title="Осталось голосов на этой неделе (сброс в понедельник)"
       >
         <span className="text-sm leading-none">⭐</span>
@@ -40,12 +46,20 @@ export function BudgetWidget({ variant = 'compact' }: BudgetWidgetProps) {
   }
 
   return (
-    <div className={`flex items-center justify-between gap-3 rounded-md px-3 py-2 ring-1 ${lowColor}`}>
+    <div
+      className="flex items-center justify-between gap-3 px-3 py-2 ring-1"
+      style={{
+        borderRadius: 'var(--cork-radius-card)',
+        color: lowStyle.color,
+        background: lowStyle.background,
+        '--tw-ring-color': lowStyle.ring,
+      } as React.CSSProperties}
+    >
       <div className="flex items-center gap-2">
         <span className="text-lg leading-none">⭐</span>
         <span className="text-sm font-medium">Осталось голосов: {remaining} из 10</span>
       </div>
-      <span className="text-xs opacity-70">Сброс в понедельник</span>
+      <span className="text-xs" style={{ opacity: 0.7 }}>Сброс в понедельник</span>
     </div>
   )
 }

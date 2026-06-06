@@ -40,12 +40,12 @@ describe('ThemeApplier', () => {
     await waitFor(() => expect(document.documentElement.classList.contains('dark')).toBe(false))
   })
 
-  it('applies data-theme="acid" and dark class when theme is acid', async () => {
+  it('applies data-theme="acid" without dark class when theme is acid', async () => {
     useThemeStore.setState({ theme: 'acid' })
     render(<ThemeApplier />)
     await waitFor(() => {
       expect(document.documentElement.getAttribute('data-theme')).toBe('acid')
-      expect(document.documentElement.classList.contains('dark')).toBe(true)
+      expect(document.documentElement.classList.contains('dark')).toBe(false)
     })
   })
 

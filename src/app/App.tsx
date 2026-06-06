@@ -15,7 +15,9 @@ import { SettingsPage } from '@/pages/SettingsPage'
 import { ChallengesPage } from '@/pages/ChallengesPage'
 import { ChallengeDetailPage } from '@/pages/ChallengeDetailPage'
 import { ThemeApplier, useThemeStore } from '@/entities/theme'
-import '@/styles/acid-pop.css'
+import '@/styles/theme-tokens.css'
+import '@/styles/theme-components.css'
+import '@/styles/themes/acid.css'
 
 function themeToColorMode(theme: 'light' | 'dark' | 'system' | 'acid'): 'day' | 'night' | 'auto' {
   if (theme === 'light') return 'day'

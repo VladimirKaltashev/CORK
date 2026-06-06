@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Button } from '@primer/react'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { supabase } from '@/shared/lib/supabase'
@@ -12,9 +11,7 @@ import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { ChallengeBanner } from '@/features/challenges'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
-import { useThemeStore } from '@/entities/theme'
 import type { AchievementCategory, ProofType } from '@/shared/types'
-import { FeedPageAcid } from './FeedPageAcid'
 
 function useDismissibleBanner() {
   const [isDismissed, setIsDismissed] = useState(() => {
@@ -77,10 +74,19 @@ function UserAvatar({ userId, name, avatar }: { userId: string; name: string; av
         <img
           src={avatar}
           alt={name}
-          className="w-10 h-10 rounded-full object-cover ring-1 ring-gray-200 hover:ring-indigo-400 transition-all"
+          className="w-10 h-10 object-cover transition-all"
+          style={{ borderRadius: 'var(--cork-radius-pill)', border: '1px solid var(--cork-border-light)' }}
         />
       ) : (
-        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold ring-1 ring-gray-200 hover:ring-indigo-400 transition-all select-none">
+        <div
+          className="w-10 h-10 flex items-center justify-center text-sm font-semibold transition-all select-none"
+          style={{
+            borderRadius: 'var(--cork-radius-pill)',
+            background: 'var(--cork-surface-3)',
+            color: 'var(--cork-brand)',
+            border: '1px solid var(--cork-border-light)',
+          }}
+        >
           {getInitials(name)}
         </div>
       )}
@@ -150,7 +156,6 @@ async function loadPage(
 type FeedMode = 'all' | 'friends'
 
 export function FeedPage() {
-  const theme = useThemeStore((s) => s.theme)
   const { user } = useAuthStore()
   const friendsStore = useFriendsStore()
   const loadReactions = useReactionsStore((s) => s.loadForAchievements)
@@ -218,29 +223,21 @@ export function FeedPage() {
     }
   }
 
-  if (theme === 'acid') {
-    return <FeedPageAcid />
-  }
-
   return (
-    <div className="flex gap-8 max-w-7xl mx-auto px-4 py-6">
-      {/* Main content — wide feed */}
-      <main className="flex-1 min-w-0">
+    <div className="cork-shell">
+      {/* Main content */}
+      <main className="cork-main">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Лента достижений</h1>
-          {/* Mode toggle for mobile/small screens */}
-          <div className="flex rounded-md border border-gray-300 overflow-hidden text-sm dark:border-gray-700">
+          <h1 className="cork-head">Лента достижений</h1>
+          {/* Mode toggle */}
+          <div className="cork-tabs">
             {(['all', 'friends'] as FeedMode[]).map((mode) => (
               <button
                 key={mode}
                 type="button"
                 onClick={() => handleModeChange(mode)}
-                className={`px-3 py-1.5 transition-colors ${
-                  feedMode === mode
-                    ? 'bg-indigo-600 text-white font-semibold'
-                    : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
-                }`}
+                className={`cork-tab ${feedMode === mode ? 'active' : ''}`}
               >
                 {mode === 'all' ? 'Все' : 'Друзья'}
               </button>
@@ -252,30 +249,28 @@ export function FeedPage() {
         {isLoading ? (
           <div className="flex flex-col gap-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800 animate-pulse">
+              <div key={i} className="cork-card cork-skeleton">
                 <div className="flex gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
+                  <div className="w-10 h-10 flex-shrink-0 cork-skeleton" style={{ borderRadius: 'var(--cork-radius-pill)' }} />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full" />
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+                    <div className="h-4 w-1/3 cork-skeleton" />
+                    <div className="h-3 w-full cork-skeleton" />
+                    <div className="h-3 w-2/3 cork-skeleton" />
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : items.length === 0 ? (
-          <div className="border border-dashed border-gray-300 rounded-md py-10 text-center">
-            <span className="text-sm text-gray-500">
-              {feedMode === 'friends'
-                ? 'У вас пока нет друзей с достижениями'
-                : 'Достижений пока нет'}
-            </span>
+          <div className="cork-empty">
+            {feedMode === 'friends'
+              ? 'У вас пока нет друзей с достижениями'
+              : 'Достижений пока нет'}
           </div>
         ) : (
           <div className="flex flex-col gap-3">
             {items.map((item) => (
-              <div key={item.id} className="border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+              <div key={item.id} className="cork-card">
                 <div className="flex gap-3">
                   {/* Avatar */}
                   <UserAvatar userId={item.userId} name={item.userName} avatar={item.userAvatar} />
@@ -287,16 +282,17 @@ export function FeedPage() {
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <Link
                             to={`/profile/${item.userId}`}
-                            className="text-sm font-semibold text-gray-900 hover:text-indigo-600 transition-colors dark:text-white dark:hover:text-indigo-400"
+                            className="cork-link"
+                            style={{ fontSize: '14px', fontWeight: 600 }}
                           >
                             {item.userName}
                           </Link>
-                          <span className="text-xs text-gray-400">·</span>
-                          <span className="text-xs text-gray-400">{formatRelativeTime(item.createdAt)}</span>
+                          <span className="cork-meta">·</span>
+                          <span className="cork-meta">{formatRelativeTime(item.createdAt)}</span>
                         </div>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-xs text-gray-400 uppercase tracking-wide">{item.category}</span>
-                          <span className="text-xs text-gray-400">· {formatAchievementDate(item.eventDate, item.year)}</span>
+                          <span className="cork-meta">{item.category}</span>
+                          <span className="cork-meta">· {formatAchievementDate(item.eventDate, item.year)}</span>
                         </div>
                       </div>
 
@@ -305,15 +301,16 @@ export function FeedPage() {
                       </div>
                     </div>
 
-                    <h2 className="text-base font-semibold text-gray-900 mt-2 dark:text-white">{item.title}</h2>
-                    <p className="text-sm text-gray-600 mt-0.5 dark:text-gray-300">{item.description}</p>
+                    <h2 className="cork-title">{item.title}</h2>
+                    <p className="cork-desc">{item.description}</p>
 
                     {item.proofType === 'url' && item.proofValue && (
                       <a
                         href={item.proofValue}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-2 inline-block text-xs text-blue-600 hover:underline"
+                        className="cork-link"
+                        style={{ fontSize: '12px', marginTop: '8px', display: 'inline-block' }}
                       >
                         Доказательство →
                       </a>
@@ -322,7 +319,8 @@ export function FeedPage() {
                       <img
                         src={item.proofValue}
                         alt="Доказательство"
-                        className="mt-2 h-28 w-auto rounded object-cover"
+                        className="mt-2 h-28 w-auto object-cover"
+                        style={{ borderRadius: 'var(--cork-radius-btn)', border: '1px solid var(--cork-border-light)' }}
                       />
                     )}
                   </div>
@@ -332,45 +330,46 @@ export function FeedPage() {
 
             {hasMore && (
               <div className="flex justify-center pt-2">
-                <Button onClick={handleLoadMore} disabled={loadingMore}>
+                <button
+                  type="button"
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="cork-btn-primary"
+                >
                   {loadingMore ? 'Загрузка...' : 'Загрузить ещё'}
-                </Button>
+                </button>
               </div>
             )}
           </div>
         )}
       </main>
 
-      {/* Sidebar — hidden on mobile/tablet */}
-      <aside className="w-72 flex-shrink-0 hidden lg:block">
+      {/* Sidebar */}
+      <aside className="cork-sidebar">
         <div className="sticky top-24 space-y-6">
-          {/* Budget — only for logged in users */}
+          {/* Budget */}
           {user && (
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3 dark:text-white">Бюджет</h3>
+            <div className="cork-panel">
+              <h3 className="cork-section-title">Бюджет</h3>
               <BudgetWidget />
             </div>
           )}
 
-          {/* Create button — only for logged in users */}
+          {/* Create */}
           {user && (
-            <div>
+            <div className="cork-panel">
               <InlineCreateCard />
             </div>
           )}
 
-          {/* Category filters */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3 dark:text-white">Фильтры</h3>
-            <div className="space-y-2">
+          {/* Filters */}
+          <div className="cork-panel">
+            <h3 className="cork-section-title">Фильтры</h3>
+            <div className="mt-2 space-y-1">
               {FILTERS.map((f) => (
                 <label
                   key={f.value}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors ${
-                    category === f.value
-                      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }`}
+                  className={`cork-filter ${category === f.value ? 'active' : ''}`}
                 >
                   <input
                     type="radio"
@@ -378,21 +377,22 @@ export function FeedPage() {
                     value={f.value}
                     checked={category === f.value}
                     onChange={() => handleFilterChange(f.value)}
-                    className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                    className="w-4 h-4"
+                    style={{ accentColor: 'var(--cork-brand)' }}
                   />
-                  <span className="text-sm">{f.label}</span>
+                  <span>{f.label}</span>
                 </label>
               ))}
             </div>
           </div>
 
-          {/* Challenge banner — dismissible */}
+          {/* Challenge */}
           {!isDismissed && (
-            <div className="relative border border-gray-300 rounded-md bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="cork-panel relative">
               <button
                 type="button"
                 onClick={dismiss}
-                className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                className="cork-dismiss"
                 title="Скрыть"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -400,7 +400,7 @@ export function FeedPage() {
                 </svg>
               </button>
               <ChallengeBanner />
-              <p className="text-xs text-gray-400 mt-2">Можно отключить в настройках</p>
+              <p className="cork-meta mt-2">Можно отключить в настройках</p>
             </div>
           )}
         </div>
