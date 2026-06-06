@@ -92,6 +92,7 @@ export interface ExtendedUserProfile {
 export type AchievementCategory = 'olympiad' | 'academic' | 'it' | 'creative' | 'sport' | 'movies' | 'games' | 'other'
 export type AchievementStatus = 'pending' | 'verified' | 'rejected'
 export type ProofType = 'photo' | 'url' | 'none'
+export type ClaimAngle = 'king' | 'clown' | 'judge'
 
 export interface Achievement {
   id: string
@@ -103,6 +104,7 @@ export interface Achievement {
   proofType: ProofType
   proofValue?: string
   status: AchievementStatus
+  claimAngle?: ClaimAngle
   rejectionReason?: string
   meta: Record<string, unknown>
   createdAt: string

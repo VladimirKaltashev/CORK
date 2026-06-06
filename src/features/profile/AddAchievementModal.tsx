@@ -4,7 +4,7 @@ import { useAuthStore } from '@/entities/auth'
 import { useProfileStore } from '@/entities/profile'
 import { showToast } from '@/shared/lib/toast'
 import { CategoryIcon, CalendarIcon } from '@/shared/ui'
-import type { AchievementCategory, ProofType } from '@/shared/types'
+import type { AchievementCategory, ClaimAngle, ProofType } from '@/shared/types'
 
 const CATEGORIES: { value: AchievementCategory; label: string }[] = [
   { value: 'olympiad', label: 'Олимпиады' },
@@ -17,6 +17,20 @@ const CATEGORIES: { value: AchievementCategory; label: string }[] = [
   { value: 'other',    label: 'Другое' },
 ]
 
+const ANGLES: { value: ClaimAngle; label: string; emoji: string }[] = [
+  { value: 'king',  label: 'На корону', emoji: '👑' },
+  { value: 'clown', label: 'На клоуна', emoji: '🤡' },
+  { value: 'judge', label: 'Рассудите', emoji: '⚖️' },
+]
+
+const PLACEHOLDERS = [
+  'Что выносим? Достижение, фейл, понт, находку — что угодно.',
+  'Собрал куб за 14.8 — король или повезло?',
+  'Официант уронил 10 тарелок. Легендарный фейл?',
+  'Нашёл проект, который заслуживает короны.',
+  'Стартап заявил, что заменит учителей. Гений или клоун?',
+]
+
 const currentYear = new Date().getFullYear()
 const MIN_YEAR = 2000
 const MAX_TEXT = 600
@@ -24,6 +38,15 @@ const TITLE_LIMIT = 100
 
 function getInitials(name: string): string {
   return name.split(' ').map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase() || '?'
+}
+
+function useRotatingPlaceholder() {
+  const [idx, setIdx] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setIdx((i) => (i + 1) % PLACEHOLDERS.length), 4000)
+    return () => clearInterval(id)
+  }, [])
+  return PLACEHOLDERS[idx]
 }
 
 interface AddAchievementModalProps {
@@ -38,12 +61,15 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const [text, setText] = useState('')
+  const [claimAngle, setClaimAngle] = useState<ClaimAngle>('judge')
   const [category, setCategory] = useState<AchievementCategory>('other')
   const [year, setYear] = useState(currentYear)
   const [eventDate, setEventDate] = useState<string | null>(null)
   const [proofType, setProofType] = useState<ProofType>('none')
   const [proofValue, setProofValue] = useState<string | undefined>()
   const [submitting, setSubmitting] = useState(false)
+
+  const placeholder = useRotatingPlaceholder()
 
   useEffect(() => {
     textareaRef.current?.focus()
@@ -92,12 +118,13 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
         year: effectiveYear,
         proofType,
         proofValue: proofValue?.trim() || undefined,
+        claimAngle,
         meta,
       })
-      showToast('success', 'Отправлено модератору на проверку')
+      showToast('success', 'Вынесено на суд!')
       onClose()
     } catch {
-      showToast('error', 'Не удалось добавить достижение')
+      showToast('error', 'Не удалось вынести на суд')
     } finally {
       setSubmitting(false)
     }
@@ -123,7 +150,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--cork-border-light)' }}>
-          <span className="text-sm" style={{ color: 'var(--cork-text-mute)' }}>Новое достижение</span>
+          <span className="text-sm font-semibold" style={{ color: 'var(--cork-text)' }}>На суд</span>
           <button
             type="button"
             onClick={onClose}
@@ -155,10 +182,38 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                 onChange={(e) => setText(e.target.value.slice(0, MAX_TEXT))}
                 onKeyDown={handleKeyDown}
                 rows={4}
-                placeholder="Чем поделишься? Например: «Выиграл городскую олимпиаду по физике, 1 место»"
+                placeholder={placeholder}
                 className="w-full resize-none border-0 outline-none text-base leading-relaxed bg-transparent"
                 style={{ color: 'var(--cork-text)' }}
               />
+            </div>
+          </div>
+
+          {/* Claim angle chips */}
+          <div className="mt-3">
+            <div className="flex flex-wrap gap-1.5">
+              {ANGLES.map((a) => {
+                const active = a.value === claimAngle
+                return (
+                  <button
+                    key={a.value}
+                    type="button"
+                    onClick={() => setClaimAngle(a.value)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs transition-colors"
+                    style={{
+                      borderRadius: 'var(--cork-radius-pill)',
+                      border: '1px solid',
+                      borderColor: active ? 'var(--cork-brand)' : 'var(--cork-border)',
+                      background: active ? 'var(--cork-surface-2)' : 'var(--cork-surface)',
+                      color: active ? 'var(--cork-brand)' : 'var(--cork-text-dim)',
+                      fontWeight: active ? 600 : 400,
+                    }}
+                  >
+                    <span>{a.emoji}</span>
+                    <span>{a.label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -343,11 +398,11 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
               style={{
                 borderRadius: 'var(--cork-radius-pill)',
                 background: canSubmit ? 'var(--cork-brand)' : 'var(--cork-surface-3)',
-                color: canSubmit ? 'var(--cork-bg)' : 'var(--cork-text-mute)',
+                color: canSubmit ? 'var(--cork-brand-ink)' : 'var(--cork-text-mute)',
                 cursor: canSubmit ? 'pointer' : 'not-allowed',
               }}
             >
-              {submitting ? 'Отправка...' : 'Опубликовать'}
+              {submitting ? 'Отправка...' : 'Вынести на суд'}
             </button>
           </div>
         </div>

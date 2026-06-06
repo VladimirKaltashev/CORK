@@ -46,6 +46,7 @@ interface FeedItem {
   userName: string
   userAvatar: string | null
   category: AchievementCategory
+  claimAngle: string
   title: string
   description: string
   year: number
@@ -75,6 +76,25 @@ function shouldShowDescription(title: string, description: string): boolean {
 
 function getInitials(name: string): string {
   return name.split(' ').map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase() || '?'
+}
+
+const ANGLE_META: Record<string, { label: string; emoji: string; color: string }> = {
+  king:  { label: 'На корону', emoji: '👑', color: 'var(--cork-king)' },
+  clown: { label: 'На клоуна', emoji: '🤡', color: 'var(--cork-clown)' },
+  judge: { label: 'Рассудите', emoji: '⚖️', color: 'var(--cork-text-mute)' },
+}
+
+function ClaimAngleBadge({ angle }: { angle: string }) {
+  const meta = ANGLE_META[angle] ?? ANGLE_META.judge
+  return (
+    <span
+      className="inline-flex items-center gap-0.5 text-[11px] font-semibold"
+      style={{ color: meta.color }}
+    >
+      <span>{meta.emoji}</span>
+      <span>{meta.label}</span>
+    </span>
+  )
 }
 
 function UserAvatar({ userId, name, avatar }: { userId: string; name: string; avatar: string | null }) {
@@ -144,23 +164,24 @@ async function loadPage(
     (profilesData ?? []).map((p) => [p.id, { name: p.name, avatar: p.avatar ?? null }])
   )
 
-  return {
-    items: achData.map((row) => ({
-      id: row.id,
-      userId: row.user_id,
-      userName: profileMap[row.user_id]?.name ?? 'Пользователь',
-      userAvatar: profileMap[row.user_id]?.avatar ?? null,
-      category: row.category,
-      title: row.title,
-      description: row.description,
-      year: row.year,
-      eventDate: getEventDate(row.meta as Record<string, unknown> | null),
-      proofType: row.proof_type,
-      proofValue: row.proof_value ?? undefined,
-      createdAt: row.created_at,
-    })),
-    hasMore: achData.length === PAGE_SIZE,
-  }
+    return {
+      items: achData.map((row) => ({
+        id: row.id,
+        userId: row.user_id,
+        userName: profileMap[row.user_id]?.name ?? 'Пользователь',
+        userAvatar: profileMap[row.user_id]?.avatar ?? null,
+        category: row.category,
+        claimAngle: row.claim_angle ?? 'king',
+        title: row.title,
+        description: row.description,
+        year: row.year,
+        eventDate: getEventDate(row.meta as Record<string, unknown> | null),
+        proofType: row.proof_type,
+        proofValue: row.proof_value ?? undefined,
+        createdAt: row.created_at,
+      })),
+      hasMore: achData.length === PAGE_SIZE,
+    }
 }
 
 type FeedMode = 'all' | 'friends'
@@ -239,7 +260,7 @@ export function FeedPage() {
       <main className="cork-main">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h1 className="cork-head" style={{ marginBottom: 0 }}>Лента достижений</h1>
+          <h1 className="cork-head" style={{ marginBottom: 0 }}>Арена</h1>
           {/* Mode toggle */}
           <div className="cork-tabs">
             {(['all', 'friends'] as FeedMode[]).map((mode) => (
@@ -300,8 +321,8 @@ export function FeedPage() {
         ) : items.length === 0 ? (
           <div className="cork-empty">
             {feedMode === 'friends'
-              ? 'У вас пока нет друзей с достижениями'
-              : 'Достижений пока нет'}
+              ? 'У вас пока нет друзей с заявками'
+              : 'Заявок пока нет'}
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -326,6 +347,8 @@ export function FeedPage() {
                         <span className="cork-meta">{formatRelativeTime(item.createdAt)}</span>
                       </div>
                       <div className="flex items-center gap-1.5 mt-0.5">
+                        <ClaimAngleBadge angle={item.claimAngle} />
+                        <span className="cork-meta">·</span>
                         <span className="cork-meta">{item.category}</span>
                         <span className="cork-meta">· {formatAchievementDate(item.eventDate, item.year)}</span>
                       </div>

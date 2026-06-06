@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Achievement, AchievementCategory, AchievementStatus, ProofType } from '@/shared/types'
+import type { Achievement, AchievementCategory, AchievementStatus, ClaimAngle, ProofType } from '@/shared/types'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
 
@@ -11,6 +11,7 @@ interface NewAchievementData {
   year: number
   proofType: ProofType
   proofValue?: string
+  claimAngle?: ClaimAngle
   meta: Record<string, unknown>
 }
 
@@ -46,6 +47,7 @@ export const useAchievementsStore = create<AchievementsState>((set) => ({
         proofType: row.proof_type,
         proofValue: row.proof_value ?? undefined,
         status: row.status,
+        claimAngle: row.claim_angle ?? 'king',
         rejectionReason: row.rejection_reason ?? undefined,
         meta: row.meta ?? {},
         createdAt: row.created_at,
@@ -69,6 +71,7 @@ export const useAchievementsStore = create<AchievementsState>((set) => ({
         year: data.year,
         proof_type: data.proofType,
         proof_value: data.proofValue ?? null,
+        claim_angle: data.claimAngle ?? 'judge',
         status: 'pending',
         meta: data.meta,
       })
@@ -85,6 +88,7 @@ export const useAchievementsStore = create<AchievementsState>((set) => ({
       proofType: inserted.proof_type,
       proofValue: inserted.proof_value ?? undefined,
       status: inserted.status,
+      claimAngle: inserted.claim_angle ?? 'judge',
       rejectionReason: inserted.rejection_reason ?? undefined,
       meta: inserted.meta ?? {},
       createdAt: inserted.created_at,

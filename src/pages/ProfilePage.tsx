@@ -246,7 +246,7 @@ export function ProfilePage() {
               className="cork-btn cork-btn-primary"
               style={{ textTransform: 'none', letterSpacing: 'normal' }}
             >
-              + Добавить
+              + Вынести на суд
             </button>
           )}
         </div>

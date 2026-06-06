@@ -42,7 +42,7 @@ export function InlineCreateCard() {
           {getInitials(name)}
         </div>
       )}
-      <span className="flex-1 text-sm" style={{ color: 'var(--cork-text-dim)' }}>Чем поделишься?</span>
+      <span className="flex-1 text-sm" style={{ color: 'var(--cork-text-dim)' }}>Что выносим?</span>
       <span
         className="flex-shrink-0 inline-flex items-center justify-center w-8 h-8"
         style={{

@@ -5,7 +5,7 @@ import { useAchievementsStore } from '@/entities/achievements/store'
 import { ReactionBar } from '@/features/reactions'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import { CategoryIcon, CheckIcon, HourglassIcon, CrossMarkIcon } from '@/shared/ui'
-import type { Achievement, AchievementCategory, AchievementStatus } from '@/shared/types'
+import type { Achievement, AchievementCategory, AchievementStatus, ClaimAngle } from '@/shared/types'
 
 type LabelVariant = 'default' | 'primary' | 'secondary' | 'accent' | 'success' | 'attention' | 'severe' | 'danger' | 'done' | 'sponsors'
 
@@ -18,6 +18,22 @@ const CATEGORY_META: Record<AchievementCategory, { label: string; variant: Label
   movies:   { label: 'Фильмы',       variant: 'done' },
   games:    { label: 'Игры',         variant: 'severe' },
   other:    { label: 'Интересное',   variant: 'secondary' },
+}
+
+const ANGLE_META: Record<string, { label: string; emoji: string; color: string }> = {
+  king:  { label: 'На корону', emoji: '👑', color: 'var(--cork-king)' },
+  clown: { label: 'На клоуна', emoji: '🤡', color: 'var(--cork-clown)' },
+  judge: { label: 'Рассудите', emoji: '⚖️', color: 'var(--cork-text-mute)' },
+}
+
+function ClaimAngleBadge({ angle }: { angle?: ClaimAngle }) {
+  const meta = ANGLE_META[angle ?? 'king'] ?? ANGLE_META.king
+  return (
+    <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold" style={{ color: meta.color }}>
+      <span>{meta.emoji}</span>
+      <span>{meta.label}</span>
+    </span>
+  )
 }
 
 function StatusBadge({ status }: { status: AchievementStatus }) {
@@ -89,6 +105,8 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1 mb-1">
+            <ClaimAngleBadge angle={achievement.claimAngle} />
+            <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>·</span>
             <Label variant={meta.variant}>{meta.label}</Label>
             <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>{formatAchievementDate(getEventDate(achievement.meta), achievement.year)}</span>
             <StatusBadge status={achievement.status} />

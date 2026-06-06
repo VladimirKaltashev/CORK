@@ -67,6 +67,12 @@ src/
 - Повторный запуск — пункт «Подсказки» в выпадашке аватара.
 - _Будет переписан под механику CORK: цели, челленджи._
 
+### Композер «На суд»
+- `src/features/profile/AddAchievementModal.tsx` — быстрый composer: обязательно только текст, всё остальное опционально.
+- `claim_angle` — авторская рамка: `👑 На корону` / `🤡 На клоуна` / `⚖️ Рассудите` (default).
+- Кнопка «Вынести на суд», placeholder с rotating примерами.
+- Категория, дата, фото, ссылка — вторичны и опциональны.
+
 ## Схема БД
 
 ### Текущая
@@ -76,9 +82,10 @@ auth.users (Supabase Auth)
    └─[trigger: handle_new_user]──▶ public.profiles (id, name, email, bio, contacts, avatar, is_admin, registered_at)
                                             │
                                             ▼
-                                  public.achievements (user_id, category, title, description, year,
-                                                       proof_type, proof_value, status, rejection_reason,
-                                                       meta, created_at)
+                                   public.achievements (user_id, category, title, description, year,
+                                                        proof_type, proof_value, status, claim_angle, rejection_reason,
+                                                        meta, created_at)
+                                                        └─ claim_angle: 'king' | 'clown' | 'judge' — авторская рамка поста
                                             │
                                             ▼
                                   public.reactions (achievement_id, user_id, kind: 'crown' | 'clown', cost)
