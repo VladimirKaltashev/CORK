@@ -207,8 +207,9 @@
   border-radius: 0;
 }
 
-[data-theme="acid"] .cork-verdict-king {
-  color: var(--cork-bg);
+[data-theme="acid"] .cork-verdict-king,
+[data-theme="acid"] .cork-verdict-clown {
+  color: var(--cork-brand-ink);
 }
 
 /* ── Tabs ── */

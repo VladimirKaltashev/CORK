@@ -4,6 +4,7 @@ import { useAuthStore } from '@/entities/auth'
 import { useProfileStore } from '@/entities/profile'
 import { useOnboardingStore } from '@/features/onboarding'
 import { useCreateAchievementDialog } from '@/entities/achievements/createDialog'
+import { useFriendsStore } from '@/entities/friends'
 import { showToast } from '@/shared/lib/api'
 
 function getInitials(name: string): string {
@@ -19,15 +20,19 @@ export function Header() {
   const { loadProfile, getProfile } = useProfileStore()
   const startOnboarding = useOnboardingStore((s) => s.start)
   const openCreateDialog = useCreateAchievementDialog((s) => s.open)
+  const pendingCount = useFriendsStore((s) => s.pendingIncomingCount())
   const profile = user ? getProfile(user.id) : undefined
   const avatar = profile?.avatar ?? null
   const name = user?.name ?? ''
 
+  const loadFriendships = useFriendsStore((s) => s.loadFriendships)
+
   useEffect(() => {
     if (token && user) {
       loadProfile(user.id)
+      loadFriendships(user.id)
     }
-  }, [token, user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [token, user?.id, loadProfile, loadFriendships]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!dropdownOpen) return
@@ -105,13 +110,18 @@ export function Header() {
               <button
                 type="button"
                 onClick={() => setDropdownOpen((v) => !v)}
-                className="cork-avatar"
+                className="cork-avatar relative"
                 aria-label="Меню профиля"
               >
                 {avatar ? (
                   <img src={avatar} alt={name} className="w-full h-full object-cover" style={{ borderRadius: 'var(--cork-radius-pill)' }} />
                 ) : (
                   getInitials(name)
+                )}
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: 'var(--cork-clown)', color: '#fff' }}>
+                    {pendingCount}
+                  </span>
                 )}
               </button>
 
@@ -121,6 +131,14 @@ export function Header() {
                     <p className="text-xs font-medium truncate" style={{ color: 'var(--cork-text)' }}>{name}</p>
                   </div>
                   <NavLink to="/profile/me" onClick={() => setDropdownOpen(false)}>Мой профиль</NavLink>
+                  <NavLink to="/friends" onClick={() => setDropdownOpen(false)}>
+                    Заявки
+                    {pendingCount > 0 && (
+                      <span className="ml-1.5 inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: 'var(--cork-clown)', color: '#fff' }}>
+                        {pendingCount}
+                      </span>
+                    )}
+                  </NavLink>
                   <NavLink to="/settings" onClick={() => setDropdownOpen(false)}>Настройки</NavLink>
                   {token && user?.role === 'admin' && (
                     <NavLink to="/admin" onClick={() => setDropdownOpen(false)}>Модерация</NavLink>

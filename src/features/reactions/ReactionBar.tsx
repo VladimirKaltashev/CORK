@@ -31,31 +31,59 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md' }: Re
   const total = crowns + clowns
   const kingPct = total === 0 ? 50 : (crowns / total) * 100
   const clownPct = total === 0 ? 50 : (clowns / total) * 100
-  const barHeight = isSm ? '28px' : '36px'
+  const barHeight = isSm ? '30px' : '36px'
+
+  let verdictLabel: string
+  if (total === 0) {
+    verdictLabel = 'НЕТ ВЕРДИКТА'
+  } else if (kingPct >= 70) {
+    verdictLabel = `КОРОЛЬ ${Math.round(kingPct)}%`
+  } else if (clownPct >= 70) {
+    verdictLabel = `ШУТ ${Math.round(clownPct)}%`
+  } else {
+    verdictLabel = `СПОРНО ${Math.round(kingPct)}/${Math.round(clownPct)}`
+  }
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Verdict bar — always full width, even at 0/0 */}
+      {/* Verdict bar — full width, only segments with votes */}
       <div className="cork-verdict-bar">
         <div className="cork-verdict-track" style={{ height: barHeight }}>
+          {crowns > 0 && (
+            <div
+              className="cork-verdict-king"
+              style={{ width: `${kingPct}%` }}
+            >
+              <span className="flex items-center gap-1">
+                <CrownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
+              </span>
+            </div>
+          )}
+          {/* Center label — always visible, positioned absolutely over the track */}
           <div
-            className="cork-verdict-king"
-            style={{ width: `${kingPct}%`, display: 'flex' }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            style={{ zIndex: 2 }}
           >
-            <span className="flex items-center gap-1">
-              <CrownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
-              {crowns}
+            <span
+              className="text-xs font-bold tracking-wider"
+              style={{
+                color: total === 0 ? 'var(--cork-text-mute)' : 'var(--cork-brand-ink)',
+                textShadow: total > 0 ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
+              }}
+            >
+              {verdictLabel}
             </span>
           </div>
-          <div
-            className="cork-verdict-clown"
-            style={{ width: `${clownPct}%`, display: 'flex', marginLeft: 'auto' }}
-          >
-            <span className="flex items-center gap-1">
-              {clowns}
-              <ClownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
-            </span>
-          </div>
+          {clowns > 0 && (
+            <div
+              className="cork-verdict-clown"
+              style={{ width: `${clownPct}%`, marginLeft: 'auto' }}
+            >
+              <span className="flex items-center gap-1">
+                <ClownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

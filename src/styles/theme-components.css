@@ -143,13 +143,14 @@
 }
 
 .cork-tab.active {
-  color: var(--cork-brand);
-  border-color: var(--cork-border);
-  background: var(--cork-surface-2);
+  background: var(--cork-brand);
+  color: var(--cork-brand-ink);
+  border-color: var(--cork-brand);
 }
 
 .cork-tab:hover {
   color: var(--cork-text);
+  border-color: var(--cork-frame);
 }
 
 /* ── User row ── */
@@ -244,7 +245,7 @@
   padding-left: 12px;
   font-weight: 800;
   font-size: 12px;
-  color: #fff;
+  color: var(--cork-brand-ink);
   font-family: var(--cork-font-body);
   position: relative;
   overflow: hidden;
@@ -267,7 +268,7 @@
   padding-right: 12px;
   font-weight: 800;
   font-size: 12px;
-  color: #fff;
+  color: var(--cork-brand-ink);
   font-family: var(--cork-font-body);
   position: relative;
   overflow: hidden;
