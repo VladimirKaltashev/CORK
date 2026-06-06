@@ -20,6 +20,7 @@
   --cork-brand:       #c6ff3d;
   --cork-brand-hover: #d6ff4d;
   --cork-brand-2:     #c6ff3d;
+  --cork-brand-ink:   #071005;
   --cork-king:        #c6ff3d;
   --cork-clown:       #ff2d78;
 
@@ -184,7 +185,9 @@
 /* ── Avatar ── */
 [data-theme="acid"] .cork-avatar {
   border-radius: 0;
-  color: var(--cork-bg);
+  background: var(--cork-surface-2) !important;
+  color: var(--cork-brand) !important;
+  border: 1px solid var(--cork-frame);
 }
 
 /* ── Verdict bar ── */

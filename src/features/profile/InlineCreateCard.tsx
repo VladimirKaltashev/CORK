@@ -28,10 +28,10 @@ export function InlineCreateCard() {
       }}
     >
       {avatar ? (
-        <img src={avatar} alt={name} className="w-10 h-10 object-cover flex-shrink-0" style={{ borderRadius: 'var(--cork-radius-pill)', border: '1px solid var(--cork-border-light)' }} />
+        <img src={avatar} alt={name} className="w-8 h-8 object-cover flex-shrink-0" style={{ borderRadius: 'var(--cork-radius-pill)', border: '1px solid var(--cork-border-light)' }} />
       ) : (
         <div
-          className="w-10 h-10 flex items-center justify-center text-sm font-semibold flex-shrink-0 select-none"
+          className="w-8 h-8 flex items-center justify-center text-sm font-semibold flex-shrink-0 select-none"
           style={{
             borderRadius: 'var(--cork-radius-pill)',
             background: 'var(--cork-surface-3)',
@@ -44,17 +44,17 @@ export function InlineCreateCard() {
       )}
       <span className="flex-1 text-sm" style={{ color: 'var(--cork-text-dim)' }}>Чем поделишься?</span>
       <span
-        className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium"
+        className="flex-shrink-0 inline-flex items-center justify-center w-8 h-8"
         style={{
           borderRadius: 'var(--cork-radius-btn)',
           background: 'var(--cork-brand)',
-          color: 'var(--cork-bg)',
+          color: 'var(--cork-brand-ink)',
         }}
+        aria-label="Добавить"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
           <path d="M12 5v14M5 12h14" />
         </svg>
-        <span>Поделиться</span>
       </span>
     </button>
   )

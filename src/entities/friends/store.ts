@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
+import { useAuthStore } from '@/entities/auth'
 
 export type FriendStatus = 'pending' | 'accepted'
 
@@ -88,8 +89,11 @@ export const useFriendsStore = create<FriendsState>()((set, get) => ({
   },
 
   sendRequest: async (targetId) => {
-    const myId = get().currentUserId
-    if (!myId) return
+    const myId = get().currentUserId ?? useAuthStore.getState().user?.id
+    if (!myId) {
+      showToast('error', 'Не удалось отправить запрос — войдите в систему')
+      throw new Error('user not authenticated')
+    }
     try {
       const { error } = await supabase
         .from('friends')
@@ -103,7 +107,7 @@ export const useFriendsStore = create<FriendsState>()((set, get) => ({
   },
 
   acceptRequest: async (recordId) => {
-    const myId = get().currentUserId
+    const myId = get().currentUserId ?? useAuthStore.getState().user?.id
     if (!myId) return
     try {
       const { error } = await supabase
@@ -119,7 +123,7 @@ export const useFriendsStore = create<FriendsState>()((set, get) => ({
   },
 
   removeRecord: async (recordId) => {
-    const myId = get().currentUserId
+    const myId = get().currentUserId ?? useAuthStore.getState().user?.id
     if (!myId) return
     try {
       const { error } = await supabase.from('friends').delete().eq('id', recordId)

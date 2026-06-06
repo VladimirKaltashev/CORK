@@ -93,14 +93,14 @@
 
 .cork-btn-primary {
   background: var(--cork-brand);
-  color: #fff;
+  color: var(--cork-brand-ink);
   border-color: transparent;
   box-shadow: var(--cork-shadow-lg);
 }
 
 .cork-btn-primary:hover {
   background: var(--cork-brand-hover);
-  color: #fff;
+  color: var(--cork-brand-ink);
 }
 
 .cork-btn-ghost {

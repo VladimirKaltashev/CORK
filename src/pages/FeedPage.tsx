@@ -63,6 +63,16 @@ function formatRelativeTime(dateStr: string): string {
   }
 }
 
+function shouldShowDescription(title: string, description: string): boolean {
+  if (!description || description.trim().length === 0) return false
+  const t = title.trim().toLowerCase()
+  const d = description.trim().toLowerCase()
+  if (d === t) return false
+  if (d.length < 5) return false
+  if (t.includes(d) || d.includes(t)) return false
+  return true
+}
+
 function getInitials(name: string): string {
   return name.split(' ').map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase() || '?'
 }
@@ -228,8 +238,8 @@ export function FeedPage() {
       {/* Main content */}
       <main className="cork-main">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="cork-head">Лента достижений</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="cork-head" style={{ marginBottom: 0 }}>Лента достижений</h1>
           {/* Mode toggle */}
           <div className="cork-tabs">
             {(['all', 'friends'] as FeedMode[]).map((mode) => (
@@ -244,6 +254,32 @@ export function FeedPage() {
             ))}
           </div>
         </div>
+
+        {/* Category filters */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {FILTERS.map((f) => (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => handleFilterChange(f.value)}
+              className="cork-tag"
+              style={category === f.value ? {
+                background: 'var(--cork-brand)',
+                color: 'var(--cork-brand-ink)',
+                borderColor: 'var(--cork-brand)',
+              } : {}}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Create prompt */}
+        {user && (
+          <div className="mb-4">
+            <InlineCreateCard />
+          </div>
+        )}
 
         {/* Feed items */}
         {isLoading ? (
@@ -302,7 +338,9 @@ export function FeedPage() {
                     </div>
 
                     <h2 className="cork-title">{item.title}</h2>
-                    <p className="cork-desc">{item.description}</p>
+                    {shouldShowDescription(item.title, item.description) && (
+                      <p className="cork-desc">{item.description}</p>
+                    )}
 
                     {item.proofType === 'url' && item.proofValue && (
                       <a
@@ -355,34 +393,13 @@ export function FeedPage() {
             </div>
           )}
 
-          {/* Create */}
-          {user && (
-            <div className="cork-panel">
-              <InlineCreateCard />
-            </div>
-          )}
-
-          {/* Filters */}
+          {/* Mini leaderboard */}
           <div className="cork-panel">
-            <h3 className="cork-section-title">Фильтры</h3>
-            <div className="mt-2 space-y-1">
-              {FILTERS.map((f) => (
-                <label
-                  key={f.value}
-                  className={`cork-filter ${category === f.value ? 'active' : ''}`}
-                >
-                  <input
-                    type="radio"
-                    name="category"
-                    value={f.value}
-                    checked={category === f.value}
-                    onChange={() => handleFilterChange(f.value)}
-                    className="w-4 h-4"
-                    style={{ accentColor: 'var(--cork-brand)' }}
-                  />
-                  <span>{f.label}</span>
-                </label>
-              ))}
+            <h3 className="cork-section-title">Топ королей</h3>
+            <div className="mt-2 space-y-2">
+              <p className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>
+                Рейтинг скоро появится здесь
+              </p>
             </div>
           </div>
 

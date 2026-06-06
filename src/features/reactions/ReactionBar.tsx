@@ -28,35 +28,64 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md' }: Re
   const padding = isSm ? 'px-2 py-1 text-xs' : 'px-2.5 py-1.5 text-sm'
   const iconClass = isSm ? 'w-4 h-4' : 'w-5 h-5'
 
+  const total = crowns + clowns
+  const kingPct = total === 0 ? 50 : (crowns / total) * 100
+  const clownPct = total === 0 ? 50 : (clowns / total) * 100
+
   return (
-    <div className="flex items-center gap-1.5">
-      <ReactionButton
-        Icon={CrownIcon}
-        count={crowns}
-        active={myKind === 'crown'}
-        cost={1}
-        disabled={disabled || pending}
-        onClick={() => handleClick('crown')}
-        kind="crown"
-        iconClass={iconClass}
-        padding={padding}
-      />
-      <ReactionButton
-        Icon={ClownIcon}
-        count={clowns}
-        active={myKind === 'clown'}
-        cost={2}
-        disabled={disabled || pending}
-        onClick={() => handleClick('clown')}
-        kind="clown"
-        iconClass={iconClass}
-        padding={padding}
-      />
-      {disabled && (
-        <span className="text-xs ml-1" style={{ color: 'var(--cork-text-mute)' }} title="Войдите, чтобы голосовать">
-          Войти
-        </span>
-      )}
+    <div className="flex flex-col gap-2">
+      {/* Verdict bar */}
+      <div className="cork-verdict-bar">
+        <div className="cork-verdict-track" style={{ height: isSm ? '28px' : '36px' }}>
+          {crowns > 0 && (
+            <div className="cork-verdict-king" style={{ width: `${kingPct}%` }}>
+              <span className="flex items-center gap-1">
+                <CrownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
+                {crowns}
+              </span>
+            </div>
+          )}
+          {clowns > 0 && (
+            <div className="cork-verdict-clown" style={{ width: `${clownPct}%`, marginLeft: crowns > 0 ? 'auto' : undefined }}>
+              <span className="flex items-center gap-1">
+                {clowns}
+                <ClownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex items-center gap-1.5">
+        <ReactionButton
+          Icon={CrownIcon}
+          count={crowns}
+          active={myKind === 'crown'}
+          cost={1}
+          disabled={disabled || pending}
+          onClick={() => handleClick('crown')}
+          kind="crown"
+          iconClass={iconClass}
+          padding={padding}
+        />
+        <ReactionButton
+          Icon={ClownIcon}
+          count={clowns}
+          active={myKind === 'clown'}
+          cost={2}
+          disabled={disabled || pending}
+          onClick={() => handleClick('clown')}
+          kind="clown"
+          iconClass={iconClass}
+          padding={padding}
+        />
+        {disabled && (
+          <span className="text-xs ml-1" style={{ color: 'var(--cork-text-mute)' }} title="Войдите, чтобы голосовать">
+            Войти
+          </span>
+        )}
+      </div>
     </div>
   )
 }

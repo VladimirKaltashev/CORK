@@ -37,13 +37,13 @@ describe('ReactionBar', () => {
   it('renders active crown', () => {
     mockState.byAchievement = { a1: { crowns: 5, clowns: 1, myKind: 'crown' } }
     render(<ReactionBar achievementId="a1" />)
-    expect(screen.getByText('5')).toBeInTheDocument()
+    expect(screen.getAllByText('5').length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders active clown', () => {
     mockState.byAchievement = { a1: { crowns: 2, clowns: 3, myKind: 'clown' } }
     render(<ReactionBar achievementId="a1" />)
-    expect(screen.getByText('3')).toBeInTheDocument()
+    expect(screen.getAllByText('3').length).toBeGreaterThanOrEqual(1)
   })
 
   it('calls toggle on crown click', () => {
