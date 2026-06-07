@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { Comment, CommentSide } from '@/shared/types'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
+import { useAuthStore } from '@/entities/auth'
 
 interface CommentsState {
   byAchievement: Record<string, Comment[]>
@@ -19,19 +20,40 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
   loadComments: async (achievementId) => {
     set((s) => ({ loading: { ...s.loading, [achievementId]: true } }))
     try {
-      const { data, error } = await supabase
+      // 1. Load comments without join (simpler, avoids join syntax issues)
+      const { data: commentsData, error: commentsError } = await supabase
         .from('comments')
-        .select('*, profiles:user_id(name, avatar)')
+        .select('*')
         .eq('achievement_id', achievementId)
         .order('created_at', { ascending: true })
-      if (error) throw error
+      if (commentsError) {
+        console.error('[comments] loadComments query error:', commentsError)
+        throw commentsError
+      }
 
-      const comments: Comment[] = (data ?? []).map((row) => ({
+      // 2. Load profiles for comment authors separately
+      const userIds = [...new Set((commentsData ?? []).map((r) => r.user_id))]
+      let profileMap: Record<string, { name: string; avatar: string | null }> = {}
+      if (userIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, name, avatar')
+          .in('id', userIds)
+        if (profilesError) {
+          console.error('[comments] loadComments profiles query error:', profilesError)
+          // Don't throw — we can still show comments without names
+        }
+        profileMap = Object.fromEntries(
+          (profilesData ?? []).map((p) => [p.id, { name: p.name, avatar: p.avatar ?? null }])
+        )
+      }
+
+      const comments: Comment[] = (commentsData ?? []).map((row) => ({
         id: row.id,
         achievementId: row.achievement_id,
         userId: row.user_id,
-        userName: row.profiles?.name ?? 'Пользователь',
-        userAvatar: row.profiles?.avatar ?? null,
+        userName: profileMap[row.user_id]?.name ?? 'Пользователь',
+        userAvatar: profileMap[row.user_id]?.avatar ?? null,
         body: row.body,
         side: row.side,
         createdAt: row.created_at,
@@ -42,7 +64,8 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
         byAchievement: { ...s.byAchievement, [achievementId]: comments },
         loading: { ...s.loading, [achievementId]: false },
       }))
-    } catch {
+    } catch (err) {
+      console.error('[comments] loadComments catch:', err)
       showToast('error', 'Не удалось загрузить комментарии')
       set((s) => ({ loading: { ...s.loading, [achievementId]: false } }))
     }
@@ -58,20 +81,48 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
       showToast('error', 'Максимум 500 символов')
       return
     }
+
+    const user = useAuthStore.getState().user
+    if (!user) {
+      console.error('[comments] addComment: no authenticated user')
+      showToast('error', 'Войдите, чтобы комментировать')
+      return
+    }
+
     try {
+      // Verify profile exists before insert (RLS requires user_id = auth.uid())
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+      if (profileError || !profileData) {
+        console.error('[comments] addComment: profile not found for user', user.id, profileError)
+        showToast('error', 'Профиль не найден. Выполните вход после сброса БД.')
+        return
+      }
+
       const { data: inserted, error } = await supabase
         .from('comments')
-        .insert({ achievement_id: achievementId, body: trimmed, side })
-        .select('*, profiles:user_id(name, avatar)')
+        .insert({
+          achievement_id: achievementId,
+          user_id: user.id,
+          body: trimmed,
+          side,
+        })
+        .select('*')
         .single()
-      if (error) throw error
+      if (error) {
+        console.error('[comments] addComment insert error:', error)
+        throw error
+      }
 
       const comment: Comment = {
         id: inserted.id,
         achievementId: inserted.achievement_id,
         userId: inserted.user_id,
-        userName: inserted.profiles?.name ?? 'Пользователь',
-        userAvatar: inserted.profiles?.avatar ?? null,
+        userName: user.name,
+        userAvatar: null, // We don't have avatar in auth store; will load on next refresh
         body: inserted.body,
         side: inserted.side,
         createdAt: inserted.created_at,
@@ -84,7 +135,8 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
           [achievementId]: [...(s.byAchievement[achievementId] ?? []), comment],
         },
       }))
-    } catch {
+    } catch (err) {
+      console.error('[comments] addComment catch:', err)
       showToast('error', 'Не удалось добавить комментарий')
     }
   },
@@ -95,7 +147,10 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
         .from('comments')
         .delete()
         .eq('id', commentId)
-      if (error) throw error
+      if (error) {
+        console.error('[comments] deleteComment error:', error)
+        throw error
+      }
 
       set((s) => ({
         byAchievement: {
@@ -103,7 +158,8 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
           [achievementId]: (s.byAchievement[achievementId] ?? []).filter((c) => c.id !== commentId),
         },
       }))
-    } catch {
+    } catch (err) {
+      console.error('[comments] deleteComment catch:', err)
       showToast('error', 'Не удалось удалить комментарий')
     }
   },
