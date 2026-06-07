@@ -7,7 +7,9 @@
 -- 3. Score per achievement
 -- 4. Агрегация по author (achievements.user_id)
 
-CREATE OR REPLACE VIEW public.scout_scores AS
+CREATE OR REPLACE VIEW public.scout_scores
+  WITH (security_invoker = true)
+AS
 WITH
   reaction_counts AS (
     SELECT
@@ -65,7 +67,9 @@ GRANT SELECT ON public.scout_scores TO authenticated, anon;
 -- Arena items view: честная сортировка без fanout
 -- =====================================================
 
-CREATE OR REPLACE VIEW public.arena_items AS
+CREATE OR REPLACE VIEW public.arena_items
+  WITH (security_invoker = true)
+AS
 WITH
   reaction_counts AS (
     SELECT
