@@ -6,6 +6,7 @@ import { useProfileStore, type LocalProfile } from '@/entities/profile'
 import { useAchievementsStore } from '@/entities/achievements/store'
 import { useFriendsStore } from '@/entities/friends'
 import { useReactionsStore } from '@/entities/reactions'
+import { useScoutStore } from '@/entities/scout'
 import { useCreateAchievementDialog } from '@/entities/achievements/createDialog'
 import { AvatarUpload } from '@/shared/ui/AvatarUpload'
 import { CrownIcon, ClownIcon } from '@/shared/ui'
@@ -60,6 +61,8 @@ export function ProfilePage() {
   const loadReactions = useReactionsStore((s) => s.loadForAchievements)
   const loadScoresFor = useReactionsStore((s) => s.loadScoresFor)
   const score = useReactionsStore((s) => (profileId ? s.userScores[profileId] : undefined))
+  const { scores: scoutScores, loadScoutScore } = useScoutStore()
+  const scoutScore = profileId ? scoutScores[profileId] : undefined
   const openCreateDialog = useCreateAchievementDialog((s) => s.open)
 
   const [showEdit, setShowEdit] = useState(false)
@@ -70,6 +73,7 @@ export function ProfilePage() {
     profileStore.loadProfile(profileId)
     loadAchievements(profileId)
     loadScoresFor(profileId)
+    loadScoutScore(profileId)
   }, [profileId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -216,6 +220,17 @@ export function ProfilePage() {
 
       {/* Score */}
       <ScoreBlock crowns={score?.crowns ?? 0} clowns={score?.clowns ?? 0} />
+
+      {/* Scout Score */}
+      {(scoutScore && scoutScore.scoutScore > 0) ? (
+        <div className="cork-panel flex items-center gap-3">
+          <span className="text-sm font-semibold" style={{ color: 'var(--cork-text-dim)' }}>🔍 Scout Score</span>
+          <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--cork-brand)' }}>{scoutScore.scoutScore}</span>
+          <span className="text-xs ml-auto" style={{ color: 'var(--cork-text-mute)' }}>
+            {scoutScore.submittedCount} принесено · {scoutScore.crownsBrought}👑 {scoutScore.clownsBrought}🤡 {scoutScore.commentsBrought}💬
+          </span>
+        </div>
+      ) : null}
 
       {/* Bio block */}
       {liveProfile.bio ? (

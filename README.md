@@ -80,6 +80,13 @@ src/
 - Только body обязателен, максимум 500 символов.
 - Удаление только своих комментариев.
 
+### Scout-lite (Phase 2)
+- `view scout_scores` — агрегат по автору заявки: `scout_score = crowns*2 + clowns*2 + comments*3 + min(crowns,clowns)*2` (если обе стороны > 0).
+- `view arena_items` — enriched achievements: `hot_score = reactions + comments`, `controversy_score = min(crowns, clowns)`.
+- `🔥 Топ скаутов` — sidebar на Арене, top 5.
+- `Scout Score` — метрика в профиле.
+- Сортировка Арены: **Новое** / **Горячее** / **Спорное**.
+
 ## Схема БД
 
 ### Текущая
@@ -104,6 +111,8 @@ auth.users (Supabase Auth)
                                      └─ side: 'crown' | 'clown' | 'neutral' — аргумент суда
 
                                    view profile_scores (id, name, avatar, crowns, clowns)
+                                   view scout_scores (user_id, user_name, avatar, submitted_count, scout_score, crowns_brought, clowns_brought, comments_brought)
+                                   view arena_items (achievements.* + crowns, clowns, comments, hot_score, controversy_score)
 
     public.friends (user_id, friend_id, status: 'pending' | 'accepted')
 ```

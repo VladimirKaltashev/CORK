@@ -8,6 +8,7 @@ import { useAuthStore } from '@/entities/auth'
 import { useFriendsStore } from '@/entities/friends'
 import { useReactionsStore } from '@/entities/reactions'
 import { useCommentsStore } from '@/entities/comments'
+import { useScoutStore } from '@/entities/scout'
 import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { ChallengeBanner } from '@/features/challenges'
@@ -129,6 +130,7 @@ function UserAvatar({ userId, name, avatar }: { userId: string; name: string; av
 async function loadPage(
   offset: number,
   category: CategoryFilter,
+  sort: ArenaSort,
   friendIds?: string[],
 ): Promise<{ items: FeedItem[]; hasMore: boolean }> {
   if (friendIds !== undefined && friendIds.length === 0) {
@@ -136,8 +138,8 @@ async function loadPage(
   }
 
   let query = supabase
-    .from('achievements')
-    .select('*')
+    .from('arena_items')
+    .select('id, user_id, category, title, description, year, proof_type, proof_value, status, claim_angle, meta, created_at, crowns, clowns, comments, hot_score, controversy_score')
     .eq('status', 'verified')
 
   if (category !== 'all') {
@@ -148,9 +150,15 @@ async function loadPage(
     query = query.in('user_id', friendIds)
   }
 
-  const { data: achData, error } = await query
-    .order('created_at', { ascending: false })
-    .range(offset, offset + PAGE_SIZE - 1)
+  if (sort === 'new') {
+    query = query.order('created_at', { ascending: false })
+  } else if (sort === 'hot') {
+    query = query.order('hot_score', { ascending: false }).order('created_at', { ascending: false })
+  } else if (sort === 'controversial') {
+    query = query.gt('crowns', 0).gt('clowns', 0).order('controversy_score', { ascending: false }).order('created_at', { ascending: false })
+  }
+
+  const { data: achData, error } = await query.range(offset, offset + PAGE_SIZE - 1)
 
   if (error) throw error
   if (!achData?.length) return { items: [], hasMore: false }
@@ -187,12 +195,20 @@ async function loadPage(
 }
 
 type FeedMode = 'all' | 'friends'
+type ArenaSort = 'new' | 'hot' | 'controversial'
+
+const SORT_TABS: { value: ArenaSort; label: string }[] = [
+  { value: 'new', label: 'Новое' },
+  { value: 'hot', label: 'Горячее' },
+  { value: 'controversial', label: 'Спорное' },
+]
 
 export function FeedPage() {
   const { user } = useAuthStore()
   const friendsStore = useFriendsStore()
   const loadReactions = useReactionsStore((s) => s.loadForAchievements)
   const reactionByAchievement = useReactionsStore((s) => s.byAchievement)
+  const { topScouts, loadTopScouts } = useScoutStore()
   const [items, setItems] = useState<FeedItem[]>([])
   const [offset, setOffset] = useState(0)
   const [hasMore, setHasMore] = useState(true)
@@ -200,15 +216,16 @@ export function FeedPage() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [feedMode, setFeedMode] = useState<FeedMode>('all')
+  const [sort, setSort] = useState<ArenaSort>('new')
   const { isDismissed, dismiss } = useDismissibleBanner()
 
   const getFriendIds = (): string[] | undefined =>
     feedMode === 'friends' ? friendsStore.acceptedFriendIds() : undefined
 
-  const fetchInitial = (cat: CategoryFilter, mode: FeedMode) => {
+  const fetchInitial = (cat: CategoryFilter, mode: FeedMode, srt: ArenaSort) => {
     const fIds = mode === 'friends' ? friendsStore.acceptedFriendIds() : undefined
     setIsLoading(true)
-    loadPage(0, cat, fIds)
+    loadPage(0, cat, srt, fIds)
       .then(({ items: loaded, hasMore: more }) => {
         setItems(loaded)
         setOffset(loaded.length)
@@ -222,8 +239,12 @@ export function FeedPage() {
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchInitial(category, feedMode)
+    fetchInitial(category, feedMode, sort)
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    loadTopScouts(5)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFilterChange = (cat: CategoryFilter) => {
     if (cat === category) return
@@ -231,7 +252,7 @@ export function FeedPage() {
     setItems([])
     setOffset(0)
     setHasMore(true)
-    fetchInitial(cat, feedMode)
+    fetchInitial(cat, feedMode, sort)
   }
 
   const handleModeChange = (mode: FeedMode) => {
@@ -240,13 +261,22 @@ export function FeedPage() {
     setItems([])
     setOffset(0)
     setHasMore(true)
-    fetchInitial(category, mode)
+    fetchInitial(category, mode, sort)
+  }
+
+  const handleSortChange = (srt: ArenaSort) => {
+    if (srt === sort) return
+    setSort(srt)
+    setItems([])
+    setOffset(0)
+    setHasMore(true)
+    fetchInitial(category, feedMode, srt)
   }
 
   const handleLoadMore = async () => {
     setLoadingMore(true)
     try {
-      const { items: more, hasMore: moreExists } = await loadPage(offset, category, getFriendIds())
+      const { items: more, hasMore: moreExists } = await loadPage(offset, category, sort, getFriendIds())
       setItems((prev) => [...prev, ...more])
       setOffset((prev) => prev + more.length)
       setHasMore(moreExists)
@@ -279,6 +309,25 @@ export function FeedPage() {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Sort tabs */}
+        <div className="flex flex-wrap gap-2 mb-3">
+          {SORT_TABS.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              onClick={() => handleSortChange(t.value)}
+              className="cork-tag"
+              style={sort === t.value ? {
+                background: 'var(--cork-brand)',
+                color: 'var(--cork-brand-ink)',
+                borderColor: 'var(--cork-brand)',
+              } : {}}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
         {/* Category filters */}
@@ -428,11 +477,33 @@ export function FeedPage() {
 
           {/* Mini leaderboard */}
           <div className="cork-panel">
-            <h3 className="cork-section-title">Топ королей</h3>
+            <h3 className="cork-section-title">🔥 Топ скаутов</h3>
             <div className="mt-2 space-y-2">
-              <p className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>
-                Рейтинг скоро появится здесь
-              </p>
+              {topScouts.length === 0 ? (
+                <p className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>
+                  Скаутов пока нет. Принеси первую заявку на суд.
+                </p>
+              ) : (
+                topScouts.map((s) => (
+                  <div key={s.userId} className="flex items-center gap-2">
+                    {s.avatar ? (
+                      <img src={s.avatar} alt={s.userName} className="w-6 h-6 object-cover flex-shrink-0" style={{ borderRadius: 'var(--cork-radius-pill)', border: '1px solid var(--cork-border-light)' }} />
+                    ) : (
+                      <div className="w-6 h-6 flex items-center justify-center text-[10px] font-semibold flex-shrink-0" style={{ borderRadius: 'var(--cork-radius-pill)', background: 'var(--cork-surface-3)', color: 'var(--cork-brand)' }}>
+                        {getInitials(s.userName)}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <Link to={`/profile/${s.userId}`} className="cork-link text-xs font-semibold truncate block">
+                        {s.userName}
+                      </Link>
+                      <span className="text-[10px]" style={{ color: 'var(--cork-text-mute)' }}>
+                        {s.scoutScore} очков · {s.submittedCount} принесено
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
