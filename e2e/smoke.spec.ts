@@ -14,7 +14,7 @@ test('smoke: login page loads', async ({ page }) => {
 test('smoke: home redirects to feed for guests', async ({ page }) => {
   await page.goto('/')
   await page.waitForURL(/.*feed/)
-  await expect(page.getByRole('heading', { name: 'Лента достижений' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Арена' })).toBeVisible()
 })
 
 
