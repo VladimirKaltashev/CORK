@@ -10,9 +10,17 @@ function getInitials(name: string): string {
 
 function Avatar({ name, avatar }: { name: string; avatar: string | null }) {
   return avatar ? (
-    <img src={avatar} alt={name} className="w-10 h-10 rounded-full object-cover ring-1 ring-gray-200 flex-shrink-0" />
+    <img
+      src={avatar}
+      alt={name}
+      className="w-10 h-10 object-cover flex-shrink-0"
+      style={{ borderRadius: 'var(--cork-radius-pill)', border: '1px solid var(--cork-border-light)' }}
+    />
   ) : (
-    <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+    <div
+      className="cork-avatar"
+      style={{ color: 'var(--cork-brand-ink)' }}
+    >
       {getInitials(name)}
     </div>
   )
@@ -23,10 +31,10 @@ function FriendRow({ record }: { record: FriendRecord }) {
   const [busy, setBusy] = useState(false)
 
   return (
-    <div className="flex items-center justify-between gap-3 border border-gray-300 rounded-md bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+    <div className="cork-user-card">
       <Link to={`/profile/${record.profile.id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity">
         <Avatar name={record.profile.name} avatar={record.profile.avatar} />
-        <span className="text-sm font-medium text-gray-900 truncate dark:text-white">{record.profile.name}</span>
+        <span className="text-sm font-medium truncate" style={{ color: 'var(--cork-text)' }}>{record.profile.name}</span>
       </Link>
       <button
         type="button"
@@ -36,7 +44,8 @@ function FriendRow({ record }: { record: FriendRecord }) {
           try { await removeRecord(record.id) }
           finally { setBusy(false) }
         }}
-        className="text-sm px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors flex-shrink-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+        className="cork-btn cork-btn-ghost text-sm px-3 py-1 flex-shrink-0"
+        style={{ letterSpacing: '0.02em', textTransform: 'none' }}
       >
         {busy ? '...' : 'Удалить'}
       </button>
@@ -49,10 +58,10 @@ function RequestRow({ record }: { record: FriendRecord }) {
   const [busy, setBusy] = useState(false)
 
   return (
-    <div className="flex items-center justify-between gap-3 border border-gray-300 rounded-md bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+    <div className="cork-user-card">
       <Link to={`/profile/${record.profile.id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity">
         <Avatar name={record.profile.name} avatar={record.profile.avatar} />
-        <span className="text-sm font-medium text-gray-900 truncate dark:text-white">{record.profile.name}</span>
+        <span className="text-sm font-medium truncate" style={{ color: 'var(--cork-text)' }}>{record.profile.name}</span>
       </Link>
       <div className="flex gap-2 flex-shrink-0">
         <button
@@ -63,7 +72,8 @@ function RequestRow({ record }: { record: FriendRecord }) {
             try { await acceptRequest(record.id) }
             finally { setBusy(false) }
           }}
-          className="text-sm px-3 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-400"
+          className="cork-btn cork-btn-primary text-sm px-3 py-1"
+          style={{ letterSpacing: '0.02em', textTransform: 'none' }}
         >
           Принять
         </button>
@@ -75,7 +85,8 @@ function RequestRow({ record }: { record: FriendRecord }) {
             try { await removeRecord(record.id) }
             finally { setBusy(false) }
           }}
-          className="text-sm px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          className="cork-btn cork-btn-ghost text-sm px-3 py-1"
+          style={{ letterSpacing: '0.02em', textTransform: 'none' }}
         >
           Отклонить
         </button>
@@ -96,35 +107,30 @@ export function FriendsPage() {
 
   return (
     <div className="mx-auto max-w-2xl py-6 px-3">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4 dark:text-white">Друзья</h1>
+      <h1 className="cork-head" style={{ marginBottom: '16px' }}>Друзья</h1>
 
-      <div className="flex border-b border-gray-200 mb-4 dark:border-gray-700">
+      <div className="cork-tabs" style={{ marginBottom: '16px', borderBottom: '1px solid var(--cork-border-light)' }}>
         <button
           type="button"
           onClick={() => setTab('friends')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            tab === 'friends'
-              ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-          }`}
+          className={`cork-tab ${tab === 'friends' ? 'active' : ''}`}
         >
           Мои друзья
           {friends.length > 0 && (
-            <span className="ml-1.5 text-xs text-gray-400 dark:text-gray-500">({friends.length})</span>
+            <span className="ml-1.5 text-xs" style={{ color: 'var(--cork-text-mute)' }}>({friends.length})</span>
           )}
         </button>
         <button
           type="button"
           onClick={() => setTab('requests')}
-          className={`relative px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            tab === 'requests'
-              ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-          }`}
+          className={`cork-tab relative ${tab === 'requests' ? 'active' : ''}`}
         >
           Входящие заявки
           {pendingRequests.length > 0 && (
-            <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold w-4 h-4">
+            <span
+              className="ml-1.5 inline-flex items-center justify-center rounded-full text-[10px] font-bold w-4 h-4"
+              style={{ background: 'var(--cork-clown)', color: '#fff' }}
+            >
               {pendingRequests.length}
             </span>
           )}
@@ -132,11 +138,11 @@ export function FriendsPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">Загрузка...</div>
+        <div className="py-8 text-center text-sm" style={{ color: 'var(--cork-text-mute)' }}>Загрузка...</div>
       ) : tab === 'friends' ? (
         friends.length === 0 ? (
-          <div className="border border-dashed border-gray-300 rounded-md py-8 text-center dark:border-gray-700">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Друзей пока нет. Найдите людей через поиск на ленте!</span>
+          <div className="cork-empty">
+            Друзей пока нет. Найдите людей через поиск на ленте!
           </div>
         ) : (
           <div className="flex flex-col gap-2">
@@ -145,8 +151,8 @@ export function FriendsPage() {
         )
       ) : (
         pendingRequests.length === 0 ? (
-          <div className="border border-dashed border-gray-300 rounded-md py-8 text-center dark:border-gray-700">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Новых заявок нет</span>
+          <div className="cork-empty">
+            Новых заявок нет
           </div>
         ) : (
           <div className="flex flex-col gap-2">
