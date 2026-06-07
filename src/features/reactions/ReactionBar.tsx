@@ -6,9 +6,10 @@ interface ReactionBarProps {
   achievementId: string
   disabled?: boolean
   size?: 'sm' | 'md'
+  compact?: boolean
 }
 
-export function ReactionBar({ achievementId, disabled = false, size = 'md' }: ReactionBarProps) {
+export function ReactionBar({ achievementId, disabled = false, size = 'md', compact = false }: ReactionBarProps) {
   const agg = useReactionsStore((s) => s.byAchievement[achievementId])
   const pending = useReactionsStore((s) => s.pending.has(achievementId))
   const budgetRemaining = useReactionsStore((s) => s.budgetRemaining)
@@ -46,77 +47,99 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md' }: Re
 
   return (
     <div className="flex flex-col gap-2">
+      {/* Compact label + counts above bar */}
+      {compact && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold tracking-wider" style={{ color: 'var(--cork-text)' }}>
+            {verdictLabel}
+          </span>
+          {total > 0 && (
+            <span className="text-xs tabular-nums" style={{ color: 'var(--cork-text-mute)' }}>
+              👑 {crowns}  🤡 {clowns}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Verdict bar — full width, only segments with votes */}
       <div className="cork-verdict-bar">
-        <div className="cork-verdict-track" style={{ height: barHeight }}>
+        <div className="cork-verdict-track" style={{ height: compact ? '6px' : barHeight }}>
           {crowns > 0 && (
             <div
               className="cork-verdict-king"
               style={{ width: `${kingPct}%` }}
             >
-              <span className="flex items-center gap-1">
-                <CrownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
+              {!compact && (
+                <span className="flex items-center gap-1">
+                  <CrownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
+                </span>
+              )}
+            </div>
+          )}
+          {/* Center label — only for non-compact */}
+          {!compact && (
+            <div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              style={{ zIndex: 2 }}
+            >
+              <span
+                className="text-xs font-bold tracking-wider"
+                style={{
+                  color: total === 0 ? 'var(--cork-text-mute)' : 'var(--cork-brand-ink)',
+                  textShadow: total > 0 ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
+                }}
+              >
+                {verdictLabel}
               </span>
             </div>
           )}
-          {/* Center label — always visible, positioned absolutely over the track */}
-          <div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            style={{ zIndex: 2 }}
-          >
-            <span
-              className="text-xs font-bold tracking-wider"
-              style={{
-                color: total === 0 ? 'var(--cork-text-mute)' : 'var(--cork-brand-ink)',
-                textShadow: total > 0 ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
-              }}
-            >
-              {verdictLabel}
-            </span>
-          </div>
           {clowns > 0 && (
             <div
               className="cork-verdict-clown"
               style={{ width: `${clownPct}%`, marginLeft: 'auto' }}
             >
-              <span className="flex items-center gap-1">
-                <ClownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
-              </span>
+              {!compact && (
+                <span className="flex items-center gap-1">
+                  <ClownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
+                </span>
+              )}
             </div>
           )}
         </div>
       </div>
 
       {/* Buttons */}
-      <div className="flex items-center gap-1.5">
-        <ReactionButton
-          Icon={CrownIcon}
-          count={crowns}
-          active={myKind === 'crown'}
-          cost={1}
-          disabled={disabled || pending}
-          onClick={() => handleClick('crown')}
-          kind="crown"
-          iconClass={iconClass}
-          padding={padding}
-        />
-        <ReactionButton
-          Icon={ClownIcon}
-          count={clowns}
-          active={myKind === 'clown'}
-          cost={2}
-          disabled={disabled || pending}
-          onClick={() => handleClick('clown')}
-          kind="clown"
-          iconClass={iconClass}
-          padding={padding}
-        />
-        {disabled && (
-          <span className="text-xs ml-1" style={{ color: 'var(--cork-text-mute)' }} title="Войдите, чтобы голосовать">
-            Войти
-          </span>
-        )}
-      </div>
+      {!compact && (
+        <div className="flex items-center gap-1.5">
+          <ReactionButton
+            Icon={CrownIcon}
+            count={crowns}
+            active={myKind === 'crown'}
+            cost={1}
+            disabled={disabled || pending}
+            onClick={() => handleClick('crown')}
+            kind="crown"
+            iconClass={iconClass}
+            padding={padding}
+          />
+          <ReactionButton
+            Icon={ClownIcon}
+            count={clowns}
+            active={myKind === 'clown'}
+            cost={2}
+            disabled={disabled || pending}
+            onClick={() => handleClick('clown')}
+            kind="clown"
+            iconClass={iconClass}
+            padding={padding}
+          />
+          {disabled && (
+            <span className="text-xs ml-1" style={{ color: 'var(--cork-text-mute)' }} title="Войдите, чтобы голосовать">
+              Войти
+            </span>
+          )}
+        </div>
+      )}
     </div>
   )
 }

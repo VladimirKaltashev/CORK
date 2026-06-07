@@ -121,7 +121,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
         claimAngle,
         meta,
       })
-      showToast('success', 'Вынесено на суд!')
+      showToast('success', 'Заявка отправлена на модерацию')
       onClose()
     } catch {
       showToast('error', 'Не удалось вынести на суд')

@@ -119,6 +119,9 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
             <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>·</span>
             <Label variant={meta.variant}>{meta.label}</Label>
             <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>{formatAchievementDate(getEventDate(achievement.meta), achievement.year)}</span>
+            {achievement.status === 'pending' && (
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'var(--cork-surface-3)', color: 'var(--cork-text-mute)' }}>На модерации</span>
+            )}
             <StatusBadge status={achievement.status} />
           </div>
           <p className="font-semibold m-0" style={{ color: 'var(--cork-text)' }}>{achievement.title}</p>
@@ -147,7 +150,7 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
             )}
             {achievement.status === 'verified' && (
               <div className="ml-auto">
-                <ReactionBar achievementId={achievement.id} disabled={!user} size="sm" />
+                <ReactionBar achievementId={achievement.id} disabled={!user} size="sm" compact />
               </div>
             )}
           </div>

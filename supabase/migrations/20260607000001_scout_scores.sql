@@ -47,6 +47,7 @@ WITH
     FROM public.achievements a
     LEFT JOIN reaction_counts rc ON rc.achievement_id = a.id
     LEFT JOIN comment_counts cc ON cc.achievement_id = a.id
+    WHERE a.status = 'verified'
   )
 SELECT
   p.id AS user_id,
@@ -112,6 +113,7 @@ SELECT
   END AS controversy_score
 FROM public.achievements a
 LEFT JOIN reaction_counts rc ON rc.achievement_id = a.id
-LEFT JOIN comment_counts cc ON cc.achievement_id = a.id;
+LEFT JOIN comment_counts cc ON cc.achievement_id = a.id
+WHERE a.status = 'verified';
 
 GRANT SELECT ON public.arena_items TO authenticated, anon;
