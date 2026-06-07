@@ -110,6 +110,20 @@ export interface Achievement {
   createdAt: string
 }
 
+export type CommentSide = 'crown' | 'clown' | 'neutral'
+
+export interface Comment {
+  id: string
+  achievementId: string
+  userId: string
+  userName?: string
+  userAvatar?: string | null
+  body: string
+  side: CommentSide
+  createdAt: string
+  updatedAt?: string
+}
+
 export type TaskPriority = 'high' | 'medium' | 'low'
 
 export interface TaskComment {

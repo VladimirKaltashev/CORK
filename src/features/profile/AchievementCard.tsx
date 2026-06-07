@@ -3,6 +3,7 @@ import { Button, Label } from '@primer/react'
 import { useAuthStore } from '@/entities/auth'
 import { useAchievementsStore } from '@/entities/achievements/store'
 import { ReactionBar } from '@/features/reactions'
+import { CommentSection } from '@/features/comments'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import { CategoryIcon, CheckIcon, HourglassIcon, CrossMarkIcon } from '@/shared/ui'
 import type { Achievement, AchievementCategory, AchievementStatus, ClaimAngle } from '@/shared/types'
@@ -141,6 +142,11 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
               </div>
             )}
           </div>
+
+          {/* Comments */}
+          {achievement.status === 'verified' && (
+            <CommentSection achievementId={achievement.id} />
+          )}
         </div>
       </div>
 

@@ -73,6 +73,13 @@ src/
 - Кнопка «Вынести на суд», placeholder с rotating примерами.
 - Категория, дата, фото, ссылка — вторичны и опциональны.
 
+### Комментарии MVP
+- `src/features/comments/CommentSection.tsx` — expandable блок под каждой заявкой.
+- Комментарий = аргумент суда: side `crown` / `clown` / `neutral`.
+- Отображаются только для `verified` заявок.
+- Только body обязателен, максимум 500 символов.
+- Удаление только своих комментариев.
+
 ## Схема БД
 
 ### Текущая
@@ -88,14 +95,17 @@ auth.users (Supabase Auth)
                                                         └─ claim_angle: 'king' | 'clown' | 'judge' — авторская рамка поста
                                             │
                                             ▼
-                                  public.reactions (achievement_id, user_id, kind: 'crown' | 'clown', cost)
-                                    └─ бюджет: 10 голосов/неделю, сброс понедельник 00:00
-                                    └─ корона = 1 голос, клоун = 2 голоса
-                                    └─ мутации через RPC: toggle_reaction(), get_reaction_budget()
+                                   public.reactions (achievement_id, user_id, kind: 'crown' | 'clown', cost)
+                                     └─ бюджет: 10 голосов/неделю, сброс понедельник 00:00
+                                     └─ корона = 1 голос, клоун = 2 голоса
+                                     └─ мутации через RPC: toggle_reaction(), get_reaction_budget()
 
-                                  view profile_scores (id, name, avatar, crowns, clowns)
+                                   public.comments (achievement_id, user_id, body, side, created_at)
+                                     └─ side: 'crown' | 'clown' | 'neutral' — аргумент суда
 
-   public.friends (user_id, friend_id, status: 'pending' | 'accepted')
+                                   view profile_scores (id, name, avatar, crowns, clowns)
+
+    public.friends (user_id, friend_id, status: 'pending' | 'accepted')
 ```
 
 Категории: `olympiad | academic | it | creative | sport | movies | games | other`.

@@ -10,6 +10,7 @@ import { useReactionsStore } from '@/entities/reactions'
 import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { ChallengeBanner } from '@/features/challenges'
+import { CommentSection } from '@/features/comments'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import type { AchievementCategory, ProofType } from '@/shared/types'
 
@@ -383,6 +384,9 @@ export function FeedPage() {
                     <div className="mt-3">
                       <ReactionBar achievementId={item.id} disabled={!user} size="sm" />
                     </div>
+
+                    {/* Comments */}
+                    <CommentSection achievementId={item.id} />
                   </div>
                 </div>
               </div>
