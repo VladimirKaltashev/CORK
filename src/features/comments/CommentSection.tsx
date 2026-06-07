@@ -60,19 +60,24 @@ function CommentItem({ comment, isOwn, onDelete }: { comment: Comment; isOwn: bo
 
 interface CommentSectionProps {
   achievementId: string
+  currentUserReaction?: 'crown' | 'clown' | null
 }
 
-export function CommentSection({ achievementId }: CommentSectionProps) {
+export function CommentSection({ achievementId, currentUserReaction }: CommentSectionProps) {
   const { user } = useAuthStore()
-  const { byAchievement, loading, loadComments, addComment, deleteComment } = useCommentsStore()
+  const { byAchievement, loading, loadComments, addComment, deleteComment, getCount } = useCommentsStore()
   const [expanded, setExpanded] = useState(false)
   const [text, setText] = useState('')
-  const [side, setSide] = useState<CommentSide>('neutral')
   const [submitting, setSubmitting] = useState(false)
+
+  const derivedSide: CommentSide =
+    currentUserReaction === 'crown' ? 'crown'
+    : currentUserReaction === 'clown' ? 'clown'
+    : 'neutral'
 
   const comments = byAchievement[achievementId] ?? []
   const isLoading = loading[achievementId] ?? false
-  const count = comments.length
+  const count = getCount(achievementId)
 
   useEffect(() => {
     if (expanded && comments.length === 0 && !isLoading) {
@@ -83,11 +88,15 @@ export function CommentSection({ achievementId }: CommentSectionProps) {
   const handleSubmit = async () => {
     if (!text.trim() || !user) return
     setSubmitting(true)
-    await addComment(achievementId, text, side)
+    await addComment(achievementId, text, derivedSide)
     setText('')
-    setSide('neutral')
     setSubmitting(false)
   }
+
+  const positionLabel =
+    derivedSide === 'crown' ? '👑 За корону'
+    : derivedSide === 'clown' ? '🤡 За клоуна'
+    : '⚖️ Нейтрально'
 
   return (
     <div className="mt-3">
@@ -99,8 +108,14 @@ export function CommentSection({ achievementId }: CommentSectionProps) {
         style={{ letterSpacing: '0.02em', textTransform: 'none' }}
       >
         <span>💬</span>
-        <span>Комментарии</span>
-        {count > 0 && <span className="ml-1 text-xs font-semibold" style={{ color: 'var(--cork-brand)' }}>{count}</span>}
+        {count === 0 ? (
+          <span>Нет аргументов</span>
+        ) : (
+          <>
+            <span>Аргументы</span>
+            <span className="ml-1 text-xs font-semibold" style={{ color: 'var(--cork-brand)' }}>{count}</span>
+          </>
+        )}
       </button>
 
       {/* Expanded section */}
@@ -129,31 +144,14 @@ export function CommentSection({ achievementId }: CommentSectionProps) {
           {/* Add form */}
           {user && (
             <div className="mt-2 pt-2" style={{ borderTop: '1px solid var(--cork-border-light)' }}>
-              {/* Side chips */}
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {( ['crown', 'clown', 'neutral'] as CommentSide[]).map((s) => {
-                  const active = s === side
-                  const meta = SIDE_META[s]
-                  return (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setSide(s)}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 text-xs transition-colors"
-                      style={{
-                        borderRadius: 'var(--cork-radius-pill)',
-                        border: '1px solid',
-                        borderColor: active ? 'var(--cork-brand)' : 'var(--cork-border)',
-                        background: active ? 'var(--cork-surface-2)' : 'var(--cork-surface)',
-                        color: active ? 'var(--cork-brand)' : 'var(--cork-text-dim)',
-                        fontWeight: active ? 600 : 400,
-                      }}
-                    >
-                      <span>{meta.emoji}</span>
-                      <span>{meta.label}</span>
-                    </button>
-                  )
-                })}
+              {/* Position indicator */}
+              <div className="mb-2 text-xs font-semibold" style={{ color: 'var(--cork-text-dim)' }}>
+                Твоя позиция: <span style={{ color: SIDE_META[derivedSide].color }}>{positionLabel}</span>
+                {derivedSide === 'neutral' && (
+                  <span className="block mt-0.5 font-normal" style={{ color: 'var(--cork-text-mute)' }}>
+                    Чтобы спорить за корону или клоуна — сначала вынеси вердикт.
+                  </span>
+                )}
               </div>
 
               <textarea

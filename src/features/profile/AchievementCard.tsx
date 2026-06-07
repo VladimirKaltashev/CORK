@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button, Label } from '@primer/react'
 import { useAuthStore } from '@/entities/auth'
 import { useAchievementsStore } from '@/entities/achievements/store'
+import { useReactionsStore } from '@/entities/reactions'
+import { useCommentsStore } from '@/entities/comments'
 import { ReactionBar } from '@/features/reactions'
 import { CommentSection } from '@/features/comments'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
@@ -73,7 +75,14 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
   const meta = CATEGORY_META[achievement.category]
   const { user } = useAuthStore()
   const { updateAchievementStatus } = useAchievementsStore()
+  const reactionByAchievement = useReactionsStore((s) => s.byAchievement)
   const isAdmin = user?.role === 'admin'
+
+  useEffect(() => {
+    if (achievement.status === 'verified') {
+      useCommentsStore.getState().loadCounts([achievement.id])
+    }
+  }, [achievement.id, achievement.status])
 
   const [showRejectForm, setShowRejectForm] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
@@ -145,7 +154,10 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
 
           {/* Comments */}
           {achievement.status === 'verified' && (
-            <CommentSection achievementId={achievement.id} />
+            <CommentSection
+              achievementId={achievement.id}
+              currentUserReaction={reactionByAchievement[achievement.id]?.myKind ?? null}
+            />
           )}
         </div>
       </div>

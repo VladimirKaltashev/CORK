@@ -7,6 +7,7 @@ import { showToast } from '@/shared/lib/toast'
 import { useAuthStore } from '@/entities/auth'
 import { useFriendsStore } from '@/entities/friends'
 import { useReactionsStore } from '@/entities/reactions'
+import { useCommentsStore } from '@/entities/comments'
 import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { ChallengeBanner } from '@/features/challenges'
@@ -191,6 +192,7 @@ export function FeedPage() {
   const { user } = useAuthStore()
   const friendsStore = useFriendsStore()
   const loadReactions = useReactionsStore((s) => s.loadForAchievements)
+  const reactionByAchievement = useReactionsStore((s) => s.byAchievement)
   const [items, setItems] = useState<FeedItem[]>([])
   const [offset, setOffset] = useState(0)
   const [hasMore, setHasMore] = useState(true)
@@ -212,6 +214,7 @@ export function FeedPage() {
         setOffset(loaded.length)
         setHasMore(more)
         loadReactions(loaded.map((i) => i.id), user?.id)
+        useCommentsStore.getState().loadCounts(loaded.map((i) => i.id))
       })
       .catch(() => showToast('error', 'Не удалось загрузить ленту'))
       .finally(() => setIsLoading(false))
@@ -248,6 +251,7 @@ export function FeedPage() {
       setOffset((prev) => prev + more.length)
       setHasMore(moreExists)
       loadReactions(more.map((i) => i.id), user?.id)
+      useCommentsStore.getState().loadCounts(more.map((i) => i.id))
     } catch {
       showToast('error', 'Не удалось загрузить ещё')
     } finally {
@@ -386,7 +390,10 @@ export function FeedPage() {
                     </div>
 
                     {/* Comments */}
-                    <CommentSection achievementId={item.id} />
+                    <CommentSection
+                      achievementId={item.id}
+                      currentUserReaction={reactionByAchievement[item.id]?.myKind ?? null}
+                    />
                   </div>
                 </div>
               </div>

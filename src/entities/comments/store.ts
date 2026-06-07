@@ -6,8 +6,10 @@ import { useAuthStore } from '@/entities/auth'
 
 interface CommentsState {
   byAchievement: Record<string, Comment[]>
+  counts: Record<string, number>
   loading: Record<string, boolean>
   loadComments: (achievementId: string) => Promise<void>
+  loadCounts: (achievementIds: string[]) => Promise<void>
   addComment: (achievementId: string, body: string, side: CommentSide) => Promise<void>
   deleteComment: (achievementId: string, commentId: string) => Promise<void>
   getCount: (achievementId: string) => number
@@ -15,6 +17,7 @@ interface CommentsState {
 
 export const useCommentsStore = create<CommentsState>((set, get) => ({
   byAchievement: {},
+  counts: {},
   loading: {},
 
   loadComments: async (achievementId) => {
@@ -68,6 +71,28 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
       console.error('[comments] loadComments catch:', err)
       showToast('error', 'Не удалось загрузить комментарии')
       set((s) => ({ loading: { ...s.loading, [achievementId]: false } }))
+    }
+  },
+
+  loadCounts: async (achievementIds) => {
+    if (achievementIds.length === 0) return
+    try {
+      const { data, error } = await supabase
+        .from('comments')
+        .select('achievement_id')
+        .in('achievement_id', achievementIds)
+      if (error) {
+        console.error('[comments] loadCounts error:', error)
+        return
+      }
+      const counts: Record<string, number> = {}
+      for (const row of data ?? []) {
+        const id = row.achievement_id as string
+        counts[id] = (counts[id] ?? 0) + 1
+      }
+      set((s) => ({ counts: { ...s.counts, ...counts } }))
+    } catch (err) {
+      console.error('[comments] loadCounts catch:', err)
     }
   },
 
@@ -134,6 +159,10 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
           ...s.byAchievement,
           [achievementId]: [...(s.byAchievement[achievementId] ?? []), comment],
         },
+        counts: {
+          ...s.counts,
+          [achievementId]: (s.counts[achievementId] ?? 0) + 1,
+        },
       }))
     } catch (err) {
       console.error('[comments] addComment catch:', err)
@@ -157,6 +186,10 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
           ...s.byAchievement,
           [achievementId]: (s.byAchievement[achievementId] ?? []).filter((c) => c.id !== commentId),
         },
+        counts: {
+          ...s.counts,
+          [achievementId]: Math.max(0, (s.counts[achievementId] ?? 0) - 1),
+        },
       }))
     } catch (err) {
       console.error('[comments] deleteComment catch:', err)
@@ -165,6 +198,6 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
   },
 
   getCount: (achievementId) => {
-    return get().byAchievement[achievementId]?.length ?? 0
+    return get().counts[achievementId] ?? get().byAchievement[achievementId]?.length ?? 0
   },
 }))
