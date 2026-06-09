@@ -69,7 +69,7 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
       }))
     } catch (err) {
       console.error('[comments] loadComments catch:', err)
-      showToast('error', 'Не удалось загрузить комментарии')
+      showToast('error', 'Не удалось загрузить аргументы')
       set((s) => ({ loading: { ...s.loading, [achievementId]: false } }))
     }
   },
@@ -99,7 +99,7 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
   addComment: async (achievementId, body, side) => {
     const trimmed = body.trim()
     if (trimmed.length < 1) {
-      showToast('error', 'Комментарий не может быть пустым')
+      showToast('error', 'Аргумент не может быть пустым')
       return
     }
     if (trimmed.length > 500) {
@@ -166,7 +166,7 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
       }))
     } catch (err) {
       console.error('[comments] addComment catch:', err)
-      showToast('error', 'Не удалось добавить комментарий')
+      showToast('error', 'Не удалось добавить аргумент')
     }
   },
 
@@ -193,7 +193,7 @@ export const useCommentsStore = create<CommentsState>((set, get) => ({
       }))
     } catch (err) {
       console.error('[comments] deleteComment catch:', err)
-      showToast('error', 'Не удалось удалить комментарий')
+      showToast('error', 'Не удалось удалить аргумент')
     }
   },
 

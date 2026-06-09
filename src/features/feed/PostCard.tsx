@@ -102,7 +102,7 @@ export function PostCard({ id, author, data, createdAt }: Props) {
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleComment() }}
-                placeholder="Написать комментарий..."
+                placeholder="Добавь аргумент..."
                 className="flex-1 rounded-lg border px-3 py-1.5 text-xs outline-none focus:border-[var(--cork-brand)]"
                 style={{ background: 'var(--cork-surface-2)', color: 'var(--cork-text)', borderColor: 'var(--cork-border)' }}
               />
