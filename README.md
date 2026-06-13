@@ -222,6 +222,109 @@ net start winnat
 .\start.ps1
 ```
 
+---
+
+## Запуск на macOS / Linux
+
+### Быстро — через скрипты
+
+В корне проекта есть `start.sh` / `stop.sh`. Скрипты:
+1. Проверяют/запускают Docker.
+2. Поднимают локальный Supabase (если ещё не запущен).
+3. Опционально применяют миграции + seed (`--reset`).
+4. Автоматически создают `.env.local` из `supabase status`.
+5. Открывают `http://localhost:5173` в браузере.
+6. Запускают Vite dev-server.
+
+```bash
+./start.sh               # обычный запуск
+./start.sh --reset       # + supabase db reset (после изменений схемы/seed)
+./start.sh --no-browser  # без открытия браузера
+```
+
+### Остановка стека
+
+`Ctrl+C` в терминале завершает только Vite — контейнеры Supabase продолжают работать. Чтобы их остановить:
+
+```bash
+./stop.sh                # supabase stop (DB volume сохраняется)
+./stop.sh --no-backup    # без дампа БД перед остановкой
+```
+
+Docker Desktop / Docker daemon остаётся работать — закрывай его вручную, если нужно.
+
+### Вручную — по шагам
+
+#### 1. Установка зависимостей (один раз)
+
+```bash
+# macOS (Homebrew)
+brew install docker supabase
+
+# Linux (Ubuntu/Debian)
+# Docker: https://docs.docker.com/engine/install/ubuntu/
+# Supabase CLI:
+curl -fsSL https://supabase.com/install.sh | sh
+# или: sudo snap install supabase
+```
+
+#### 2. Запуск Docker
+
+```bash
+# macOS: запустить Docker Desktop.app
+# Linux: Docker обычно запускается как сервис
+sudo systemctl start docker
+# Проверить:
+docker info
+```
+
+#### 3. Запуск локального Supabase
+
+```bash
+cd /path/to/CORK
+supabase start
+```
+
+Вывод покажет `API URL` и `anon key` — они нужны для фронтенда.
+
+#### 4. Создать `.env.local`
+
+```bash
+cat > .env.local << 'EOF'
+VITE_SUPABASE_URL=http://127.0.0.1:54321
+VITE_SUPABASE_ANON_KEY=<твой_anon_key_из_вывода_supabase_start>
+EOF
+```
+
+Или просто запусти `./start.sh` — он создаст файл автоматически.
+
+#### 5. (Опционально) Применить миграции + сид
+
+```bash
+supabase db reset
+```
+
+#### 6. Dev-сервер
+
+```bash
+npm install
+npm run dev
+```
+
+Откроется `http://localhost:5173`. Тестовые пользователи — пароль `Test123456`, список email в `supabase/seed.sql`.
+
+#### 7. Остановка
+
+```bash
+# Остановить Vite: Ctrl+C
+# Остановить Supabase (данные сохраняются):
+supabase stop
+# Полная остановка с удалением данных:
+supabase stop --no-backup
+```
+
+---
+
 ## Скрипты
 
 | Команда                  | Что делает                                  |
