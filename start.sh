@@ -55,10 +55,27 @@ if docker info >/dev/null 2>&1; then
 else
   echo "Docker not running. Attempting to start..."
   if [[ "$(uname)" == "Darwin" ]]; then
-    # macOS: open Docker Desktop app
-    open -a Docker
+    # macOS: try to open Docker Desktop, if not installed — install via Homebrew
+    if open -a Docker 2>/dev/null; then
+      : # opened successfully
+    else
+      echo "Docker Desktop not found. Installing via Homebrew..."
+      if command -v brew >/dev/null 2>&1; then
+        brew install --cask docker || error_exit "Failed to install Docker Desktop via Homebrew. Install manually from https://docker.com"
+        echo "Docker Desktop installed. Launching..."
+        open -a Docker || error_exit "Failed to launch Docker Desktop. Open it manually from Applications."
+      else
+        error_exit "Homebrew not found. Install Docker Desktop manually from https://docker.com"
+      fi
+    fi
   elif command -v systemctl >/dev/null 2>&1; then
     # Linux with systemd
+    if ! command -v docker >/dev/null 2>&1; then
+      echo "Docker not installed. Install it first:"
+      echo "  Ubuntu/Debian: sudo apt update && sudo apt install -y docker.io"
+      echo "  Or: https://docs.docker.com/engine/install/ubuntu/"
+      error_exit "Docker not installed."
+    fi
     sudo systemctl start docker || error_exit "Failed to start Docker via systemctl. Start Docker manually."
   else
     error_exit "Docker is not running. Please start Docker Desktop (macOS) or Docker daemon (Linux) manually."
@@ -81,7 +98,16 @@ fi
 # 2. Supabase CLI check
 section "Supabase CLI"
 if ! command -v "$SUPABASE_CLI" >/dev/null 2>&1; then
-  error_exit "Supabase CLI not found in PATH. Install it: https://supabase.com/docs/guides/cli"
+  echo "Supabase CLI not found. Attempting to install..."
+  if [[ "$(uname)" == "Darwin" ]] && command -v brew >/dev/null 2>&1; then
+    brew install supabase || error_exit "Failed to install Supabase CLI via Homebrew."
+  elif command -v curl >/dev/null 2>&1; then
+    curl -fsSL https://supabase.com/install.sh | sh || error_exit "Failed to install Supabase CLI via installer."
+    # Add to PATH for current session
+    export PATH="$HOME/.supabase/bin:$PATH"
+  else
+    error_exit "Supabase CLI not found. Install it: https://supabase.com/docs/guides/cli"
+  fi
 fi
 echo "Found: $($SUPABASE_CLI --version)"
 
