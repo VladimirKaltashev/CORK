@@ -155,7 +155,20 @@ if $SUPABASE_CLI status >/dev/null 2>&1; then
   info "Already running."
 else
   warn "Starting Supabase stack..."
-  $SUPABASE_CLI start || err "Supabase failed to start. Run 'supabase status' for details."
+  if ! $SUPABASE_CLI start; then
+    warn "Supabase start failed. Attempting to stop and retry..."
+    $SUPABASE_CLI stop --no-backup 2>/dev/null || true
+    # Wait for port 54322 to be free
+    warn "Waiting for port 54322 to be released..."
+    for i in {1..30}; do
+      if ! lsof -i :54322 >/dev/null 2>&1; then
+        break
+      fi
+      echo -n "."
+      sleep 1
+    done
+    $SUPABASE_CLI start || err "Supabase failed to start after retry. Run 'supabase status' for details."
+  fi
 fi
 
 # 3. Optional db reset
