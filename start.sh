@@ -168,8 +168,14 @@ fi
 if [[ ! -f .env.local ]]; then
   section "Creating .env.local from Supabase status"
   STATUS_OUT=$($SUPABASE_CLI status --output json 2>/dev/null || $SUPABASE_CLI status)
-  API_URL=$(echo "$STATUS_OUT" | grep -o '"API URL": "[^"]*"' | cut -d'"' -f4 | head -1)
-  ANON_KEY=$(echo "$STATUS_OUT" | grep -o '"anon key": "[^"]*"' | cut -d'"' -f4 | head -1)
+  # Parse JSON output (keys: API_URL, ANON_KEY)
+  if command -v jq >/dev/null 2>&1; then
+    API_URL=$(echo "$STATUS_OUT" | jq -r '.API_URL // empty')
+    ANON_KEY=$(echo "$STATUS_OUT" | jq -r '.ANON_KEY // empty')
+  else
+    API_URL=$(echo "$STATUS_OUT" | grep -o '"API_URL": "[^"]*"' | cut -d'"' -f4 | head -1)
+    ANON_KEY=$(echo "$STATUS_OUT" | grep -o '"ANON_KEY": "[^"]*"' | cut -d'"' -f4 | head -1)
+  fi
   if [[ -z "$API_URL" || -z "$ANON_KEY" ]]; then
     warn "Could not auto-detect Supabase credentials."
     echo "Run 'supabase status' and manually create .env.local with:"
