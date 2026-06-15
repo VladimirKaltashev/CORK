@@ -33,11 +33,3 @@ DROP POLICY IF EXISTS "friends_insert_own" ON public.friends;
 CREATE POLICY "friends_insert_own"
   ON public.friends FOR INSERT
   WITH CHECK (user_id = auth.uid());
-
--- Challenge submissions: authenticated users can insert
-GRANT INSERT ON public.challenge_submissions TO authenticated;
-ALTER TABLE public.challenge_submissions ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "challenge_submissions_insert_own" ON public.challenge_submissions;
-CREATE POLICY "challenge_submissions_insert_own"
-  ON public.challenge_submissions FOR INSERT
-  WITH CHECK (user_id = auth.uid());

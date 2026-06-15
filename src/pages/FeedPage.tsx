@@ -11,21 +11,9 @@ import { useCommentsStore } from '@/entities/comments'
 import { useScoutStore } from '@/entities/scout'
 import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
-import { ChallengeBanner } from '@/features/challenges'
 import { CommentSection } from '@/features/comments'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import type { AchievementCategory, ProofType } from '@/shared/types'
-
-function useDismissibleBanner() {
-  const [isDismissed, setIsDismissed] = useState(() => {
-    return localStorage.getItem('hideChallengeBanner') === 'true'
-  })
-  const dismiss = () => {
-    setIsDismissed(true)
-    localStorage.setItem('hideChallengeBanner', 'true')
-  }
-  return { isDismissed, dismiss }
-}
 
 const PAGE_SIZE = 10
 
@@ -217,7 +205,6 @@ export function FeedPage() {
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [feedMode, setFeedMode] = useState<FeedMode>('all')
   const [sort, setSort] = useState<ArenaSort>('new')
-  const { isDismissed, dismiss } = useDismissibleBanner()
 
   const getFriendIds = (): string[] | undefined =>
     feedMode === 'friends' ? friendsStore.acceptedFriendIds() : undefined
@@ -506,24 +493,6 @@ export function FeedPage() {
               )}
             </div>
           </div>
-
-          {/* Challenge */}
-          {!isDismissed && (
-            <div className="cork-panel relative">
-              <button
-                type="button"
-                onClick={dismiss}
-                className="cork-dismiss"
-                title="Скрыть"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              <ChallengeBanner />
-              <p className="cork-meta mt-2">Можно отключить в настройках</p>
-            </div>
-          )}
         </div>
       </aside>
     </div>

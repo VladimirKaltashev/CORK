@@ -14,7 +14,5 @@ export const ROUTES = {
   FRIENDS: '/friends',
   LEADERBOARD: '/leaderboard',
   SETTINGS: '/settings',
-  CHALLENGES: '/challenges',
-  CHALLENGE: '/challenges/:id',
   NOT_FOUND: '*',
 } as const

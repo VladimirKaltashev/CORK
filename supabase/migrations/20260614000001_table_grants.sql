@@ -13,12 +13,3 @@ GRANT SELECT ON public.comments TO anon, authenticated;
 
 -- Friends
 GRANT SELECT ON public.friends TO anon, authenticated;
-
--- Challenges
-GRANT SELECT ON public.challenges TO anon, authenticated;
-
--- Challenge submissions
-GRANT SELECT ON public.challenge_submissions TO anon, authenticated;
-
--- Badges
-GRANT SELECT ON public.badges TO anon, authenticated;
