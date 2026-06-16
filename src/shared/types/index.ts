@@ -173,3 +173,14 @@ export interface UserStudyStatus {
   subject?: Subject
   since?: string
 }
+
+export type {
+  ChallengeStatus,
+  ProposalStatus,
+  AwardType,
+  ExpertThreshold,
+  ChallengeProposal,
+  Challenge,
+  ChallengeEntry,
+  ChallengeAward,
+} from './challenge'
