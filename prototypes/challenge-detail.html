@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>МЕМНЫЙ БАТЛ — CORK</title>
+  <style>
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── THEME TOKENS ── */
+    :root {
+      --cork-bg:          #f9fafb;
+      --cork-surface:     #ffffff;
+      --cork-surface-2:   #f3f4f6;
+      --cork-surface-3:   #e5e7eb;
+      --cork-text:        #111827;
+      --cork-text-dim:    #6b7280;
+      --cork-text-mute:   #9ca3af;
+      --cork-brand:       #4f46e5;
+      --cork-brand-hover: #4338ca;
+      --cork-brand-2:     #f59e0b;
+      --cork-brand-ink:   #ffffff;
+      --cork-king:        #d97706;
+      --cork-clown:       #ef4444;
+      --cork-success:     #22c55e;
+      --cork-border:      #e5e7eb;
+      --cork-border-light:#f3f4f6;
+      --cork-frame:       #4f46e5;
+      --cork-frame-light: #c7d2fe;
+      --cork-radius-card: 0.5rem;
+      --cork-radius-btn:  0.375rem;
+      --cork-radius-pill: 9999px;
+      --cork-shadow:      0 1px 3px rgba(0,0,0,0.1);
+      --cork-shadow-lg:   0 4px 12px rgba(0,0,0,0.08);
+      --cork-glow:        rgba(79, 70, 229, 0.15);
+      --cork-ease: cubic-bezier(.22, .61, .36, 1);
+      --cork-backdrop:    rgba(255,255,255,0.85);
+      --cork-font-display: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --cork-font-body:    system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    .dark {
+      --cork-bg:          #111827;
+      --cork-surface:     #1f2937;
+      --cork-surface-2:   #374151;
+      --cork-surface-3:   #4b5563;
+      --cork-text:        #f3f4f6;
+      --cork-text-dim:    #9ca3af;
+      --cork-text-mute:   #6b7280;
+      --cork-brand:       #818cf8;
+      --cork-brand-hover: #a5b4fc;
+      --cork-brand-2:     #fbbf24;
+      --cork-king:        #fbbf24;
+      --cork-clown:       #f87171;
+      --cork-success:     #22c55e;
+      --cork-border:      #374151;
+      --cork-border-light:#4b5563;
+      --cork-frame:       #818cf8;
+      --cork-frame-light: #6366f1;
+      --cork-backdrop:    rgba(17,24,39,0.85);
+      --cork-shadow:      0 1px 3px rgba(0,0,0,0.4);
+      --cork-shadow-lg:   0 4px 12px rgba(0,0,0,0.3);
+      --cork-glow:        rgba(129, 140, 248, 0.15);
+    }
+    [data-theme="acid"] {
+      --cork-bg:          #070908;
+      --cork-surface:     #0c0f0d;
+      --cork-surface-2:   #101410;
+      --cork-surface-3:   #151b14;
+      --cork-text:        #e9f1e3;
+      --cork-text-dim:    #9cae90;
+      --cork-text-mute:   #5f6e54;
+      --cork-brand:       #c6ff3d;
+      --cork-brand-hover: #d6ff4d;
+      --cork-brand-2:     #c6ff3d;
+      --cork-brand-ink:   #071005;
+      --cork-king:        #c6ff3d;
+      --cork-clown:       #ff2d78;
+      --cork-success:     #c6ff3d;
+      --cork-border:      rgba(198, 255, 61, 0.22);
+      --cork-border-light: rgba(198, 255, 61, 0.12);
+      --cork-frame:       #c6ff3d;
+      --cork-frame-light: rgba(198, 255, 61, 0.4);
+      --cork-radius-card: 0;
+      --cork-radius-btn:  0;
+      --cork-radius-pill: 0;
+      --cork-shadow:       none;
+      --cork-shadow-lg:    none;
+      --cork-glow:         rgba(198, 255, 61, 0.35);
+      --cork-backdrop:    rgba(7, 9, 8, 0.85);
+      --cork-font-display: 'Russo One', system-ui, sans-serif;
+      --cork-font-body:    'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    body {
+      background: var(--cork-bg);
+      color: var(--cork-text);
+      font-family: var(--cork-font-body);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .cork-header {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(18px) saturate(140%);
+      background: var(--cork-backdrop);
+      border-bottom: 1px solid var(--cork-border);
+    }
+    .cork-header__inner {
+      max-width: 1280px; margin: 0 auto;
+      display: flex; height: 64px; align-items: center;
+      justify-content: space-between; padding: 0 24px; gap: 16px;
+    }
+    .cork-header__brand {
+      font-family: var(--cork-font-display);
+      font-weight: 800; font-size: 20px;
+      letter-spacing: -0.5px; text-transform: uppercase;
+      color: var(--cork-text); text-decoration: none;
+    }
+    .cork-header__brand span { color: var(--cork-brand); }
+    .cork-header__nav { display: flex; align-items: center; gap: 4px; margin: 0 auto; }
+    .cork-nav-link {
+      font-size: 13px; font-weight: 600; color: var(--cork-text-dim);
+      padding: 8px 14px; transition: color 0.2s;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      font-family: var(--cork-font-body); text-decoration: none;
+      border-radius: var(--cork-radius-btn);
+    }
+    .cork-nav-link:hover { color: var(--cork-text); }
+    .cork-nav-link.active { color: var(--cork-brand); background: var(--cork-surface-2); }
+    .cork-header__actions { display: flex; align-items: center; gap: 8px; }
+    .cork-avatar {
+      width: 36px; height: 36px;
+      background: var(--cork-brand); display: grid; place-items: center;
+      font-weight: 800; font-size: 12px; color: #fff;
+      border-radius: var(--cork-radius-pill); cursor: pointer;
+    }
+    .cork-avatar--sm { width: 28px; height: 28px; font-size: 10px; }
+
+    /* ── SHELL ── */
+    .cork-shell { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+    /* ── BACK ── */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600; color: var(--cork-text-dim);
+      text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 16px; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--cork-brand); }
+
+    /* ── HERO ── */
+    .challenge-hero {
+      background: var(--cork-surface);
+      border: 1px solid var(--cork-border);
+      border-radius: var(--cork-radius-card);
+      padding: 28px; margin-bottom: 24px;
+    }
+    .challenge-hero__top {
+      display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px;
+    }
+    .challenge-hero__icon {
+      flex-shrink: 0; width: 56px; height: 56px;
+      background: var(--cork-surface-3); border-radius: var(--cork-radius-btn);
+      display: grid; place-items: center; font-size: 26px;
+    }
+    .challenge-hero__body { flex: 1; }
+    .challenge-hero__tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .challenge-hero h1 {
+      font-family: var(--cork-font-display); font-size: 24px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: -0.5px;
+      color: var(--cork-text); margin: 0 0 4px;
+    }
+    .challenge-hero__meta {
+      font-size: 12px; color: var(--cork-text-mute); letter-spacing: 0.03em;
+      display: flex; gap: 20px; flex-wrap: wrap;
+    }
+    .challenge-hero__desc {
+      font-size: 14px; color: var(--cork-text-dim); line-height: 1.6;
+      margin: 16px 0 20px; max-width: 640px;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .cork-stat {
+      background: var(--cork-surface-3); border: 1px solid var(--cork-border-light);
+      border-radius: var(--cork-radius-btn); padding: 14px 10px; text-align: center;
+    }
+    .cork-stat b { display: block; font-size: 18px; color: var(--cork-brand); letter-spacing: -0.5px; }
+    .cork-stat small { font-size: 10px; color: var(--cork-text-mute); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── TIMER ── */
+    .timer-large {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 20px;
+      background: var(--cork-surface-2); border: 1px solid var(--cork-border);
+      border-radius: var(--cork-radius-btn); margin-bottom: 20px;
+      font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums;
+    }
+    .timer-large svg { flex-shrink: 0; }
+
+    /* ── BUTTONS ── */
+    .cork-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 18px; font-weight: 700; font-size: 12px;
+      border: 1px solid var(--cork-border);
+      border-radius: var(--cork-radius-btn);
+      background: var(--cork-surface-2); color: var(--cork-text);
+      transition: all 0.18s var(--cork-ease); cursor: pointer;
+      font-family: var(--cork-font-body);
+      text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none;
+    }
+    .cork-btn:hover { transform: translateY(-2px); border-color: var(--cork-frame); color: var(--cork-brand); }
+    .cork-btn:active { transform: translateY(0) scale(0.98); }
+    .cork-btn-primary {
+      background: var(--cork-brand); color: var(--cork-brand-ink);
+      border-color: transparent; box-shadow: var(--cork-shadow-lg);
+    }
+    .cork-btn-primary:hover { background: var(--cork-brand-hover); color: var(--cork-brand-ink); }
+    .cork-btn-danger { color: var(--cork-clown); border-color: rgba(248,113,113,0.3); }
+    .cork-btn-danger:hover { border-color: var(--cork-clown); color: var(--cork-clown); }
+    .cork-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── SECTION ── */
+    .cork-section-title {
+      font-family: var(--cork-font-display); font-size: 14px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--cork-text); margin-bottom: 12px; margin-top: 28px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .cork-section-title .count {
+      font-size: 11px; color: var(--cork-text-mute);
+      background: var(--cork-surface-3); padding: 2px 8px;
+      border-radius: var(--cork-radius-pill);
+    }
+
+    /* ── TAG ── */
+    .cork-tag {
+      font-size: 11px; font-weight: 600; padding: 4px 10px;
+      background: var(--cork-surface-3);
+      border: 1px solid var(--cork-border-light);
+      border-radius: var(--cork-radius-pill);
+      color: var(--cork-text-dim);
+      font-family: var(--cork-font-body);
+      white-space: nowrap;
+    }
+    .cork-tag--active { background: rgba(34,197,94,0.15); color: var(--cork-success); border-color: rgba(34,197,94,0.3); }
+    .cork-tag--upcoming { background: rgba(79,70,229,0.15); color: var(--cork-brand); border-color: rgba(79,70,229,0.3); }
+    .cork-tag--done { background: rgba(107,114,128,0.15); color: var(--cork-text-dim); border-color: rgba(107,114,128,0.3); }
+    .cork-tag--king { background: rgba(251,191,36,0.15); color: var(--cork-king); border-color: rgba(251,191,36,0.3); }
+    .cork-tag--clown { background: rgba(248,113,113,0.15); color: var(--cork-clown); border-color: rgba(248,113,113,0.3); }
+    .cork-tag--finder { background: rgba(52,211,153,0.15); color: #34d399; border-color: rgba(52,211,153,0.3); }
+    .cork-tag--award { background: rgba(251,191,36,0.15); color: var(--cork-king); border-color: rgba(251,191,36,0.3); }
+
+    /* ── CARD ── */
+    .cork-card {
+      background: var(--cork-surface);
+      border: 1px solid var(--cork-border);
+      border-radius: var(--cork-radius-card);
+      padding: 20px; margin-bottom: 16px;
+      transition: transform 0.25s var(--cork-ease), border-color 0.3s, box-shadow 0.3s;
+    }
+    .cork-card:hover {
+      border-color: var(--cork-frame);
+      box-shadow: var(--cork-shadow-lg);
+    }
+
+    /* ── ENTRY ── */
+    .entry-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px;
+      background: var(--cork-surface-2); border: 1px solid var(--cork-border-light);
+      border-radius: var(--cork-radius-btn); margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+    .entry-card:hover { border-color: var(--cork-frame); }
+    .entry-card__avatar {
+      width: 40px; height: 40px; border-radius: var(--cork-radius-pill);
+      background: var(--cork-brand); color: #fff; font-weight: 800; font-size: 13px;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .entry-card__body { flex: 1; min-width: 0; }
+    .entry-card__name { font-weight: 700; font-size: 13px; color: var(--cork-text); }
+    .entry-card__name a { color: inherit; text-decoration: none; }
+    .entry-card__name a:hover { color: var(--cork-brand); }
+    .entry-card__claim { font-size: 12px; color: var(--cork-text-dim); margin-top: 2px; }
+    .entry-card__award { font-size: 14px; flex-shrink: 0; }
+
+    /* ── MY ENTRY ── */
+    .my-entry {
+      background: var(--cork-surface);
+      border: 1px solid var(--cork-brand);
+      border-radius: var(--cork-radius-card);
+      padding: 24px; margin-bottom: 20px;
+      box-shadow: 0 0 0 1px var(--cork-glow);
+    }
+    .my-entry__head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; gap: 12px;
+    }
+    .my-entry h3 {
+      font-family: var(--cork-font-display); font-size: 14px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .my-entry__claim {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px; background: var(--cork-surface-2);
+      border: 1px solid var(--cork-border-light);
+      border-radius: var(--cork-radius-btn);
+    }
+    .my-entry__claim-icon {
+      width: 40px; height: 40px; background: var(--cork-surface-3);
+      border-radius: var(--cork-radius-btn); display: grid; place-items: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .my-entry__claim-body { flex: 1; }
+    .my-entry__claim-title { font-weight: 700; font-size: 14px; color: var(--cork-text); }
+    .my-entry__claim-desc { font-size: 12px; color: var(--cork-text-dim); margin-top: 2px; }
+
+    /* ── AWARD ── */
+    .award-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px;
+      background: var(--cork-surface-2); border: 1px solid var(--cork-border-light);
+      border-radius: var(--cork-radius-btn); margin-bottom: 10px;
+    }
+    .award-row__badge { font-size: 24px; flex-shrink: 0; }
+    .award-row__body { flex: 1; }
+    .award-row__title { font-weight: 700; font-size: 13px; color: var(--cork-text); text-transform: uppercase; }
+    .award-row__user { font-size: 12px; color: var(--cork-text-dim); }
+
+    /* ── DIVIDER ── */
+    .cork-divider { border: none; border-top: 1px solid var(--cork-border-light); margin: 16px 0; }
+
+    /* ── GRID ── */
+    .two-col { display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── SIDEBAR BLOCK ── */
+    .sidebar-block {
+      background: var(--cork-surface);
+      border: 1px solid var(--cork-border);
+      border-radius: var(--cork-radius-card);
+      padding: 20px; margin-bottom: 16px;
+    }
+    .sidebar-block h4 {
+      font-family: var(--cork-font-display); font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--cork-text-mute); margin-bottom: 12px;
+    }
+    .sidebar-stat {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; font-size: 13px; border-bottom: 1px solid var(--cork-border-light);
+    }
+    .sidebar-stat:last-child { border-bottom: none; }
+    .sidebar-stat__label { color: var(--cork-text-dim); }
+    .sidebar-stat__value { font-weight: 700; color: var(--cork-text); }
+
+    /* ── ICONS ── */
+    .icon { width: 16px; height: 16px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
+    .icon-lg { width: 24px; height: 24px; }
+
+    /* ── ACID ── */
+    [data-theme="acid"] body {
+      background-image: linear-gradient(rgba(198, 255, 61, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(198, 255, 61, 0.04) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    [data-theme="acid"] .cork-card, [data-theme="acid"] .challenge-hero, [data-theme="acid"] .sidebar-block, [data-theme="acid"] .my-entry {
+      border-radius: 0;
+    }
+    [data-theme="acid"] .challenge-hero::before {
+      content: ""; position: absolute; top: -1px; left: -1px;
+      width: 14px; height: 14px;
+      border-top: 2px solid var(--cork-frame);
+      border-left: 2px solid var(--cork-frame);
+      pointer-events: none;
+    }
+    [data-theme="acid"] .challenge-hero::after {
+      content: ""; position: absolute; bottom: -1px; right: -1px;
+      width: 14px; height: 14px;
+      border-bottom: 2px solid var(--cork-frame);
+      border-right: 2px solid var(--cork-frame);
+      pointer-events: none;
+    }
+    [data-theme="acid"] .challenge-hero { position: relative; }
+    [data-theme="acid"] .cork-btn, [data-theme="acid"] .cork-btn-primary {
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      border-radius: 0;
+    }
+    [data-theme="acid"] .entry-card, [data-theme="acid"] .award-row, [data-theme="acid"] .my-entry__claim {
+      border-radius: 0;
+    }
+    [data-theme="acid"] .cork-tag, [data-theme="acid"] .cork-stat, [data-theme="acid"] .cork-avatar { border-radius: 0; }
+
+    @media (max-width: 768px) {
+      .cork-header__nav { display: none; }
+      .cork-shell { padding: 20px 16px; }
+      .challenge-hero { padding: 20px; }
+      .challenge-hero h1 { font-size: 20px; }
+    }
+
+    /* ── THEME SWITCHER ── */
+    .theme-switcher {
+      position: fixed; bottom: 20px; right: 20px; z-index: 999;
+      display: flex; gap: 4px;
+      background: var(--cork-surface); border: 1px solid var(--cork-border);
+      border-radius: var(--cork-radius-btn); padding: 4px;
+    }
+    .theme-switcher button {
+      width: 28px; height: 28px; border: 2px solid transparent;
+      border-radius: var(--cork-radius-btn); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .theme-switcher button.active { border-color: var(--cork-brand); }
+    .theme-switcher .ts-light { background: #f9fafb; }
+    .theme-switcher .ts-dark { background: #111827; }
+    .theme-switcher .ts-acid { background: #070908; }
+  </style>
+</head>
+<body>
+
+  <!-- ══ HEADER ══ -->
+  <header class="cork-header">
+    <div class="cork-header__inner">
+      <a class="cork-header__brand" href="#">CORK<span>.</span></a>
+      <nav class="cork-header__nav">
+        <a class="cork-nav-link" href="#">Лента</a>
+        <a class="cork-nav-link" href="#">Достижения</a>
+        <a class="cork-nav-link active" href="challenges.html">Челленджи</a>
+        <a class="cork-nav-link" href="#">Профиль</a>
+      </nav>
+      <div class="cork-header__actions">
+        <div class="cork-avatar" title="Влад">ВЛ</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ PAGE ══ -->
+  <div class="cork-shell">
+
+    <!-- ══ BACK LINK ══ -->
+    <a class="back-link" href="challenges.html">
+      <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4l-6 6 6 6"/></svg>
+      К списку челленджей
+    </a>
+
+    <div class="two-col">
+
+      <!-- ══ MAIN COLUMN ══ -->
+      <div>
+
+        <!-- Hero -->
+        <div class="challenge-hero">
+          <div class="challenge-hero__top">
+            <div class="challenge-hero__icon">🎭</div>
+            <div class="challenge-hero__body">
+              <div class="challenge-hero__tags">
+                <span class="cork-tag cork-tag--active">active</span>
+                <span class="cork-tag cork-tag--king">👑 king</span>
+                <span class="cork-tag cork-tag--clown">🤡 clown</span>
+                <span class="cork-tag cork-tag--finder">🔍 finder</span>
+              </div>
+              <h1>МЕМНЫЙ БАТЛ</h1>
+              <div class="challenge-hero__meta">
+                <span>🗓 12–26 июня 2026</span>
+                <span>👤 организатор <strong style="color:var(--cork-brand)">@meme_lord</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <p class="challenge-hero__desc">
+            Кто найдёт самый смешной мем про учёбу — тот победил. Загружай свой лучший мем и докажи, что у тебя отличное чувство юмора. Победитель определяется голосованием сообщества. Удачи! 🚀
+          </p>
+
+          <!-- Timer -->
+          <div class="timer-large">
+            <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            Осталось <span style="color:var(--cork-brand)">3 дня 12 часов 45 минут</span>
+            &nbsp;·&nbsp; закончится 26 июня в 23:59
+          </div>
+
+          <!-- Stats -->
+          <div class="stats-grid">
+            <div class="cork-stat"><b>24</b><small>участника</small></div>
+            <div class="cork-stat"><b>36</b><small>заявок</small></div>
+            <div class="cork-stat"><b>1.5K</b><small>голосов</small></div>
+            <div class="cork-stat"><b>4</b><small>дня осталось</small></div>
+          </div>
+        </div>
+
+        <!-- ══ MY ENTRY ══ -->
+        <div class="my-entry">
+          <div class="my-entry__head">
+            <h3>📎 Моя заявка</h3>
+            <div style="display:flex;gap:8px">
+              <button class="cork-btn" style="padding:8px 14px">✏️ Изменить</button>
+              <button class="cork-btn cork-btn-danger" style="padding:8px 14px">✕ Удалить</button>
+            </div>
+          </div>
+          <div class="my-entry__claim">
+            <div class="my-entry__claim-icon">🎯</div>
+            <div class="my-entry__claim-body">
+              <div class="my-entry__claim-title">Победа в олимпиаде по физике</div>
+              <div class="my-entry__claim-desc">
+                Муниципальный этап ВсОШ — диплом призёра. Загрузил этот мем как доказательство, что учёба может быть весёлой.
+                <span style="display:block;margin-top:4px;font-size:11px;color:var(--cork-text-mute)">
+                  🔗 достижение #ach_3f8a · версия 2
+                </span>
+              </div>
+            </div>
+            <button class="cork-btn" style="padding:6px 10px;font-size:11px" title="Обновить заявку">🔄</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11px;color:var(--cork-text-mute)">
+            <span>✅ Заявка активна · можно обновить до завершения челленджа</span>
+            <span>🕒 обновлено 2 часа назад</span>
+          </div>
+        </div>
+
+        <!-- ══ ENTRIES ══ -->
+        <div class="cork-section-title">
+          👥 Участники
+          <span class="count">24</span>
+        </div>
+
+        <div class="entry-card">
+          <div class="entry-card__avatar" style="background:#818cf8">АН</div>
+          <div class="entry-card__body">
+            <div class="entry-card__name"><a href="#">@anna_study</a></div>
+            <div class="entry-card__claim">«Конспект по химии в стиле комиксов» 🎨</div>
+          </div>
+          <div style="font-size:12px;color:var(--cork-text-dim);text-align:right">
+            <div>🔥 24 голоса</div>
+            <div style="font-size:10px;color:var(--cork-text-mute)">#ach_a1b2</div>
+          </div>
+        </div>
+
+        <div class="entry-card">
+          <div class="entry-card__avatar" style="background:#fbbf24">СВ</div>
+          <div class="entry-card__body">
+            <div class="entry-card__name"><a href="#">@sv_developer</a></div>
+            <div class="entry-card__claim">«Мем про дедлайн: я vs мой код» 💀</div>
+          </div>
+          <div style="font-size:12px;color:var(--cork-text-dim);text-align:right">
+            <div>🔥 18 голосов</div>
+            <div style="font-size:10px;color:var(--cork-text-mute)">#ach_c3d4</div>
+          </div>
+        </div>
+
+        <div class="entry-card">
+          <div class="entry-card__avatar" style="background:#f87171">КС</div>
+          <div class="entry-card__body">
+            <div class="entry-card__name"><a href="#">@ksen_math</a></div>
+            <div class="entry-card__claim">«Когда учишь матан и понимаешь, что ты в матрице» 🤯</div>
+          </div>
+          <div style="font-size:12px;color:var(--cork-text-dim);text-align:right">
+            <div>🔥 15 голосов</div>
+            <div style="font-size:10px;color:var(--cork-text-mute)">#ach_e5f6</div>
+          </div>
+        </div>
+
+        <div class="entry-card">
+          <div class="entry-card__avatar" style="background:#34d399">ДМ</div>
+          <div class="entry-card__body">
+            <div class="entry-card__name"><a href="#">@dm_proger</a></div>
+            <div class="entry-card__claim">«Сдача лабы по ООП в 3 ночи» 🌙</div>
+          </div>
+          <div style="font-size:12px;color:var(--cork-text-dim);text-align:right">
+            <div>🔥 12 голосов</div>
+            <div style="font-size:10px;color:var(--cork-text-mute)">#ach_g7h8</div>
+          </div>
+        </div>
+
+        <div class="entry-card" style="opacity:0.6">
+          <div class="entry-card__avatar" style="background:var(--cork-surface-3);color:var(--cork-text-mute)">+20</div>
+          <div class="entry-card__body">
+            <div class="entry-card__claim" style="color:var(--cork-text-mute)">Ещё 20 участников</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══ SIDEBAR ══ -->
+      <div>
+
+        <!-- Info block -->
+        <div class="sidebar-block">
+          <h4>ℹ️ О челлендже</h4>
+          <div class="sidebar-stat">
+            <span class="sidebar-stat__label">Статус</span>
+            <span class="sidebar-stat__value" style="color:var(--cork-success)">🟢 Активен</span>
+          </div>
+          <div class="sidebar-stat">
+            <span class="sidebar-stat__label">Старт</span>
+            <span class="sidebar-stat__value">12 июня 2026</span>
+          </div>
+          <div class="sidebar-stat">
+            <span class="sidebar-stat__label">Финиш</span>
+            <span class="sidebar-stat__value">26 июня 2026</span>
+          </div>
+          <div class="sidebar-stat">
+            <span class="sidebar-stat__label">Длительность</span>
+            <span class="sidebar-stat__value">14 дней</span>
+          </div>
+          <div class="sidebar-stat">
+            <span class="sidebar-stat__label">Тип</span>
+            <span class="sidebar-stat__value">community</span>
+          </div>
+        </div>
+
+        <!-- Awards block -->
+        <div class="sidebar-block">
+          <h4>🏆 Награды</h4>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:20px">👑</span>
+              <div>
+                <div style="font-weight:700;font-size:13px">King</div>
+                <div style="font-size:11px;color:var(--cork-text-dim)">Победитель (1 место)</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:20px">🤡</span>
+              <div>
+                <div style="font-weight:700;font-size:13px">Clown</div>
+                <div style="font-size:11px;color:var(--cork-text-dim)">Самая смешная заявка</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:20px">🔍</span>
+              <div>
+                <div style="font-weight:700;font-size:13px">Finder</div>
+                <div style="font-size:11px;color:var(--cork-text-dim)">Первооткрыватель темы</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:20px">💬</span>
+              <div>
+                <div style="font-weight:700;font-size:13px">Best Comment</div>
+                <div style="font-size:11px;color:var(--cork-text-dim)">Лучший комментарий</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expert info -->
+        <div class="sidebar-block">
+          <h4>⭐ Экспертный ранг</h4>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+            <div style="font-size:32px">🥇</div>
+            <div>
+              <div style="font-weight:700;font-size:14px;color:var(--cork-brand)">Gold</div>
+              <div style="font-size:11px;color:var(--cork-text-dim)">50 реакций · голос ×2</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px">
+            <div style="background:var(--cork-surface-3);padding:6px 8px;border-radius:var(--cork-radius-btn);text-align:center;color:var(--cork-text-dim)">
+              🥉 Bronze<br><strong style="color:var(--cork-text)">5</strong> реакций
+            </div>
+            <div style="background:var(--cork-surface-3);padding:6px 8px;border-radius:var(--cork-radius-btn);text-align:center;color:var(--cork-text-dim)">
+              🥈 Silver<br><strong style="color:var(--cork-text)">20</strong> реакций
+            </div>
+            <div style="background:var(--cork-brand);padding:6px 8px;border-radius:var(--cork-radius-btn);text-align:center;color:var(--cork-brand-ink)">
+              🥇 Gold<br><strong>50</strong> реакций
+            </div>
+            <div style="background:var(--cork-surface-3);padding:6px 8px;border-radius:var(--cork-radius-btn);text-align:center;color:var(--cork-text-dim)">
+              💎 Platinum<br><strong style="color:var(--cork-text)">100</strong> реакций
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ COMPLETED AWARDS (shown for finished challenges) ══ -->
+    <div style="margin-top:32px;display:none" id="completed-section">
+      <hr class="cork-divider">
+      <div class="cork-section-title" style="margin-top:24px">
+        🏅 Награды
+        <span class="count">4</span>
+      </div>
+
+      <div class="award-row">
+        <div class="award-row__badge">👑</div>
+        <div class="award-row__body">
+          <div class="award-row__title">King</div>
+          <div class="award-row__user">@anna_study &middot; 24 голоса</div>
+        </div>
+        <span class="cork-tag cork-tag--king">победитель</span>
+      </div>
+      <div class="award-row">
+        <div class="award-row__badge">🤡</div>
+        <div class="award-row__body">
+          <div class="award-row__title">Clown</div>
+          <div class="award-row__user">@sv_developer &middot; 18 голосов</div>
+        </div>
+        <span class="cork-tag cork-tag--clown">юморист</span>
+      </div>
+      <div class="award-row">
+        <div class="award-row__badge">🔍</div>
+        <div class="award-row__body">
+          <div class="award-row__title">Finder</div>
+          <div class="award-row__user">@ksen_math &middot; первая заявка</div>
+        </div>
+        <span class="cork-tag cork-tag--finder">первый</span>
+      </div>
+      <div class="award-row">
+        <div class="award-row__badge">💬</div>
+        <div class="award-row__body">
+          <div class="award-row__title">Best Comment</div>
+          <div class="award-row__user">@meme_critic &middot; «Этот мем живёт у меня в голове бесплатно уже неделю»</div>
+        </div>
+        <span class="cork-tag cork-tag--award">топ коммент</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ THEME SWITCHER (dev only) ══ -->
+  <div class="theme-switcher">
+    <button class="ts-light" onclick="setTheme('light')" title="Light">☀</button>
+    <button class="ts-dark active" onclick="setTheme('dark')" title="Dark">🌙</button>
+    <button class="ts-acid" onclick="setTheme('acid')" title="Acid">💚</button>
+  </div>
+
+  <script>
+    function setTheme(t) {
+      document.documentElement.className = t === 'light' ? '' : t;
+      document.documentElement.dataset.theme = t === 'acid' ? 'acid' : '';
+      document.querySelectorAll('.theme-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelector('.ts-' + t).classList.add('active');
+    }
+  </script>
+</body>
+</html>

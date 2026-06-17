@@ -229,6 +229,158 @@ LIMIT 40
 ON CONFLICT (user_id, friend_id) DO NOTHING;
 
 -- =====================================================
+-- ЧЕЛЛЕНДЖИ
+-- =====================================================
+DO $$
+DECLARE
+  challenge_meme   UUID;
+  challenge_code   UUID;
+  challenge_photo  UUID;
+  challenge_sci    UUID;
+  challenge_review UUID;
+BEGIN
+
+  -- Активные
+  INSERT INTO public.challenges (id, title, description, created_by, starts_at, ends_at, status, config)
+  VALUES (
+    gen_random_uuid(),
+    'МЕМНЫЙ БАТЛ',
+    'Кто найдёт самый смешной мем про учёбу — тот победил. Загружай свой лучший мем и докажи, что у тебя отличное чувство юмора.',
+    (SELECT id FROM public.profiles WHERE email = 'elena.kozlova@test.com'),
+    NOW() - INTERVAL '2 days',
+    NOW() + INTERVAL '11 days',
+    'active',
+    '{"awards":["king","clown","finder"]}'
+  ) RETURNING id INTO challenge_meme;
+
+  INSERT INTO public.challenges (id, title, description, created_by, starts_at, ends_at, status, config)
+  VALUES (
+    gen_random_uuid(),
+    'ЛУЧШИЙ КОД',
+    'Покажи свой самый элегантный код. Любой язык, любой стек. Красота и чистота — главные критерии.',
+    (SELECT id FROM public.profiles WHERE email = 'olga.fedorova@test.com'),
+    NOW() - INTERVAL '5 days',
+    NOW() + INTERVAL '9 days',
+    'active',
+    '{"awards":["king","best_comment"]}'
+  ) RETURNING id INTO challenge_code;
+
+  -- Предстоящий
+  INSERT INTO public.challenges (id, title, description, created_by, starts_at, ends_at, status, config)
+  VALUES (
+    gen_random_uuid(),
+    'КРЕАТИВНАЯ ФОТКА',
+    'Самая креативная фотография твоего учебного процесса. Креативность и нестандартный подход — всё, что нужно для победы.',
+    (SELECT id FROM public.profiles WHERE email = 'artem.frolov@test.com'),
+    NOW() + INTERVAL '3 days',
+    NOW() + INTERVAL '17 days',
+    'scheduled',
+    '{"awards":["king","clown","most_controversial"]}'
+  ) RETURNING id INTO challenge_photo;
+
+  -- Завершённые
+  INSERT INTO public.challenges (id, title, description, created_by, starts_at, ends_at, status, config)
+  VALUES (
+    gen_random_uuid(),
+    'SCIENCE MEME',
+    'Самый смешной мем про науку и учёбу. Победитель определён голосованием.',
+    (SELECT id FROM public.profiles WHERE email = 'alexey.ivanov@test.com'),
+    NOW() - INTERVAL '20 days',
+    NOW() - INTERVAL '6 days',
+    'completed',
+    '{"awards":["king"]}'
+  ) RETURNING id INTO challenge_sci;
+
+  INSERT INTO public.challenges (id, title, description, created_by, starts_at, ends_at, status, config)
+  VALUES (
+    gen_random_uuid(),
+    'CODE REVIEW',
+    'Найди самую забавную ошибку в коде. Победитель определяется сообществом.',
+    (SELECT id FROM public.profiles WHERE email = 'dmitry.smirnov@test.com'),
+    NOW() - INTERVAL '30 days',
+    NOW() - INTERVAL '16 days',
+    'completed',
+    '{"awards":["king","clown"]}'
+  ) RETURNING id INTO challenge_review;
+
+  -- ══ Заявки (challenge_entries) ══
+  -- МЕМНЫЙ БАТЛ: 4 участника
+  INSERT INTO public.challenge_entries (challenge_id, user_id, claim_id, title, description, version, is_current)
+  SELECT challenge_meme, user_id, claim_id, title, descr, 1, true FROM (VALUES
+    ((SELECT id FROM public.profiles WHERE email = 'alexey.ivanov@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Победитель ВсОШ по математике' LIMIT 1),
+     'Мем про интегралы', 'Когда решаешь интеграл, а он решает тебя')),
+    ((SELECT id FROM public.profiles WHERE email = 'maria.petrova@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Призёр олимпиады по химии' LIMIT 1),
+     'Химическая реакция на дедлайн', 'Моё лицо, когда лабу надо сдать вчера')),
+    ((SELECT id FROM public.profiles WHERE email = 'sergey.morozov@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Победитель олимпиады по английскому' LIMIT 1),
+     'Английский юмор', 'When you finally understand present perfect')),
+    ((SELECT id FROM public.profiles WHERE email = 'pavel.novikov@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'КМС по лёгкой атлетике' LIMIT 1),
+     'Спортивный интерес', 'Бегу за дипломом быстрее, чем на стометровке')
+  ) AS t(user_id, claim_id, title, descr);
+
+  -- ЛУЧШИЙ КОД: 3 участника
+  INSERT INTO public.challenge_entries (challenge_id, user_id, claim_id, title, description, version, is_current)
+  SELECT challenge_code, user_id, claim_id, title, descr, 1, true FROM (VALUES
+    ((SELECT id FROM public.profiles WHERE email = 'olga.fedorova@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Kaggle Bronze Medal' LIMIT 1),
+     'Python one-liner', 'Распарсил JSON в одну строку. Красота.')),
+    ((SELECT id FROM public.profiles WHERE email = 'ruslan.chernyshov@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Победитель хакатона' LIMIT 1),
+     'React компонент', 'Многоразовый компонент таблицы с сортировкой за 50 строк')),
+    ((SELECT id FROM public.profiles WHERE email = 'evgeny.nikolaev@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Решено 200 задач на Codeforces' LIMIT 1),
+     'Жемчужина на C++', 'DFS за 20 строк без единого копипаста'))
+  ) AS t(user_id, claim_id, title, descr);
+
+  -- КРЕАТИВНАЯ ФОТКА: 2 участника (предстоящий)
+  INSERT INTO public.challenge_entries (challenge_id, user_id, claim_id, title, description, version, is_current)
+  SELECT challenge_photo, user_id, claim_id, title, descr, 1, true FROM (VALUES
+    ((SELECT id FROM public.profiles WHERE email = 'anna.vasilyeva@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Персональная выставка работ' LIMIT 1),
+     'Рабочее место художника', 'Фото стола, заставленного красками и конспектами')),
+    ((SELECT id FROM public.profiles WHERE email = 'nikita.egorov@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Чемпион школы по баскетболу' LIMIT 1),
+     'Учёба после тренировки', 'Форма, учебник и капельница с кофе'))
+  ) AS t(user_id, claim_id, title, descr);
+
+  -- SCIENCE MEME: 3 участника (завершён)
+  INSERT INTO public.challenge_entries (challenge_id, user_id, claim_id, title, description, version, is_current)
+  SELECT challenge_sci, user_id, claim_id, title, descr, 1, true FROM (VALUES
+    ((SELECT id FROM public.profiles WHERE email = 'natalia.kuznetsova@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Олимпиада по биологии' LIMIT 1),
+     'Эволюция студента', 'От амёбы до кандидата наук за одну сессию')),
+    ((SELECT id FROM public.profiles WHERE email = 'vladimir.sokolov@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Грант астрономического общества' LIMIT 1),
+     'Чёрная дыра бюджета', 'Когда увидел цены на учебники'))
+  ) AS t(user_id, claim_id, title, descr);
+
+  -- CODE REVIEW: 2 участника (завершён)
+  INSERT INTO public.challenge_entries (challenge_id, user_id, claim_id, title, description, version, is_current)
+  SELECT challenge_review, user_id, claim_id, title, descr, 1, true FROM (VALUES
+    ((SELECT id FROM public.profiles WHERE email = 'andrey.popov@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Победитель соревнования роботов' LIMIT 1),
+     'Баг на миллион', 'Забыл break в switch — прод упал')),
+    ((SELECT id FROM public.profiles WHERE email = 'nikolay.filatov@test.com'),
+     (SELECT id FROM public.achievements WHERE title LIKE 'Open-source вклад' LIMIT 1),
+     'Комментарий века', '// TODO: fix this later — живёт в проде 3 года'))
+  ) AS t(user_id, claim_id, title, descr);
+
+  -- ══ Награды для завершённых ══
+  INSERT INTO public.challenge_awards (challenge_id, user_id, award_type, claim_id)
+  VALUES
+    (challenge_sci, (SELECT id FROM public.profiles WHERE email = 'natalia.kuznetsova@test.com'), 'king',
+     (SELECT id FROM public.challenge_entries WHERE challenge_id = challenge_sci AND user_id = (SELECT id FROM public.profiles WHERE email = 'natalia.kuznetsova@test.com') LIMIT 1)),
+    (challenge_review, (SELECT id FROM public.profiles WHERE email = 'andrey.popov@test.com'), 'king',
+     (SELECT id FROM public.challenge_entries WHERE challenge_id = challenge_review AND user_id = (SELECT id FROM public.profiles WHERE email = 'andrey.popov@test.com') LIMIT 1)),
+    (challenge_review, (SELECT id FROM public.profiles WHERE email = 'nikolay.filatov@test.com'), 'clown',
+     (SELECT id FROM public.challenge_entries WHERE challenge_id = challenge_review AND user_id = (SELECT id FROM public.profiles WHERE email = 'nikolay.filatov@test.com') LIMIT 1));
+
+END $$;
+
+-- =====================================================
 -- Возвращаем нормальный режим: триггеры снова стреляют.
 -- =====================================================
 SET session_replication_role = origin;

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="acid">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Челленджи — CORK [ACID]</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── ACID TOKENS ── */
+    [data-theme="acid"] {
+      --cork-bg:          #070908;
+      --cork-surface:     #0c0f0d;
+      --cork-surface-2:   #101410;
+      --cork-surface-3:   #151b14;
+      --cork-text:        #e9f1e3;
+      --cork-text-dim:    #9cae90;
+      --cork-text-mute:   #5f6e54;
+      --cork-brand:       #c6ff3d;
+      --cork-brand-hover: #d6ff4d;
+      --cork-brand-ink:   #071005;
+      --cork-king:        #c6ff3d;
+      --cork-clown:       #ff2d78;
+      --cork-success:     #c6ff3d;
+      --cork-border:      rgba(198, 255, 61, 0.22);
+      --cork-border-light: rgba(198, 255, 61, 0.12);
+      --cork-frame:       #c6ff3d;
+      --cork-frame-light: rgba(198, 255, 61, 0.4);
+      --cork-radius-card: 0;
+      --cork-radius-btn:  0;
+      --cork-radius-pill: 0;
+      --cork-shadow:       none;
+      --cork-shadow-lg:    none;
+      --cork-glow:         rgba(198, 255, 61, 0.35);
+      --cork-backdrop:    rgba(7, 9, 8, 0.85);
+      --cork-font-display: 'Russo One', system-ui, sans-serif;
+      --cork-font-body:    'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    /* ── BASE ── */
+    body {
+      background: var(--cork-bg);
+      color: var(--cork-text);
+      font-family: var(--cork-font-body);
+      min-height: 100vh;
+      background-image:
+        linear-gradient(rgba(198, 255, 61, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(198, 255, 61, 0.04) 1px, transparent 1px);
+      background-size: 24px 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── SCANLINES ── */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 3px);
+      mix-blend-mode: overlay;
+      opacity: 0.25;
+    }
+
+    /* ── GLOW BLOB ── */
+    body::before {
+      content: "";
+      position: fixed;
+      z-index: 0;
+      pointer-events: none;
+      width: 60vw;
+      height: 60vw;
+      border-radius: 50%;
+      filter: blur(90px);
+      top: -18vw;
+      right: -12vw;
+      background: radial-gradient(circle, rgba(198, 255, 61, 0.12), transparent 65%);
+    }
+
+    #root { position: relative; z-index: 1; }
+
+    /* ── HEADER ── */
+    .cork-header {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(18px) saturate(140%);
+      background: var(--cork-backdrop);
+      border-bottom: 1px solid var(--cork-border);
+    }
+    .cork-header__inner {
+      max-width: 1280px; margin: 0 auto;
+      display: flex; height: 64px; align-items: center;
+      justify-content: space-between; padding: 0 24px; gap: 16px;
+    }
+    .cork-header__brand {
+      font-family: var(--cork-font-display);
+      font-weight: 800; font-size: 20px;
+      letter-spacing: -0.5px; text-transform: uppercase;
+      color: var(--cork-text); text-decoration: none;
+    }
+    .cork-header__brand span { color: var(--cork-brand); }
+    .cork-header__nav { display: flex; align-items: center; gap: 4px; margin: 0 auto; }
+    .cork-nav-link {
+      font-size: 12px; font-weight: 600; color: var(--cork-text-dim);
+      padding: 8px 14px; transition: color 0.2s;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      font-family: var(--cork-font-body); text-decoration: none;
+    }
+    .cork-nav-link:hover { color: var(--cork-text); }
+    .cork-nav-link.active { color: var(--cork-brand); background: var(--cork-surface-2); }
+    .cork-header__actions { display: flex; align-items: center; gap: 8px; }
+
+    /* ── AVATAR ── */
+    .cork-avatar {
+      width: 36px; height: 36px;
+      background: var(--cork-surface-2); display: grid; place-items: center;
+      font-weight: 800; font-size: 11px;
+      border: 1px solid var(--cork-frame);
+      color: var(--cork-brand);
+      cursor: pointer;
+    }
+
+    /* ── SHELL ── */
+    .cork-shell { max-width: 1200px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
+
+    /* ── PAGE HEAD ── */
+    .page-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; gap: 16px;
+    }
+    .cork-head {
+      font-family: var(--cork-font-display); font-size: 22px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: -0.5px; color: var(--cork-text);
+      margin: 0;
+    }
+    .cork-head small {
+      font-size: 12px; font-weight: 400; color: var(--cork-text-dim);
+      text-transform: none; letter-spacing: 0;
+      font-family: var(--cork-font-body);
+    }
+
+    /* ── BUTTONS ── */
+    .cork-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 18px; font-weight: 700; font-size: 11px;
+      border: 1px solid var(--cork-border);
+      background: var(--cork-surface-2); color: var(--cork-text);
+      transition: all 0.2s ease; cursor: pointer;
+      font-family: var(--cork-font-body);
+      text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    }
+    .cork-btn:hover { transform: translateY(-2px); border-color: var(--cork-frame); color: var(--cork-brand); }
+    .cork-btn-primary {
+      background: var(--cork-brand); color: var(--cork-brand-ink);
+      border-color: transparent; box-shadow: 0 10px 24px -10px var(--cork-glow);
+    }
+    .cork-btn-primary:hover { background: var(--cork-brand-hover); color: var(--cork-brand-ink); }
+    .cork-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    /* ── TABS ── */
+    .cork-tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+    .cork-tab {
+      font-size: 11px; font-weight: 600; color: var(--cork-text-dim);
+      padding: 7px 12px; border: 1px solid transparent;
+      transition: all 0.2s; cursor: pointer; background: transparent;
+      font-family: var(--cork-font-body); text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .cork-tab.active { background: var(--cork-brand); color: var(--cork-brand-ink); border-color: var(--cork-brand); }
+    .cork-tab:hover { color: var(--cork-text); border-color: var(--cork-frame); }
+
+    /* ── SECTION TITLE ── */
+    .cork-section-title {
+      font-family: var(--cork-font-display); font-size: 13px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--cork-text); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .cork-section-title .count {
+      font-size: 10px; color: var(--cork-text-mute);
+      background: var(--cork-surface-3); padding: 2px 8px;
+      border: 1px solid var(--cork-border-light);
+    }
+
+    /* ── CARD (HUD corners via pseudo) ── */
+    .cork-card {
+      position: relative;
+      background: var(--cork-surface);
+      border: 1px solid var(--cork-border);
+      padding: 20px; margin-bottom: 16px;
+      transition: all 0.2s ease;
+    }
+    .cork-card::before {
+      content: ""; position: absolute; top: -1px; left: -1px;
+      width: 14px; height: 14px;
+      border-top: 2px solid var(--cork-frame);
+      border-left: 2px solid var(--cork-frame);
+      pointer-events: none;
+    }
+    .cork-card::after {
+      content: ""; position: absolute; bottom: -1px; right: -1px;
+      width: 14px; height: 14px;
+      border-bottom: 2px solid var(--cork-frame);
+      border-right: 2px solid var(--cork-frame);
+      pointer-events: none;
+    }
+    .cork-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--cork-frame);
+      box-shadow: 0 0 24px -8px var(--cork-glow);
+    }
+    .cork-card__top {
+      display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px;
+    }
+    .cork-card__icon {
+      flex-shrink: 0; width: 40px; height: 40px;
+      background: var(--cork-surface-2); border: 1px solid var(--cork-border-light);
+      display: grid; place-items: center; font-size: 18px;
+    }
+    .cork-card__body { flex: 1; min-width: 0; }
+    .cork-title {
+      font-family: var(--cork-font-display); font-size: 15px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: -0.3px;
+      color: var(--cork-text); margin: 0 0 4px;
+    }
+    .cork-title a { color: inherit; text-decoration: none; }
+    .cork-title a:hover { color: var(--cork-brand); }
+    .cork-desc {
+      font-size: 12px; color: var(--cork-text-dim); line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    .cork-card__footer {
+      display: flex; align-items: center; gap: 16px;
+      margin-top: 14px; color: var(--cork-text-mute); font-size: 11px;
+      border-top: 1px solid var(--cork-border-light); padding-top: 12px;
+    }
+    .cork-card__footer .spacer { margin-left: auto; }
+
+    /* ── TAG ── */
+    .cork-tag {
+      font-size: 10px; font-weight: 600; padding: 4px 10px;
+      background: var(--cork-surface-3);
+      border: 1px solid var(--cork-border-light);
+      color: var(--cork-text-dim);
+      font-family: var(--cork-font-body);
+      white-space: nowrap;
+    }
+    .cork-tag--active { background: rgba(198,255,61,0.1); color: var(--cork-success); border-color: rgba(198,255,61,0.3); }
+    .cork-tag--upcoming { background: rgba(198,255,61,0.08); color: var(--cork-brand); border-color: rgba(198,255,61,0.2); }
+    .cork-tag--done { background: rgba(94,110,84,0.15); color: var(--cork-text-dim); border-color: rgba(94,110,84,0.3); }
+    .cork-tag--king { background: rgba(198,255,61,0.1); color: var(--cork-king); border-color: rgba(198,255,61,0.3); }
+    .cork-tag--clown { background: rgba(255,45,120,0.1); color: var(--cork-clown); border-color: rgba(255,45,120,0.3); }
+    .cork-tag--finder { background: rgba(52,211,153,0.1); color: #34d399; border-color: rgba(52,211,153,0.3); }
+
+    /* ── STAT ── */
+    .stat-row { display: flex; gap: 12px; align-items: center; }
+    .cork-stat {
+      background: var(--cork-surface-3); border: 1px solid var(--cork-border-light);
+      padding: 8px 10px; text-align: center;
+    }
+    .cork-stat b { display: block; font-size: 14px; color: var(--cork-brand); letter-spacing: -0.5px; }
+    .cork-stat small { font-size: 9px; color: var(--cork-text-mute); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── TIMER ── */
+    .timer { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--cork-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .timer svg { flex-shrink: 0; }
+
+    /* ── EMPTY ── */
+    .cork-empty {
+      border: 1px dashed var(--cork-border-light); padding: 48px; text-align: center;
+      color: var(--cork-text-mute); font-size: 12px;
+    }
+    .cork-empty b { display: block; font-size: 28px; margin-bottom: 8px; }
+
+    /* ── USERS MINI ── */
+    .user-avatars { display: flex; }
+    .user-avatars .mini-avatar {
+      width: 28px; height: 28px;
+      background: var(--cork-surface-2); color: var(--cork-brand);
+      font-size: 10px; font-weight: 800; border: 1px solid var(--cork-frame);
+      display: grid; place-items: center;
+      margin-left: -6px; cursor: pointer; transition: transform 0.2s;
+    }
+    .user-avatars .mini-avatar:first-child { margin-left: 0; }
+    .user-avatars .mini-avatar:hover { transform: translateY(-3px); z-index: 2; }
+
+    .icon { width: 16px; height: 16px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
+    .icon-lg { width: 20px; height: 20px; }
+
+    @media (max-width: 768px) {
+      .cork-header__nav { display: none; }
+      .page-head { flex-direction: column; align-items: stretch; }
+      .cork-shell { padding: 20px 16px; }
+      .cork-card { padding: 16px; }
+    }
+
+    /* ── THEME SWITCHER ── */
+    .theme-switcher {
+      position: fixed; bottom: 20px; right: 20px; z-index: 99999;
+      display: flex; gap: 4px;
+      background: var(--cork-surface); border: 1px solid var(--cork-border);
+      padding: 4px;
+    }
+    .theme-switcher button {
+      width: 28px; height: 28px; border: 2px solid transparent;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .theme-switcher button.active { border-color: var(--cork-brand); }
+    .theme-switcher .ts-light { background: #f9fafb; }
+    .theme-switcher .ts-dark { background: #111827; }
+    .theme-switcher .ts-acid { background: #070908; }
+  </style>
+</head>
+<body>
+  <div id="root">
+
+    <!-- ══ HEADER ══ -->
+    <header class="cork-header">
+      <div class="cork-header__inner">
+        <a class="cork-header__brand" href="#">CORK<span>.</span></a>
+        <nav class="cork-header__nav">
+          <a class="cork-nav-link" href="#">Лента</a>
+          <a class="cork-nav-link" href="#">Достижения</a>
+          <a class="cork-nav-link active" href="#">Челленджи</a>
+          <a class="cork-nav-link" href="#">Профиль</a>
+        </nav>
+        <div class="cork-header__actions">
+          <div class="cork-avatar">ВЛ</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ══ PAGE ══ -->
+    <div class="cork-shell">
+
+      <div class="page-head">
+        <h1 class="cork-head">Челленджи <small>сообщество решает</small></h1>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:10px;color:var(--cork-text-mute);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">
+            🏆 gold · vote ×2
+          </span>
+          <button class="cork-btn cork-btn-primary" disabled>
+            <span>+</span> Предложить челлендж
+          </button>
+        </div>
+      </div>
+
+      <div class="cork-tabs">
+        <button class="cork-tab active">Все</button>
+        <button class="cork-tab">Активные</button>
+        <button class="cork-tab">Предстоящие</button>
+        <button class="cork-tab">Завершённые</button>
+      </div>
+
+      <!-- ══ ACTIVE ══ -->
+      <div class="cork-section-title">🔥 Активные <span class="count">2</span></div>
+
+      <div class="cork-card">
+        <div class="cork-card__top">
+          <div class="cork-card__icon">🎭</div>
+          <div class="cork-card__body">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+              <span class="cork-tag cork-tag--active">active</span>
+              <span class="cork-tag cork-tag--king">👑 king</span>
+              <span class="cork-tag cork-tag--clown">🤡 clown</span>
+            </div>
+            <h2 class="cork-title"><a href="challenge-detail-acid.html">МЕМНЫЙ БАТЛ</a></h2>
+            <p class="cork-desc">Кто найдёт самый смешной мем про учёбу — тот победил. Загружай свой лучший мем и докажи, что у тебя отличное чувство юмора.</p>
+          </div>
+        </div>
+        <div class="cork-card__footer">
+          <div class="timer">
+            <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l2.5 2.5"/></svg>
+            Осталось 3д 12ч
+          </div>
+          <span>👤 24</span>
+          <span class="spacer"></span>
+          <div class="user-avatars">
+            <div class="mini-avatar">АН</div>
+            <div class="mini-avatar">СВ</div>
+            <div class="mini-avatar">КС</div>
+            <div class="mini-avatar" style="background:var(--cork-surface-3);color:var(--cork-text-mute);font-size:9px">+21</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cork-card">
+        <div class="cork-card__top">
+          <div class="cork-card__icon">💻</div>
+          <div class="cork-card__body">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+              <span class="cork-tag cork-tag--active">active</span>
+              <span class="cork-tag cork-tag--king">👑 king</span>
+              <span class="cork-tag">💬 best comment</span>
+            </div>
+            <h2 class="cork-title"><a href="#">ЛУЧШИЙ КОД</a></h2>
+            <p class="cork-desc">Покажи свой самый элегантный код. Любой язык, любой стек. Красота и чистота — главные критерии.</p>
+          </div>
+        </div>
+        <div class="cork-card__footer">
+          <div class="timer">
+            <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l2.5 2.5"/></svg>
+            Осталось 7д 5ч
+          </div>
+          <span>👤 18</span>
+          <span class="spacer"></span>
+          <div class="user-avatars">
+            <div class="mini-avatar">ДМ</div>
+            <div class="mini-avatar">АЛ</div>
+            <div class="mini-avatar">НИ</div>
+            <div class="mini-avatar" style="background:var(--cork-surface-3);color:var(--cork-text-mute);font-size:9px">+15</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ UPCOMING ══ -->
+      <div class="cork-section-title" style="margin-top:32px">📅 Предстоящие <span class="count">1</span></div>
+
+      <div class="cork-card">
+        <div class="cork-card__top">
+          <div class="cork-card__icon">📸</div>
+          <div class="cork-card__body">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+              <span class="cork-tag cork-tag--upcoming">upcoming</span>
+              <span class="cork-tag cork-tag--king">👑 king</span>
+              <span class="cork-tag cork-tag--clown">🤡 clown</span>
+              <span class="cork-tag">🔥 most controversial</span>
+            </div>
+            <h2 class="cork-title"><a href="#">КРЕАТИВНАЯ ФОТКА</a></h2>
+            <p class="cork-desc">Самая креативная фотография твоего учебного процесса. Креативность и нестандартный подход — всё, что нужно для победы.</p>
+          </div>
+        </div>
+        <div class="cork-card__footer">
+          <div class="timer" style="color:var(--cork-brand)">
+            <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="16" height="14" rx="2"/><path d="M6 4V2m8 2V2"/></svg>
+            Стартует через 5д
+          </div>
+          <span>🎯 @alex_expert</span>
+        </div>
+      </div>
+
+      <!-- ══ COMPLETED ══ -->
+      <div class="cork-section-title" style="margin-top:32px">✅ Завершённые <span class="count">2</span></div>
+
+      <div class="cork-card">
+        <div class="cork-card__top">
+          <div class="cork-card__icon">🔬</div>
+          <div class="cork-card__body">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+              <span class="cork-tag cork-tag--done">completed</span>
+              <span class="cork-tag cork-tag--king">👑 king</span>
+            </div>
+            <h2 class="cork-title"><a href="#">SCIENCE MEME</a></h2>
+            <p class="cork-desc">Самый смешной мем про науку и учёбу.</p>
+          </div>
+        </div>
+        <div class="cork-card__footer">
+          <span>🏆 <strong style="color:var(--cork-brand)">@scientist_ann</strong></span>
+          <span>👤 32</span>
+          <span class="spacer"></span>
+          <span class="cork-meta" style="font-size:10px;color:var(--cork-text-mute);text-transform:uppercase">2д назад</span>
+        </div>
+      </div>
+
+      <div class="cork-card">
+        <div class="cork-card__top">
+          <div class="cork-card__icon">📝</div>
+          <div class="cork-card__body">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+              <span class="cork-tag cork-tag--done">completed</span>
+              <span class="cork-tag cork-tag--king">👑 king</span>
+              <span class="cork-tag cork-tag--clown">🤡 clown</span>
+            </div>
+            <h2 class="cork-title"><a href="#">CODE REVIEW</a></h2>
+            <p class="cork-desc">Найди самую забавную ошибку в коде.</p>
+          </div>
+        </div>
+        <div class="cork-card__footer">
+          <span>🏆 <strong style="color:var(--cork-brand)">@bug_hunter</strong></span>
+          <span>👤 15</span>
+          <span class="spacer"></span>
+          <span class="cork-meta" style="font-size:10px;color:var(--cork-text-mute);text-transform:uppercase">5д назад</span>
+        </div>
+      </div>
+
+      <!-- ══ EMPTY PROPOSALS ══ -->
+      <div class="cork-section-title" style="margin-top:32px">💡 Мои предложения <span class="count">0</span></div>
+      <div class="cork-empty">
+        <b>💬</b>
+        Достигните ранга <strong style="color:var(--cork-brand)">Silver</strong> (20 реакций), чтобы предлагать челленджи.
+      </div>
+
+    </div>
+  </div>
+
+  <div class="theme-switcher">
+    <button class="ts-light" onclick="setTheme('light')" title="Light">☀</button>
+    <button class="ts-dark" onclick="setTheme('dark')" title="Dark">🌙</button>
+    <button class="ts-acid active" onclick="setTheme('acid')" title="Acid">💚</button>
+  </div>
+
+  <script>
+    function setTheme(t) {
+      document.documentElement.dataset.theme = t === 'acid' ? 'acid' : '';
+      document.documentElement.className = t === 'acid' || t === 'dark' ? t : '';
+      if (t === 'light') document.documentElement.className = '';
+      document.querySelectorAll('.theme-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelector('.ts-' + t).classList.add('active');
+      // reload scanlines + glow
+      document.body.style.backgroundImage = t === 'acid'
+        ? 'linear-gradient(rgba(198,255,61,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(198,255,61,0.04) 1px, transparent 1px)'
+        : 'none';
+      document.body.style.backgroundSize = t === 'acid' ? '24px 24px' : '';
+    }
+  </script>
+</body>
+</html>

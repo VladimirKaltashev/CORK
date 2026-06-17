@@ -12,6 +12,8 @@ export const ROUTES = {
   ADMIN: '/admin',
   SEARCH: '/search',
   FRIENDS: '/friends',
+  CHALLENGES: '/challenges',
+  CHALLENGE_DETAIL: '/challenges/:id',
   LEADERBOARD: '/leaderboard',
   SETTINGS: '/settings',
   NOT_FOUND: '*',

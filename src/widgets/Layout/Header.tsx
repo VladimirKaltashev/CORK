@@ -69,6 +69,9 @@ export function Header() {
           <NavLink to="/leaderboard" className={({ isActive }) => `cork-nav-link ${isActive ? 'active' : ''}`}>
             Рейтинг
           </NavLink>
+          <NavLink to="/challenges" className={({ isActive }) => `cork-nav-link ${isActive ? 'active' : ''}`}>
+            Челленджи
+          </NavLink>
           <NavLink to="/profile/me" className={({ isActive }) => `cork-nav-link ${isActive ? 'active' : ''}`}>
             Профиль
           </NavLink>
@@ -172,6 +175,7 @@ export function Header() {
         <nav className="cork-mobile-nav">
           <NavLink to="/feed" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Арена</NavLink>
           <NavLink to="/leaderboard" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Рейтинг</NavLink>
+          <NavLink to="/challenges" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Челленджи</NavLink>
           <NavLink to="/profile/me" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Профиль</NavLink>
           {token && user?.role === 'admin' && (
             <NavLink to="/admin" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Модерация</NavLink>
