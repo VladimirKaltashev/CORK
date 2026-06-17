@@ -46,18 +46,39 @@ test.beforeEach(async ({ page }) => {
       body: JSON.stringify([{ id: 'test-user', name: 'Test User', is_admin: false }]),
     })
   })
+
+  // Mock profile_scores
+  await page.route(/\/rest\/v1\/profile_scores/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ user_id: 'test-user', crowns: 5, clowns: 2 }]),
+    })
+  })
+
+  // Mock expert_thresholds
+  await page.route(/\/rest\/v1\/expert_thresholds/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([
+        { tier: 'Bronze', min_reactions: 5, can_propose: false, vote_power: 1 },
+        { tier: 'Silver', min_reactions: 20, can_propose: true, vote_power: 1 },
+        { tier: 'Gold', min_reactions: 50, can_propose: true, vote_power: 2 },
+        { tier: 'Platinum', min_reactions: 100, can_propose: true, vote_power: 3 },
+      ]),
+    })
+  })
 })
 
 test.describe('Challenges', () => {
   test('challenges page loads and shows active challenge', async ({ page }) => {
     await page.route(/\/rest\/v1\/challenges/, async (route) => {
-      const url = route.request().url()
-      const hasIdFilter = url.includes('id=eq.')
-      if (hasIdFilter) {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify([{
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
             id: '11111111-1111-1111-1111-111111111111',
             title: 'На велике — больше всех!',
             description: 'Кто проедет больше километров на велосипеде?',
@@ -67,38 +88,20 @@ test.describe('Challenges', () => {
             status: 'active',
             config: { awards: ['king'] },
             created_at: '2026-05-20T00:00:00Z',
-          }]),
-        })
-      } else {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify([
-            {
-              id: '11111111-1111-1111-1111-111111111111',
-              title: 'На велике — больше всех!',
-              description: 'Кто проедет больше километров на велосипеде?',
-              created_by: 'admin-id',
-              starts_at: '2026-05-27T00:00:00Z',
-              ends_at: '2026-06-03T00:00:00Z',
-              status: 'active',
-              config: { awards: ['king'] },
-              created_at: '2026-05-20T00:00:00Z',
-            },
-            {
-              id: '22222222-2222-2222-2222-222222222222',
-              title: 'Кино-марафон',
-              description: 'Посмотри как можно больше фильмов за неделю!',
-              created_by: 'admin-id',
-              starts_at: '2026-05-13T00:00:00Z',
-              ends_at: '2026-05-20T00:00:00Z',
-              status: 'completed',
-              config: { awards: ['king', 'clown'] },
-              created_at: '2026-05-05T00:00:00Z',
-            },
-          ]),
-        })
-      }
+          },
+          {
+            id: '22222222-2222-2222-2222-222222222222',
+            title: 'Кино-марафон',
+            description: 'Посмотри как можно больше фильмов за неделю!',
+            created_by: 'admin-id',
+            starts_at: '2026-05-13T00:00:00Z',
+            ends_at: '2026-05-20T00:00:00Z',
+            status: 'completed',
+            config: { awards: ['king', 'clown'] },
+            created_at: '2026-05-05T00:00:00Z',
+          },
+        ]),
+      })
     })
 
     await page.goto('/login')
@@ -117,21 +120,47 @@ test.describe('Challenges', () => {
   })
 
   test('challenge detail page loads', async ({ page }) => {
+    // Mock challenge detail query (single result via id filter)
     await page.route(/\/rest\/v1\/challenges/, async (route) => {
+      const url = route.request().url()
+      if (url.includes('id=eq')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: '11111111-1111-1111-1111-111111111111',
+            title: 'На велике — больше всех!',
+            description: 'Кто проедет больше километров на велосипеде?',
+            created_by: 'admin-id',
+            starts_at: '2026-05-27T00:00:00Z',
+            ends_at: '2026-06-03T00:00:00Z',
+            status: 'active',
+            config: { awards: ['king'] },
+            created_at: '2026-05-20T00:00:00Z',
+          }),
+        })
+      } else {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) })
+      }
+    })
+
+    // Mock entries
+    await page.route(/\/rest\/v1\/challenge_entries/, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([{
-          id: '11111111-1111-1111-1111-111111111111',
-          title: 'На велике — больше всех!',
-          description: 'Кто проедет больше километров на велосипеде?',
-          created_by: 'admin-id',
-          starts_at: '2026-05-27T00:00:00Z',
-          ends_at: '2026-06-03T00:00:00Z',
-          status: 'active',
-          config: { awards: ['king'] },
-          created_at: '2026-05-20T00:00:00Z',
-        }]),
+        body: JSON.stringify([
+          { id: 'e1', challenge_id: '11111111-1111-1111-1111-111111111111', user_id: 'test-user', claim_id: 'c1', title: 'Моя заявка', version: 1, is_current: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+        ]),
+      })
+    })
+
+    // Mock awards
+    await page.route(/\/rest\/v1\/challenge_awards/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
       })
     })
 
@@ -144,6 +173,7 @@ test.describe('Challenges', () => {
 
     await page.goto('/challenges/11111111-1111-1111-1111-111111111111')
     await expect(page.getByRole('heading', { name: 'На велике — больше всех!' })).toBeVisible()
-    await expect(page.getByText('🔥 Активные')).toBeVisible()
+    await expect(page.getByText('👥 Участники')).toBeVisible()
+    await expect(page.getByText('Моя заявка')).toBeVisible()
   })
 })

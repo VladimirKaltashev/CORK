@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Challenge } from '@/shared/types'
+import type { Challenge, ChallengeEntry, ChallengeAward, AwardType } from '@/shared/types'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
 import { getThresholds, getExpertTier } from '@/shared/lib/expert'
@@ -11,6 +11,14 @@ interface ExpertTierInfo {
   votePower: number
 }
 
+export interface EntryWithProfile extends ChallengeEntry {
+  userName: string
+}
+
+export interface AwardWithProfile extends ChallengeAward {
+  userName: string
+}
+
 interface ChallengesState {
   challenges: Challenge[]
   activeChallenges: Challenge[]
@@ -19,8 +27,16 @@ interface ChallengesState {
   isLoading: boolean
   error: string | null
   expertTier: ExpertTierInfo
+
+  detail: Challenge | null
+  entries: EntryWithProfile[]
+  awards: AwardWithProfile[]
+  isDetailLoading: boolean
+  detailError: string | null
+
   loadChallenges: () => Promise<void>
   loadExpertTier: (userId: string) => Promise<void>
+  loadDetail: (id: string) => Promise<void>
   reset: () => void
 }
 
@@ -47,6 +63,12 @@ export const useChallengesStore = create<ChallengesState>((set) => ({
   isLoading: false,
   error: null,
   expertTier: { tier: null, reactions: 0, canPropose: false, votePower: 1 },
+
+  detail: null,
+  entries: [],
+  awards: [],
+  isDetailLoading: false,
+  detailError: null,
 
   loadChallenges: async () => {
     set({ isLoading: true, error: null })
@@ -91,6 +113,74 @@ export const useChallengesStore = create<ChallengesState>((set) => ({
     }
   },
 
+  loadDetail: async (id) => {
+    set({ isDetailLoading: true, detailError: null })
+    try {
+      const [challengeResult, entriesResult, awardsResult] = await Promise.all([
+        supabase.from('challenges').select('*').eq('id', id).single(),
+        supabase
+          .from('challenge_entries')
+          .select('*')
+          .eq('challenge_id', id)
+          .eq('is_current', true)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('challenge_awards')
+          .select('*')
+          .eq('challenge_id', id),
+      ])
+
+      if (challengeResult.error) throw challengeResult.error
+
+      const challenge = mapRow(challengeResult.data as Record<string, unknown>)
+
+      // Resolve entry user names
+      const entryUserIds = [...new Set((entriesResult.data ?? []).map((e: { user_id: string }) => e.user_id))]
+      const awardUserIds = [...new Set((awardsResult.data ?? []).map((a: { user_id: string }) => a.user_id))]
+      const allIds = [...new Set([...entryUserIds, ...awardUserIds])]
+
+      let profileMap: Record<string, string> = {}
+      if (allIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, name')
+          .in('id', allIds)
+        profileMap = Object.fromEntries((profiles ?? []).map((p: { id: string; name: string }) => [p.id, p.name]))
+      }
+
+      const entries: EntryWithProfile[] = (entriesResult.data ?? []).map((e: Record<string, unknown>) => ({
+        id: e.id as string,
+        challengeId: e.challenge_id as string,
+        userId: e.user_id as string,
+        claimId: e.claim_id as string,
+        title: e.title as string,
+        description: e.description as string | undefined,
+        version: e.version as number,
+        isCurrent: e.is_current as boolean,
+        createdAt: e.created_at as string,
+        updatedAt: e.updated_at as string,
+        userName: profileMap[e.user_id as string] ?? 'Пользователь',
+      }))
+
+      const awards: AwardWithProfile[] = (awardsResult.data ?? []).map((a: Record<string, unknown>) => ({
+        id: a.id as string,
+        challengeId: a.challenge_id as string,
+        userId: a.user_id as string,
+        awardType: a.award_type as AwardType,
+        claimId: (a.claim_id as string) ?? undefined,
+        awardedAt: a.awarded_at as string,
+        userName: profileMap[a.user_id as string] ?? 'Пользователь',
+      }))
+
+      set({ detail: challenge, entries, awards })
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Не удалось загрузить челлендж'
+      set({ detailError: msg })
+    } finally {
+      set({ isDetailLoading: false })
+    }
+  },
+
   reset: () => set({
     challenges: [],
     activeChallenges: [],
@@ -99,5 +189,10 @@ export const useChallengesStore = create<ChallengesState>((set) => ({
     isLoading: false,
     error: null,
     expertTier: { tier: null, reactions: 0, canPropose: false, votePower: 1 },
+    detail: null,
+    entries: [],
+    awards: [],
+    isDetailLoading: false,
+    detailError: null,
   }),
 }))
