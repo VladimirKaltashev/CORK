@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useChallengesStore } from '@/entities/challenges'
 import { useAuthStore } from '@/entities/auth'
+import { getTierIcon } from '@/shared/lib/expert'
 import type { Challenge } from '@/shared/types'
 
 function formatTimer(startsAt: string, endsAt: string, status: string): { label: string; urgent: boolean; icon: string } {
@@ -103,13 +104,6 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
   )
 }
 
-const TIER_ICONS: Record<string, string> = {
-  bronze: '🥉',
-  silver: '🥈',
-  gold: '🥇',
-  platinum: '💎',
-}
-
 const TABS = ['Все', 'Активные', 'Предстоящие', 'Завершённые'] as const
 type Tab = typeof TABS[number]
 
@@ -136,7 +130,7 @@ export function ChallengesPage() {
     }
   }, [activeTab, activeChallenges, upcomingChallenges, completedChallenges])
 
-  const tierIcon = expertTier.tier ? (TIER_ICONS[expertTier.tier.toLowerCase()] ?? '🏆') : null
+  const tierIcon = getTierIcon(expertTier.tier)
 
   return (
     <div className="cork-page">

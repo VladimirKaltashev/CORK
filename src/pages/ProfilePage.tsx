@@ -7,6 +7,8 @@ import { useAchievementsStore } from '@/entities/achievements/store'
 import { useFriendsStore } from '@/entities/friends'
 import { useReactionsStore } from '@/entities/reactions'
 import { useScoutStore } from '@/entities/scout'
+import { getThresholds, getExpertTier, getTierIcon } from '@/shared/lib/expert'
+import type { ExpertThreshold } from '@/shared/types'
 import { useCreateAchievementDialog } from '@/entities/achievements/createDialog'
 import { AvatarUpload } from '@/shared/ui/AvatarUpload'
 import { CrownIcon, ClownIcon } from '@/shared/ui'
@@ -67,6 +69,11 @@ export function ProfilePage() {
 
   const [showEdit, setShowEdit] = useState(false)
   const [friendBusy, setFriendBusy] = useState(false)
+  const [thresholds, setThresholds] = useState<ExpertThreshold[] | null>(null)
+
+  useEffect(() => {
+    getThresholds().then(setThresholds)
+  }, [])
 
   useEffect(() => {
     if (!profileId) return
@@ -220,6 +227,27 @@ export function ProfilePage() {
 
       {/* Score */}
       <ScoreBlock crowns={score?.crowns ?? 0} clowns={score?.clowns ?? 0} />
+
+      {/* Expert Tier */}
+      {thresholds && (() => {
+        const total = (score?.crowns ?? 0) + (score?.clowns ?? 0)
+        const tier = getExpertTier(total, thresholds)
+        if (!tier.tier) return null
+        return (
+          <div className="cork-panel flex items-center gap-3">
+            <span className="text-lg">{getTierIcon(tier.tier)}</span>
+            <span className="text-sm font-semibold" style={{ color: 'var(--cork-text-dim)' }}>
+              Ранг
+            </span>
+            <span className="text-lg font-bold" style={{ color: 'var(--cork-brand)' }}>
+              {tier.tier}
+            </span>
+            <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>
+              ({total} реакций · голос ×{tier.votePower}{tier.canPropose ? ' · может предлагать челленджи' : ''})
+            </span>
+          </div>
+        )
+      })()}
 
       {/* Scout Score */}
       {(scoutScore && scoutScore.scoutScore > 0) ? (

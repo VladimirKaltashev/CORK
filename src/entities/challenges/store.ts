@@ -1,7 +1,8 @@
 import { create } from 'zustand'
-import type { Challenge, ExpertThreshold } from '@/shared/types'
+import type { Challenge } from '@/shared/types'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
+import { getThresholds, getExpertTier } from '@/shared/lib/expert'
 
 interface ExpertTierInfo {
   tier: string | null
@@ -35,39 +36,6 @@ function mapRow(row: Record<string, unknown>): Challenge {
     status: row.status as Challenge['status'],
     config: (row.config as Record<string, unknown>) ?? {},
     createdAt: row.created_at as string,
-  }
-}
-
-async function resolveExpertTier(userId: string): Promise<ExpertTierInfo> {
-  const [scoresResult, thresholdsResult] = await Promise.all([
-    supabase
-      .from('profile_scores')
-      .select('crowns, clowns')
-      .eq('user_id', userId)
-      .maybeSingle(),
-    supabase
-      .from('expert_thresholds')
-      .select('*')
-      .order('min_reactions', { ascending: false }),
-  ])
-
-  const total =
-    (scoresResult.data?.crowns ?? 0) + (scoresResult.data?.clowns ?? 0)
-
-  const thresholds: ExpertThreshold[] = (thresholdsResult.data ?? []).map((r: Record<string, unknown>) => ({
-    tier: r.tier as string,
-    minReactions: r.min_reactions as number,
-    canPropose: r.can_propose as boolean,
-    votePower: r.vote_power as number,
-    updatedAt: r.updated_at as string,
-  }))
-  const matched = thresholds.find((t) => total >= t.minReactions)
-
-  return {
-    tier: matched?.tier ?? null,
-    reactions: total,
-    canPropose: matched?.canPropose ?? false,
-    votePower: matched?.votePower ?? 1,
   }
 }
 
@@ -108,8 +76,16 @@ export const useChallengesStore = create<ChallengesState>((set) => ({
 
   loadExpertTier: async (userId) => {
     try {
-      const info = await resolveExpertTier(userId)
-      set({ expertTier: info })
+      const { data } = await supabase
+        .from('profile_scores')
+        .select('crowns, clowns')
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      const total = (data?.crowns ?? 0) + (data?.clowns ?? 0)
+      const thresholds = await getThresholds()
+      const { tier, canPropose, votePower } = getExpertTier(total, thresholds)
+      set({ expertTier: { tier, reactions: total, canPropose, votePower } })
     } catch {
       // Non-critical — keep defaults
     }
