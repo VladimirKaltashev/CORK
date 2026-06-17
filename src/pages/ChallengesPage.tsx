@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useChallengesStore } from '@/entities/challenges'
+import { useAuthStore } from '@/entities/auth'
 import type { Challenge } from '@/shared/types'
 
 function formatTimer(startsAt: string, endsAt: string, status: string): { label: string; urgent: boolean; icon: string } {
@@ -90,26 +91,41 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
           </span>
         )}
         <span className="spacer" />
-        <span className="cork-meta">
-          {new Date(challenge.startsAt).toLocaleDateString('ru-RU')}
-          {' — '}
-          {new Date(challenge.endsAt).toLocaleDateString('ru-RU')}
-        </span>
+        {challenge.status !== 'active' && (
+          <span className="cork-meta">
+            {new Date(challenge.startsAt).toLocaleDateString('ru-RU')}
+            {' — '}
+            {new Date(challenge.endsAt).toLocaleDateString('ru-RU')}
+          </span>
+        )}
       </div>
     </div>
   )
+}
+
+const TIER_ICONS: Record<string, string> = {
+  bronze: '🥉',
+  silver: '🥈',
+  gold: '🥇',
+  platinum: '💎',
 }
 
 const TABS = ['Все', 'Активные', 'Предстоящие', 'Завершённые'] as const
 type Tab = typeof TABS[number]
 
 export function ChallengesPage() {
-  const { activeChallenges, upcomingChallenges, completedChallenges, isLoading, error, loadChallenges } = useChallengesStore()
-  const [activeTab, setActiveTab] = useState<Tab>('Все')
+  const { activeChallenges, upcomingChallenges, completedChallenges, isLoading, error, loadChallenges, expertTier, loadExpertTier } = useChallengesStore()
+  const user = useAuthStore((s) => s.user)
 
   useEffect(() => {
     loadChallenges()
   }, [loadChallenges])
+
+  useEffect(() => {
+    if (user?.id) loadExpertTier(user.id)
+  }, [user?.id, loadExpertTier])
+
+  const [activeTab, setActiveTab] = useState<Tab>('Все')
 
   const visible = useMemo(() => {
     switch (activeTab) {
@@ -119,6 +135,8 @@ export function ChallengesPage() {
       default: return [...activeChallenges, ...upcomingChallenges, ...completedChallenges]
     }
   }, [activeTab, activeChallenges, upcomingChallenges, completedChallenges])
+
+  const tierIcon = expertTier.tier ? (TIER_ICONS[expertTier.tier.toLowerCase()] ?? '🏆') : null
 
   return (
     <div className="cork-page">
@@ -131,10 +149,12 @@ export function ChallengesPage() {
               Челленджи
             </h1>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <span style={{ fontSize: 11, color: 'var(--cork-text-mute)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                🏆 эксперт · голос ×3
-              </span>
-              <button className="cork-btn cork-btn-primary" disabled title="Только эксперты (Silver+)">
+              {expertTier.tier && (
+                <span style={{ fontSize: 11, color: 'var(--cork-text-mute)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {tierIcon} {expertTier.tier} · голос ×{expertTier.votePower}
+                </span>
+              )}
+              <button className="cork-btn cork-btn-primary" disabled={!expertTier.canPropose} title={expertTier.canPropose ? '' : 'Только эксперты (Silver+)'}>
                 <span>+</span> Предложить челлендж
               </button>
             </div>

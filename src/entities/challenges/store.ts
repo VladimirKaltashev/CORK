@@ -1,7 +1,14 @@
 import { create } from 'zustand'
-import type { Challenge } from '@/shared/types'
+import type { Challenge, ExpertThreshold } from '@/shared/types'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
+
+interface ExpertTierInfo {
+  tier: string | null
+  reactions: number
+  canPropose: boolean
+  votePower: number
+}
 
 interface ChallengesState {
   challenges: Challenge[]
@@ -10,7 +17,9 @@ interface ChallengesState {
   completedChallenges: Challenge[]
   isLoading: boolean
   error: string | null
+  expertTier: ExpertTierInfo
   loadChallenges: () => Promise<void>
+  loadExpertTier: (userId: string) => Promise<void>
   reset: () => void
 }
 
@@ -29,6 +38,39 @@ function mapRow(row: Record<string, unknown>): Challenge {
   }
 }
 
+async function resolveExpertTier(userId: string): Promise<ExpertTierInfo> {
+  const [scoresResult, thresholdsResult] = await Promise.all([
+    supabase
+      .from('profile_scores')
+      .select('crowns, clowns')
+      .eq('user_id', userId)
+      .maybeSingle(),
+    supabase
+      .from('expert_thresholds')
+      .select('*')
+      .order('min_reactions', { ascending: false }),
+  ])
+
+  const total =
+    (scoresResult.data?.crowns ?? 0) + (scoresResult.data?.clowns ?? 0)
+
+  const thresholds: ExpertThreshold[] = (thresholdsResult.data ?? []).map((r: Record<string, unknown>) => ({
+    tier: r.tier as string,
+    minReactions: r.min_reactions as number,
+    canPropose: r.can_propose as boolean,
+    votePower: r.vote_power as number,
+    updatedAt: r.updated_at as string,
+  }))
+  const matched = thresholds.find((t) => total >= t.minReactions)
+
+  return {
+    tier: matched?.tier ?? null,
+    reactions: total,
+    canPropose: matched?.canPropose ?? false,
+    votePower: matched?.votePower ?? 1,
+  }
+}
+
 export const useChallengesStore = create<ChallengesState>((set) => ({
   challenges: [],
   activeChallenges: [],
@@ -36,6 +78,7 @@ export const useChallengesStore = create<ChallengesState>((set) => ({
   completedChallenges: [],
   isLoading: false,
   error: null,
+  expertTier: { tier: null, reactions: 0, canPropose: false, votePower: 1 },
 
   loadChallenges: async () => {
     set({ isLoading: true, error: null })
@@ -63,6 +106,15 @@ export const useChallengesStore = create<ChallengesState>((set) => ({
     }
   },
 
+  loadExpertTier: async (userId) => {
+    try {
+      const info = await resolveExpertTier(userId)
+      set({ expertTier: info })
+    } catch {
+      // Non-critical — keep defaults
+    }
+  },
+
   reset: () => set({
     challenges: [],
     activeChallenges: [],
@@ -70,5 +122,6 @@ export const useChallengesStore = create<ChallengesState>((set) => ({
     completedChallenges: [],
     isLoading: false,
     error: null,
+    expertTier: { tier: null, reactions: 0, canPropose: false, votePower: 1 },
   }),
 }))
