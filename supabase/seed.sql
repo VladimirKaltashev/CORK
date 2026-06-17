@@ -306,67 +306,57 @@ BEGIN
   -- ══ Заявки (challenge_entries) ══
   -- МЕМНЫЙ БАТЛ: 4 участника
   INSERT INTO public.challenge_entries (challenge_id, user_id, claim_id, title, description, version, is_current)
-  SELECT challenge_meme, user_id, claim_id, title, descr, 1, true FROM (VALUES
-    ((SELECT id FROM public.profiles WHERE email = 'alexey.ivanov@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Победитель ВсОШ по математике' LIMIT 1),
-     'Мем про интегралы', 'Когда решаешь интеграл, а он решает тебя')),
-    ((SELECT id FROM public.profiles WHERE email = 'maria.petrova@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Призёр олимпиады по химии' LIMIT 1),
-     'Химическая реакция на дедлайн', 'Моё лицо, когда лабу надо сдать вчера')),
-    ((SELECT id FROM public.profiles WHERE email = 'sergey.morozov@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Победитель олимпиады по английскому' LIMIT 1),
-     'Английский юмор', 'When you finally understand present perfect')),
-    ((SELECT id FROM public.profiles WHERE email = 'pavel.novikov@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'КМС по лёгкой атлетике' LIMIT 1),
-     'Спортивный интерес', 'Бегу за дипломом быстрее, чем на стометровке')
-  ) AS t(user_id, claim_id, title, descr);
+  SELECT challenge_meme, (SELECT id FROM public.profiles WHERE email = 'alexey.ivanov@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Победитель ВсОШ по математике' LIMIT 1),
+    'Мем про интегралы', 'Когда решаешь интеграл, а он решает тебя', 1, true
+  UNION ALL SELECT challenge_meme, (SELECT id FROM public.profiles WHERE email = 'maria.petrova@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Призёр олимпиады по химии' LIMIT 1),
+    'Химическая реакция на дедлайн', 'Моё лицо, когда лабу надо сдать вчера', 1, true
+  UNION ALL SELECT challenge_meme, (SELECT id FROM public.profiles WHERE email = 'sergey.morozov@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Победитель олимпиады по английскому' LIMIT 1),
+    'Английский юмор', 'When you finally understand present perfect', 1, true
+  UNION ALL SELECT challenge_meme, (SELECT id FROM public.profiles WHERE email = 'pavel.novikov@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'КМС по лёгкой атлетике' LIMIT 1),
+    'Спортивный интерес', 'Бегу за дипломом быстрее, чем на стометровке', 1, true;
 
   -- ЛУЧШИЙ КОД: 3 участника
   INSERT INTO public.challenge_entries (challenge_id, user_id, claim_id, title, description, version, is_current)
-  SELECT challenge_code, user_id, claim_id, title, descr, 1, true FROM (VALUES
-    ((SELECT id FROM public.profiles WHERE email = 'olga.fedorova@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Kaggle Bronze Medal' LIMIT 1),
-     'Python one-liner', 'Распарсил JSON в одну строку. Красота.')),
-    ((SELECT id FROM public.profiles WHERE email = 'ruslan.chernyshov@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Победитель хакатона' LIMIT 1),
-     'React компонент', 'Многоразовый компонент таблицы с сортировкой за 50 строк')),
-    ((SELECT id FROM public.profiles WHERE email = 'evgeny.nikolaev@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Решено 200 задач на Codeforces' LIMIT 1),
-     'Жемчужина на C++', 'DFS за 20 строк без единого копипаста'))
-  ) AS t(user_id, claim_id, title, descr);
+  SELECT challenge_code, (SELECT id FROM public.profiles WHERE email = 'olga.fedorova@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Kaggle Bronze Medal' LIMIT 1),
+    'Python one-liner', 'Распарсил JSON в одну строку. Красота.', 1, true
+  UNION ALL SELECT challenge_code, (SELECT id FROM public.profiles WHERE email = 'ruslan.chernyshov@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Победитель хакатона' LIMIT 1),
+    'React компонент', 'Многоразовый компонент таблицы с сортировкой за 50 строк', 1, true
+  UNION ALL SELECT challenge_code, (SELECT id FROM public.profiles WHERE email = 'evgeny.nikolaev@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Решено 200 задач на Codeforces' LIMIT 1),
+    'Жемчужина на C++', 'DFS за 20 строк без единого копипаста', 1, true;
 
   -- КРЕАТИВНАЯ ФОТКА: 2 участника (предстоящий)
   INSERT INTO public.challenge_entries (challenge_id, user_id, claim_id, title, description, version, is_current)
-  SELECT challenge_photo, user_id, claim_id, title, descr, 1, true FROM (VALUES
-    ((SELECT id FROM public.profiles WHERE email = 'anna.vasilyeva@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Персональная выставка работ' LIMIT 1),
-     'Рабочее место художника', 'Фото стола, заставленного красками и конспектами')),
-    ((SELECT id FROM public.profiles WHERE email = 'nikita.egorov@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Чемпион школы по баскетболу' LIMIT 1),
-     'Учёба после тренировки', 'Форма, учебник и капельница с кофе'))
-  ) AS t(user_id, claim_id, title, descr);
+  SELECT challenge_photo, (SELECT id FROM public.profiles WHERE email = 'anna.vasilyeva@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Персональная выставка работ' LIMIT 1),
+    'Рабочее место художника', 'Фото стола, заставленного красками и конспектами', 1, true
+  UNION ALL SELECT challenge_photo, (SELECT id FROM public.profiles WHERE email = 'nikita.egorov@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Чемпион школы по баскетболу' LIMIT 1),
+    'Учёба после тренировки', 'Форма, учебник и капельница с кофе', 1, true;
 
-  -- SCIENCE MEME: 3 участника (завершён)
+  -- SCIENCE MEME: 2 участника (завершён)
   INSERT INTO public.challenge_entries (challenge_id, user_id, claim_id, title, description, version, is_current)
-  SELECT challenge_sci, user_id, claim_id, title, descr, 1, true FROM (VALUES
-    ((SELECT id FROM public.profiles WHERE email = 'natalia.kuznetsova@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Олимпиада по биологии' LIMIT 1),
-     'Эволюция студента', 'От амёбы до кандидата наук за одну сессию')),
-    ((SELECT id FROM public.profiles WHERE email = 'vladimir.sokolov@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Грант астрономического общества' LIMIT 1),
-     'Чёрная дыра бюджета', 'Когда увидел цены на учебники'))
-  ) AS t(user_id, claim_id, title, descr);
+  SELECT challenge_sci, (SELECT id FROM public.profiles WHERE email = 'natalia.kuznetsova@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Олимпиада по биологии' LIMIT 1),
+    'Эволюция студента', 'От амёбы до кандидата наук за одну сессию', 1, true
+  UNION ALL SELECT challenge_sci, (SELECT id FROM public.profiles WHERE email = 'vladimir.sokolov@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Грант астрономического общества' LIMIT 1),
+    'Чёрная дыра бюджета', 'Когда увидел цены на учебники', 1, true;
 
   -- CODE REVIEW: 2 участника (завершён)
   INSERT INTO public.challenge_entries (challenge_id, user_id, claim_id, title, description, version, is_current)
-  SELECT challenge_review, user_id, claim_id, title, descr, 1, true FROM (VALUES
-    ((SELECT id FROM public.profiles WHERE email = 'andrey.popov@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Победитель соревнования роботов' LIMIT 1),
-     'Баг на миллион', 'Забыл break в switch — прод упал')),
-    ((SELECT id FROM public.profiles WHERE email = 'nikolay.filatov@test.com'),
-     (SELECT id FROM public.achievements WHERE title LIKE 'Open-source вклад' LIMIT 1),
-     'Комментарий века', '// TODO: fix this later — живёт в проде 3 года'))
-  ) AS t(user_id, claim_id, title, descr);
+  SELECT challenge_review, (SELECT id FROM public.profiles WHERE email = 'andrey.popov@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Победитель соревнования роботов' LIMIT 1),
+    'Баг на миллион', 'Забыл break в switch — прод упал', 1, true
+  UNION ALL SELECT challenge_review, (SELECT id FROM public.profiles WHERE email = 'nikolay.filatov@test.com'),
+    (SELECT id FROM public.achievements WHERE title LIKE 'Open-source вклад' LIMIT 1),
+    'Комментарий века', '// TODO: fix this later — живёт в проде 3 года', 1, true;
 
   -- ══ Награды для завершённых ══
   INSERT INTO public.challenge_awards (challenge_id, user_id, award_type, claim_id)
