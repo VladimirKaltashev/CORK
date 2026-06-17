@@ -3,27 +3,27 @@ import { Link } from 'react-router-dom'
 import { useChallengesStore } from '@/entities/challenges'
 import type { Challenge } from '@/shared/types'
 
-function formatTimer(startsAt: string, endsAt: string, status: string): { label: string; urgent: boolean } {
+function formatTimer(startsAt: string, endsAt: string, status: string): { label: string; urgent: boolean; icon: string } {
   const now = Date.now()
   const start = new Date(startsAt).getTime()
   const end = new Date(endsAt).getTime()
 
   if (status === 'active') {
     const diff = end - now
-    if (diff <= 0) return { label: 'Завершён', urgent: false }
+    if (diff <= 0) return { label: 'Завершён', urgent: false, icon: 'clock' }
     const days = Math.floor(diff / 86400000)
     const hours = Math.floor((diff % 86400000) / 3600000)
-    return { label: `Осталось ${days}д ${hours}ч`, urgent: days < 2 }
+    return { label: `Осталось ${days}д ${hours}ч`, urgent: days < 2, icon: 'clock' }
   }
 
   if (status === 'scheduled') {
     const diff = start - now
-    if (diff <= 0) return { label: 'Стартует скоро', urgent: false }
+    if (diff <= 0) return { label: 'Стартует скоро', urgent: false, icon: 'calendar' }
     const days = Math.floor(diff / 86400000)
-    return { label: `Стартует через ${days}д`, urgent: false }
+    return { label: `Стартует через ${days}д`, urgent: false, icon: 'calendar' }
   }
 
-  return { label: '', urgent: false }
+  return { label: '', urgent: false, icon: '' }
 }
 
 function getStatusTag(status: string): { text: string; className: string } {
@@ -36,18 +36,18 @@ function getStatusTag(status: string): { text: string; className: string } {
   }
 }
 
-function getAwardTags(config: Record<string, unknown>): string[] {
+function getAwardTags(config: Record<string, unknown>): { icon: string; label: string }[] {
   const awards = config.awards as string[] | undefined
   if (!awards || awards.length === 0) return []
-  const icons: Record<string, string> = {
-    king: '👑',
-    clown: '🤡',
-    finder: '🔍',
-    best_comment: '💬',
-    most_controversial: '🔥',
-    participant: '🎖',
+  const map: Record<string, { icon: string; label: string }> = {
+    king: { icon: '👑', label: 'king' },
+    clown: { icon: '🤡', label: 'clown' },
+    finder: { icon: '🔍', label: 'finder' },
+    best_comment: { icon: '💬', label: 'best comment' },
+    most_controversial: { icon: '🔥', label: 'most controversial' },
+    participant: { icon: '🎖', label: 'participant' },
   }
-  return awards.map((a) => icons[a] ?? a)
+  return awards.map((a) => map[a] ?? { icon: '', label: a })
 }
 
 function ChallengeCard({ challenge }: { challenge: Challenge }) {
@@ -62,8 +62,8 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
         <div className="cork-card__body">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
             <span className={`cork-tag ${statusTag.className}`}>{statusTag.text}</span>
-            {awardTags.map((tag) => (
-              <span key={tag} className="cork-tag">{tag}</span>
+            {awardTags.map((t) => (
+              <span key={t.label} className="cork-tag">{t.icon} {t.label}</span>
             ))}
           </div>
           <h2 className="cork-title">
@@ -75,10 +75,17 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
       <div className="cork-card__footer">
         {timer.label && (
           <span className="timer" style={timer.urgent ? { color: 'var(--cork-clown)' } : undefined}>
-            <svg className="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="10" cy="10" r="8" />
-              <path d="M10 6v4l2.5 2.5" />
-            </svg>
+            {timer.icon === 'calendar' ? (
+              <svg className="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="2" y="4" width="16" height="14" rx="2" />
+                <path d="M6 4V2m8 2V2" />
+              </svg>
+            ) : (
+              <svg className="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="10" cy="10" r="8" />
+                <path d="M10 6v4l2.5 2.5" />
+              </svg>
+            )}
             {timer.label}
           </span>
         )}
@@ -115,93 +122,119 @@ export function ChallengesPage() {
 
   return (
     <div className="cork-page">
-      <div className="cork-shell" style={{ padding: '16px 0' }}>
-        <div className="page-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h1 className="cork-head" style={{ margin: 0 }}>
-            Челленджи
-            <small style={{ marginLeft: 8, fontSize: 13, fontWeight: 400, color: 'var(--cork-text-dim)', textTransform: 'none', letterSpacing: 0 }}>
-              сообщество решает
-            </small>
-          </h1>
-        </div>
+      <div className="cork-shell">
+        <main className="cork-main">
 
-        <div className="cork-tabs" style={{ marginBottom: 24, flexWrap: 'wrap' }}>
-          {TABS.map((tab) => (
-            <button
-              key={tab}
-              className={`cork-tab${activeTab === tab ? ' active' : ''}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+          {/* Header */}
+          <div className="page-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <h1 className="cork-head" style={{ margin: 0 }}>
+              Челленджи
+            </h1>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: 'var(--cork-text-mute)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                🏆 эксперт · голос ×3
+              </span>
+              <button className="cork-btn cork-btn-primary" disabled title="Только эксперты (Silver+)">
+                <span>+</span> Предложить челлендж
+              </button>
+            </div>
+          </div>
 
-        {isLoading && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="cork-card" style={{ height: 140 }}>
-                <div className="cork-skeleton" style={{ width: '60%', height: 20, marginBottom: 12 }} />
-                <div className="cork-skeleton" style={{ width: '40%', height: 14, marginBottom: 8 }} />
-                <div className="cork-skeleton" style={{ width: '80%', height: 14 }} />
-              </div>
+          {/* Tabs */}
+          <div className="cork-tabs" style={{ marginBottom: 24 }}>
+            {TABS.map((tab) => (
+              <button
+                key={tab}
+                className={`cork-tab${activeTab === tab ? ' active' : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
             ))}
           </div>
-        )}
 
-        {error && !isLoading && (
-          <div className="cork-empty">
-            <b>⚠️</b>
-            {error}
-            <br />
-            <button className="cork-btn" style={{ marginTop: 12 }} onClick={loadChallenges}>Повторить</button>
+          {/* Loading */}
+          {isLoading && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="cork-card" style={{ height: 140 }}>
+                  <div className="cork-skeleton" style={{ width: '60%', height: 20, marginBottom: 12 }} />
+                  <div className="cork-skeleton" style={{ width: '40%', height: 14, marginBottom: 8 }} />
+                  <div className="cork-skeleton" style={{ width: '80%', height: 14 }} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Error */}
+          {error && !isLoading && (
+            <div className="cork-empty">
+              <b>⚠️</b>
+              {error}
+              <br />
+              <button className="cork-btn" style={{ marginTop: 12 }} onClick={loadChallenges}>Повторить</button>
+            </div>
+          )}
+
+          {/* Empty */}
+          {!isLoading && !error && visible.length === 0 && (
+            <div className="cork-empty">
+              <b>🏆</b>
+              Нет челленджей
+            </div>
+          )}
+
+          {/* Content */}
+          {!isLoading && !error && visible.length > 0 && (
+            <>
+              {activeTab === 'Все' ? (
+                <>
+                  {activeChallenges.length > 0 && (
+                    <div style={{ marginBottom: 32 }}>
+                      <div className="cork-section-title">
+                        🔥 Активные
+                        <span className="count">{activeChallenges.length}</span>
+                      </div>
+                      {activeChallenges.map((c) => <ChallengeCard key={c.id} challenge={c} />)}
+                    </div>
+                  )}
+                  {upcomingChallenges.length > 0 && (
+                    <div style={{ marginBottom: 32 }}>
+                      <div className="cork-section-title">
+                        📅 Предстоящие
+                        <span className="count">{upcomingChallenges.length}</span>
+                      </div>
+                      {upcomingChallenges.map((c) => <ChallengeCard key={c.id} challenge={c} />)}
+                    </div>
+                  )}
+                  {completedChallenges.length > 0 && (
+                    <div>
+                      <div className="cork-section-title">
+                        ✅ Завершённые
+                        <span className="count">{completedChallenges.length}</span>
+                      </div>
+                      {completedChallenges.map((c) => <ChallengeCard key={c.id} challenge={c} />)}
+                    </div>
+                  )}
+                </>
+              ) : (
+                visible.map((c) => <ChallengeCard key={c.id} challenge={c} />)
+              )}
+            </>
+          )}
+
+          {/* Мои предложения */}
+          <div className="cork-section-title" style={{ marginTop: 32 }}>
+            💡 Мои предложения
+            <span className="count">0</span>
           </div>
-        )}
-
-        {!isLoading && !error && visible.length === 0 && (
           <div className="cork-empty">
-            <b>🏆</b>
-            Нет челленджей
+            <b>💬</b>
+            Вы ещё не предлагали челленджи.<br />
+            Достигните ранга <strong style={{ color: 'var(--cork-brand)' }}>Silver</strong> (20 реакций), чтобы предлагать челленджи сообществу.
           </div>
-        )}
 
-        {!isLoading && !error && (
-          <>
-            {activeTab === 'Все' ? (
-              <>
-                {activeChallenges.length > 0 && (
-                  <div style={{ marginBottom: 32 }}>
-                    <div className="cork-section-title">
-                      🔥 Активные
-                      <span className="count">{activeChallenges.length}</span>
-                    </div>
-                    {activeChallenges.map((c) => <ChallengeCard key={c.id} challenge={c} />)}
-                  </div>
-                )}
-                {upcomingChallenges.length > 0 && (
-                  <div style={{ marginBottom: 32 }}>
-                    <div className="cork-section-title">
-                      📅 Предстоящие
-                      <span className="count">{upcomingChallenges.length}</span>
-                    </div>
-                    {upcomingChallenges.map((c) => <ChallengeCard key={c.id} challenge={c} />)}
-                  </div>
-                )}
-                {completedChallenges.length > 0 && (
-                  <div>
-                    <div className="cork-section-title">
-                      ✅ Завершённые
-                      <span className="count">{completedChallenges.length}</span>
-                    </div>
-                    {completedChallenges.map((c) => <ChallengeCard key={c.id} challenge={c} />)}
-                  </div>
-                )}
-              </>
-            ) : (
-              visible.map((c) => <ChallengeCard key={c.id} challenge={c} />)
-            )}
-          </>
-        )}
+        </main>
       </div>
     </div>
   )

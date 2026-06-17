@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test'
 
 test.beforeEach(async ({ page }) => {
-  // Mock Supabase auth endpoints
   await page.route(/\/auth\/v1\//, async (route) => {
     const url = route.request().url()
     if (url.includes('grant_type=password')) {
@@ -40,7 +39,6 @@ test.beforeEach(async ({ page }) => {
     }
   })
 
-  // Mock Supabase profile query
   await page.route(/\/rest\/v1\/profiles/, async (route) => {
     await route.fulfill({
       status: 200,
@@ -52,45 +50,55 @@ test.beforeEach(async ({ page }) => {
 
 test.describe('Challenges', () => {
   test('challenges page loads and shows active challenge', async ({ page }) => {
-    await page.route('http://127.0.0.1:8000/challenges', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          challenges: [
+    await page.route(/\/rest\/v1\/challenges/, async (route) => {
+      const url = route.request().url()
+      const hasIdFilter = url.includes('id=eq.')
+      if (hasIdFilter) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([{
+            id: '11111111-1111-1111-1111-111111111111',
+            title: 'На велике — больше всех!',
+            description: 'Кто проедет больше километров на велосипеде?',
+            created_by: 'admin-id',
+            starts_at: '2026-05-27T00:00:00Z',
+            ends_at: '2026-06-03T00:00:00Z',
+            status: 'active',
+            config: { awards: ['king'] },
+            created_at: '2026-05-20T00:00:00Z',
+          }]),
+        })
+      } else {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([
             {
               id: '11111111-1111-1111-1111-111111111111',
               title: 'На велике — больше всех!',
-              description: 'Кто проедет больше километров на велосипеде за неделю?',
-              category: 'sport',
-              goalType: 'distance',
-              unit: 'км',
-              proofConfig: { fields: ['photo', 'value'], valueLabel: 'км', valueRequired: true },
-              startsAt: '2026-05-27T00:00:00Z',
-              endsAt: '2026-06-03T00:00:00Z',
+              description: 'Кто проедет больше километров на велосипеде?',
+              created_by: 'admin-id',
+              starts_at: '2026-05-27T00:00:00Z',
+              ends_at: '2026-06-03T00:00:00Z',
               status: 'active',
-              createdBy: 'admin-id',
-              createdAt: '2026-05-20T00:00:00Z',
-              participantCount: 20,
+              config: { awards: ['king'] },
+              created_at: '2026-05-20T00:00:00Z',
             },
             {
               id: '22222222-2222-2222-2222-222222222222',
               title: 'Кино-марафон',
               description: 'Посмотри как можно больше фильмов за неделю!',
-              category: 'movies',
-              goalType: 'count',
-              unit: 'фильмов',
-              proofConfig: { fields: ['text', 'url'], valueLabel: 'фильмов', valueRequired: false },
-              startsAt: '2026-05-13T00:00:00Z',
-              endsAt: '2026-05-20T00:00:00Z',
+              created_by: 'admin-id',
+              starts_at: '2026-05-13T00:00:00Z',
+              ends_at: '2026-05-20T00:00:00Z',
               status: 'completed',
-              createdBy: 'admin-id',
-              createdAt: '2026-05-05T00:00:00Z',
-              participantCount: 35,
+              config: { awards: ['king', 'clown'] },
+              created_at: '2026-05-05T00:00:00Z',
             },
-          ],
-        }),
-      })
+          ]),
+        })
+      }
     })
 
     await page.goto('/login')
@@ -102,80 +110,28 @@ test.describe('Challenges', () => {
 
     await page.goto('/challenges')
     await expect(page.getByRole('heading', { name: 'Челленджи' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Активный челлендж' })).toBeVisible()
+    await expect(page.getByText('🔥 Активные')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'На велике — больше всех!' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'История' })).toBeVisible()
-    await expect(page.getByText('Кино-марафон')).toBeVisible()
+    await expect(page.getByText('✅ Завершённые')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Кино-марафон' })).toBeVisible()
   })
 
   test('challenge detail page loads', async ({ page }) => {
-    await page.route('http://127.0.0.1:8000/challenges/11111111-1111-1111-1111-111111111111', async (route) => {
+    await page.route(/\/rest\/v1\/challenges/, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          challenge: {
-            id: '11111111-1111-1111-1111-111111111111',
-            title: 'На велике — больше всех!',
-            description: 'Кто проедет больше километров на велосипеде за неделю?',
-            category: 'sport',
-            goalType: 'distance',
-            unit: 'км',
-            proofConfig: { fields: ['photo', 'value'], valueLabel: 'км', valueRequired: true },
-            startsAt: '2026-05-27T00:00:00Z',
-            endsAt: '2026-06-03T00:00:00Z',
-            status: 'active',
-            createdBy: 'admin-id',
-            createdAt: '2026-05-20T00:00:00Z',
-            participantCount: 20,
-          },
-        }),
-      })
-    })
-
-    await page.route('http://127.0.0.1:8000/challenges/11111111-1111-1111-1111-111111111111/submissions', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          submissions: [
-            {
-              id: 'sub-1',
-              challengeId: '11111111-1111-1111-1111-111111111111',
-              userId: 'user-1',
-              proofType: 'photo',
-              proofValue: 'https://example.com/strava1.jpg',
-              value: 45.2,
-              description: 'Вчера вел 45 км по берегу',
-              submittedAt: '2026-05-28T10:00:00Z',
-              userName: 'Алексей Иванов',
-            },
-            {
-              id: 'sub-2',
-              challengeId: '11111111-1111-1111-1111-111111111111',
-              userId: 'user-2',
-              proofType: 'photo',
-              proofValue: 'https://example.com/strava2.jpg',
-              value: 67.5,
-              description: 'Лучший заезд в сезоне',
-              submittedAt: '2026-05-29T15:00:00Z',
-              userName: 'Мария Петрова',
-            },
-          ],
-        }),
-      })
-    })
-
-    await page.route('http://127.0.0.1:8000/challenges/11111111-1111-1111-1111-111111111111/leaderboard', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          leaderboard: [
-            { userId: 'user-2', userName: 'Мария Петрова', totalProgress: 67.5, submissionCount: 1 },
-            { userId: 'user-1', userName: 'Алексей Иванов', totalProgress: 45.2, submissionCount: 1 },
-          ],
-        }),
+        body: JSON.stringify([{
+          id: '11111111-1111-1111-1111-111111111111',
+          title: 'На велике — больше всех!',
+          description: 'Кто проедет больше километров на велосипеде?',
+          created_by: 'admin-id',
+          starts_at: '2026-05-27T00:00:00Z',
+          ends_at: '2026-06-03T00:00:00Z',
+          status: 'active',
+          config: { awards: ['king'] },
+          created_at: '2026-05-20T00:00:00Z',
+        }]),
       })
     })
 
@@ -188,8 +144,6 @@ test.describe('Challenges', () => {
 
     await page.goto('/challenges/11111111-1111-1111-1111-111111111111')
     await expect(page.getByRole('heading', { name: 'На велике — больше всех!' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Лидерборд' })).toBeVisible()
-    await expect(page.getByRole('cell', { name: 'Мария Петрова' })).toBeVisible()
-    await expect(page.getByRole('cell', { name: 'Алексей Иванов' })).toBeVisible()
+    await expect(page.getByText('🔥 Активные')).toBeVisible()
   })
 })

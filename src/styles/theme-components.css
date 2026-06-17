@@ -727,6 +727,11 @@
   50% { opacity: 0.4; }
 }
 
+/* ── Icon sizes ── */
+.icon { width: 16px; height: 16px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
+.icon-lg { width: 20px; height: 20px; }
+.icon-sm { width: 12px; height: 12px; }
+
 /* ── Mobile adjustments ── */
 @media (max-width: 640px) {
   .cork-shell {
