@@ -146,7 +146,7 @@ test.describe('Challenges', () => {
     await page.goto('/challenges')
     await expect(page.getByRole('heading', { name: 'Челленджи' })).toBeVisible()
     await expect(page.getByText('🔥 Активные')).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'На велике — больше всех!' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'На велике — больше всех!' }).first()).toBeVisible()
     await expect(page.getByText('✅ Завершённые')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Кино-марафон' })).toBeVisible()
   })
