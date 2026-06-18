@@ -5,6 +5,8 @@ import { useProfileStore } from '@/entities/profile'
 import { showToast } from '@/shared/lib/toast'
 import { CategoryIcon, CalendarIcon } from '@/shared/ui'
 import type { AchievementCategory, ClaimAngle, ProofType } from '@/shared/types'
+import type { ClaimSubjectType, ClaimType } from '@/entities/claims'
+import { buildClaimMeta, defaultSubjectTypeForClaimType } from '@/entities/claims'
 
 const CATEGORIES: { value: AchievementCategory; label: string }[] = [
   { value: 'olympiad', label: 'Олимпиады' },
@@ -15,6 +17,46 @@ const CATEGORIES: { value: AchievementCategory; label: string }[] = [
   { value: 'movies',   label: 'Фильмы' },
   { value: 'games',    label: 'Игры' },
   { value: 'other',    label: 'Другое' },
+]
+
+const CLAIM_TYPES: { value: ClaimType; label: string; emoji: string }[] = [
+  { value: 'self_achievement',  label: 'Моё',       emoji: '👤' },
+  { value: 'other_achievement', label: 'Нашёл',      emoji: '🔎' },
+  { value: 'fail',              label: 'Фейл',       emoji: '💥' },
+  { value: 'flex',              label: 'Flex',       emoji: '⚡' },
+  { value: 'discovery',         label: 'Находка',    emoji: '💎' },
+  { value: 'debate',            label: 'Спорно',     emoji: '⚖️' },
+  { value: 'absurd',            label: 'Абсурд',     emoji: '🌀' },
+  { value: 'organization',      label: 'Орга/проект', emoji: '🏛️' },
+]
+
+const SUBJECT_TYPES: { value: ClaimSubjectType; label: string }[] = [
+  { value: 'self',         label: 'Я' },
+  { value: 'person',       label: 'Человек' },
+  { value: 'organization', label: 'Организация' },
+  { value: 'project',      label: 'Проект' },
+  { value: 'event',        label: 'Событие' },
+  { value: 'internet',     label: 'Интернет' },
+  { value: 'unknown',      label: 'Неясно' },
+]
+
+const SUBJECT_PLACEHOLDERS: Partial<Record<ClaimSubjectType, string>> = {
+  person: 'Имя человека или автора',
+  organization: 'Название организации',
+  project: 'Название проекта',
+  event: 'Название события',
+  internet: 'Что нашли в интернете?',
+  unknown: 'Короткий контекст',
+}
+
+const THREADS: { value: string; label: string }[] = [
+  { value: '',                   label: 'Без ветки' },
+  { value: 'Самый неуклюжий',    label: 'Самый неуклюжий' },
+  { value: 'Полезная находка',   label: 'Полезная находка' },
+  { value: 'Лучший проект',      label: 'Лучший проект' },
+  { value: 'Спорный flex',       label: 'Спорный flex' },
+  { value: 'Клоунская заявка',   label: 'Клоунская заявка' },
+  { value: '__custom__',         label: 'Своя тема' },
 ]
 
 const ANGLES: { value: ClaimAngle; label: string; emoji: string }[] = [
@@ -62,12 +104,18 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
 
   const [text, setText] = useState('')
   const [claimAngle, setClaimAngle] = useState<ClaimAngle>('judge')
+  const [claimType, setClaimType] = useState<ClaimType>('self_achievement')
+  const [subjectType, setSubjectType] = useState<ClaimSubjectType>('self')
+  const [subjectName, setSubjectName] = useState('')
+  const [thread, setThread] = useState('')
+  const [customThread, setCustomThread] = useState('')
   const [category, setCategory] = useState<AchievementCategory>('other')
   const [year, setYear] = useState(currentYear)
   const [eventDate, setEventDate] = useState<string | null>(null)
   const [proofType, setProofType] = useState<ProofType>('none')
   const [proofValue, setProofValue] = useState<string | undefined>()
   const [submitting, setSubmitting] = useState(false)
+  const subjectPristine = useRef(true)
 
   const placeholder = useRotatingPlaceholder()
 
@@ -82,6 +130,12 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
+
+  useEffect(() => {
+    if (subjectPristine.current) {
+      setSubjectType(defaultSubjectTypeForClaimType(claimType))
+    }
+  }, [claimType])
 
   const trimmed = text.trim()
   const canSubmit = trimmed.length >= 3 && !submitting && (proofType !== 'url' || !!proofValue?.trim())
@@ -109,7 +163,14 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
         ? trimmed
         : trimmed.slice(0, TITLE_LIMIT).replace(/\s+\S*$/, '') + '…'
       const effectiveYear = eventDate ? parseInt(eventDate.slice(0, 4), 10) : year
-      const meta: Record<string, unknown> = eventDate ? { event_date: eventDate } : {}
+      const resolvedThread = thread === '__custom__' ? customThread : thread
+      const meta = buildClaimMeta({
+        eventDate,
+        claimType,
+        subjectType,
+        subjectName,
+        thread: resolvedThread,
+      })
       await addAchievement({
         userId: user.id,
         category,
@@ -121,7 +182,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
         claimAngle,
         meta,
       })
-      showToast('success', 'Заявка отправлена на модерацию')
+      showToast('success', 'Вынесено на суд')
       onClose()
     } catch {
       showToast('error', 'Не удалось вынести на суд')
@@ -215,6 +276,130 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                 )
               })}
             </div>
+          </div>
+
+          {/* Claim type chips */}
+          <div className="mt-3">
+            <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--cork-text-dim)' }}>Тип заявки</div>
+            <div className="flex flex-wrap gap-1.5">
+              {CLAIM_TYPES.map((ct) => {
+                const active = ct.value === claimType
+                return (
+                  <button
+                    key={ct.value}
+                    type="button"
+                    onClick={() => setClaimType(ct.value)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs transition-colors"
+                    style={{
+                      borderRadius: 'var(--cork-radius-pill)',
+                      border: '1px solid',
+                      borderColor: active ? 'var(--cork-brand)' : 'var(--cork-border)',
+                      background: active ? 'var(--cork-surface-2)' : 'var(--cork-surface)',
+                      color: active ? 'var(--cork-brand)' : 'var(--cork-text-dim)',
+                      fontWeight: active ? 600 : 400,
+                    }}
+                  >
+                    <span>{ct.emoji}</span>
+                    <span>{ct.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Subject type chips */}
+          <div className="mt-3">
+            <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--cork-text-dim)' }}>О ком / о чём</div>
+            <div className="flex flex-wrap gap-1.5">
+              {SUBJECT_TYPES.map((st) => {
+                const active = st.value === subjectType
+                return (
+                  <button
+                    key={st.value}
+                    type="button"
+                    onClick={() => {
+                      subjectPristine.current = false
+                      setSubjectType(st.value)
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs transition-colors"
+                    style={{
+                      borderRadius: 'var(--cork-radius-pill)',
+                      border: '1px solid',
+                      borderColor: active ? 'var(--cork-brand)' : 'var(--cork-border)',
+                      background: active ? 'var(--cork-surface-2)' : 'var(--cork-surface)',
+                      color: active ? 'var(--cork-brand)' : 'var(--cork-text-dim)',
+                      fontWeight: active ? 600 : 400,
+                    }}
+                  >
+                    <span>{st.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Subject name input (hidden when subject is self) */}
+          {subjectType !== 'self' && (
+            <div className="mt-3">
+              <input
+                type="text"
+                value={subjectName}
+                onChange={(e) => setSubjectName(e.target.value)}
+                placeholder={SUBJECT_PLACEHOLDERS[subjectType] ?? 'Короткий контекст'}
+                className="w-full px-3 py-2 text-sm outline-none"
+                style={{
+                  borderRadius: 'var(--cork-radius-card)',
+                  border: '1px solid var(--cork-border)',
+                  background: 'var(--cork-surface-2)',
+                  color: 'var(--cork-text)',
+                }}
+              />
+            </div>
+          )}
+
+          {/* Thread chips */}
+          <div className="mt-3">
+            <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--cork-text-dim)' }}>Ветка</div>
+            <div className="flex flex-wrap gap-1.5">
+              {THREADS.map((t) => {
+                const active = t.value === thread
+                return (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setThread(t.value)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs transition-colors"
+                    style={{
+                      borderRadius: 'var(--cork-radius-pill)',
+                      border: '1px solid',
+                      borderColor: active ? 'var(--cork-brand)' : 'var(--cork-border)',
+                      background: active ? 'var(--cork-surface-2)' : 'var(--cork-surface)',
+                      color: active ? 'var(--cork-brand)' : 'var(--cork-text-dim)',
+                      fontWeight: active ? 600 : 400,
+                    }}
+                  >
+                    <span>{t.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+            {thread === '__custom__' && (
+              <div className="mt-2">
+                <input
+                  type="text"
+                  value={customThread}
+                  onChange={(e) => setCustomThread(e.target.value)}
+                  placeholder="Своя тема"
+                  className="w-full px-3 py-2 text-sm outline-none"
+                  style={{
+                    borderRadius: 'var(--cork-radius-card)',
+                    border: '1px solid var(--cork-border)',
+                    background: 'var(--cork-surface-2)',
+                    color: 'var(--cork-text)',
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Proof preview / picker */}

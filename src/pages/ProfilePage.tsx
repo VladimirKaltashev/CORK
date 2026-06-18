@@ -285,11 +285,11 @@ export function ProfilePage() {
         </div>
       ) : null}
 
-      {/* Achievements */}
+      {/* Achievements / Claims */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xl font-semibold" style={{ color: 'var(--cork-text)' }}>
-            Достижения
+            Заявки
             {achievements.length > 0 && (
               <span className="text-sm font-normal ml-1" style={{ color: 'var(--cork-text-mute)' }}>({achievements.length})</span>
             )}
@@ -311,7 +311,7 @@ export function ProfilePage() {
         ) : achievements.length === 0 ? (
           <div className="cork-empty">
             <span className="text-sm">
-              {isOwn ? 'Нет достижений. Добавьте первое!' : 'Достижений пока нет'}
+              {isOwn ? 'Нет заявок. Добавьте первую!' : 'Заявок пока нет'}
             </span>
           </div>
         ) : (
