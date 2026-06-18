@@ -2,14 +2,7 @@ import { create } from 'zustand'
 import type { Challenge, ChallengeEntry, ChallengeAward, AwardType } from '@/shared/types'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
-import { getThresholds, getExpertTier } from '@/shared/lib/expert'
-
-interface ExpertTierInfo {
-  tier: string | null
-  reactions: number
-  canPropose: boolean
-  votePower: number
-}
+import { getThresholds, getExpertProgress, type ExpertProgress } from '@/shared/lib/expert'
 
 export interface EntryWithProfile extends ChallengeEntry {
   userName: string
@@ -19,14 +12,30 @@ export interface AwardWithProfile extends ChallengeAward {
   userName: string
 }
 
+export interface ChallengeStats {
+  entries: number
+  awards: number
+}
+
+interface ChallengeEntryPayload {
+  title: string
+  description?: string
+}
+
+interface ChallengeEntryUser {
+  id: string
+  name: string
+}
+
 interface ChallengesState {
   challenges: Challenge[]
   activeChallenges: Challenge[]
   upcomingChallenges: Challenge[]
   completedChallenges: Challenge[]
+  statsByChallenge: Record<string, ChallengeStats>
   isLoading: boolean
   error: string | null
-  expertTier: ExpertTierInfo
+  expertTier: ExpertProgress
 
   detail: Challenge | null
   entries: EntryWithProfile[]
@@ -37,6 +46,7 @@ interface ChallengesState {
   loadChallenges: () => Promise<void>
   loadExpertTier: (userId: string) => Promise<void>
   loadDetail: (id: string) => Promise<void>
+  submitEntry: (challengeId: string, user: ChallengeEntryUser, payload: ChallengeEntryPayload) => Promise<void>
   reset: () => void
 }
 
@@ -55,14 +65,47 @@ function mapRow(row: Record<string, unknown>): Challenge {
   }
 }
 
+function createEmptyStats(challenges: Challenge[]): Record<string, ChallengeStats> {
+  return Object.fromEntries(challenges.map((c) => [c.id, { entries: 0, awards: 0 }]))
+}
+
+function mapEntryRow(row: Record<string, unknown>, profileMap: Record<string, string>): EntryWithProfile {
+  return {
+    id: row.id as string,
+    challengeId: row.challenge_id as string,
+    userId: row.user_id as string,
+    claimId: (row.claim_id as string | null) ?? undefined,
+    title: row.title as string,
+    description: (row.description as string | null) ?? undefined,
+    version: row.version as number,
+    isCurrent: row.is_current as boolean,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+    userName: profileMap[row.user_id as string] ?? 'Пользователь',
+  }
+}
+
+function mapAwardRow(row: Record<string, unknown>, profileMap: Record<string, string>): AwardWithProfile {
+  return {
+    id: row.id as string,
+    challengeId: row.challenge_id as string,
+    userId: row.user_id as string,
+    awardType: row.award_type as AwardType,
+    claimId: (row.claim_id as string | null) ?? undefined,
+    awardedAt: row.awarded_at as string,
+    userName: profileMap[row.user_id as string] ?? 'Пользователь',
+  }
+}
+
 export const useChallengesStore = create<ChallengesState>((set) => ({
   challenges: [],
   activeChallenges: [],
   upcomingChallenges: [],
   completedChallenges: [],
+  statsByChallenge: {},
   isLoading: false,
   error: null,
-  expertTier: { tier: null, reactions: 0, canPropose: false, votePower: 1 },
+  expertTier: getExpertProgress(0, []),
 
   detail: null,
   entries: [],
@@ -81,11 +124,43 @@ export const useChallengesStore = create<ChallengesState>((set) => ({
       if (error) throw error
 
       const challenges = (data ?? []).map(mapRow)
+      const statsByChallenge = createEmptyStats(challenges)
+      const challengeIds = challenges.map((c) => c.id)
+
+      if (challengeIds.length > 0) {
+        const [entriesResult, awardsResult] = await Promise.all([
+          supabase
+            .from('challenge_entries')
+            .select('challenge_id')
+            .in('challenge_id', challengeIds)
+            .eq('is_current', true),
+          supabase
+            .from('challenge_awards')
+            .select('challenge_id')
+            .in('challenge_id', challengeIds),
+        ])
+
+        if (!entriesResult.error) {
+          for (const row of entriesResult.data ?? []) {
+            const id = (row as { challenge_id: string }).challenge_id
+            if (statsByChallenge[id]) statsByChallenge[id].entries += 1
+          }
+        }
+
+        if (!awardsResult.error) {
+          for (const row of awardsResult.data ?? []) {
+            const id = (row as { challenge_id: string }).challenge_id
+            if (statsByChallenge[id]) statsByChallenge[id].awards += 1
+          }
+        }
+      }
+
       set({
         challenges,
         activeChallenges: challenges.filter((c) => c.status === 'active'),
         upcomingChallenges: challenges.filter((c) => c.status === 'scheduled'),
         completedChallenges: challenges.filter((c) => c.status === 'completed' || c.status === 'archived'),
+        statsByChallenge,
       })
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Не удалось загрузить челленджи'
@@ -106,8 +181,7 @@ export const useChallengesStore = create<ChallengesState>((set) => ({
 
       const total = (data?.crowns ?? 0) + (data?.clowns ?? 0)
       const thresholds = await getThresholds()
-      const { tier, canPropose, votePower } = getExpertTier(total, thresholds)
-      set({ expertTier: { tier, reactions: total, canPropose, votePower } })
+      set({ expertTier: getExpertProgress(total, thresholds) })
     } catch {
       // Non-critical — keep defaults
     }
@@ -148,29 +222,9 @@ export const useChallengesStore = create<ChallengesState>((set) => ({
         profileMap = Object.fromEntries((profiles ?? []).map((p: { id: string; name: string }) => [p.id, p.name]))
       }
 
-      const entries: EntryWithProfile[] = (entriesResult.data ?? []).map((e: Record<string, unknown>) => ({
-        id: e.id as string,
-        challengeId: e.challenge_id as string,
-        userId: e.user_id as string,
-        claimId: e.claim_id as string,
-        title: e.title as string,
-        description: e.description as string | undefined,
-        version: e.version as number,
-        isCurrent: e.is_current as boolean,
-        createdAt: e.created_at as string,
-        updatedAt: e.updated_at as string,
-        userName: profileMap[e.user_id as string] ?? 'Пользователь',
-      }))
+      const entries: EntryWithProfile[] = (entriesResult.data ?? []).map((e: Record<string, unknown>) => mapEntryRow(e, profileMap))
 
-      const awards: AwardWithProfile[] = (awardsResult.data ?? []).map((a: Record<string, unknown>) => ({
-        id: a.id as string,
-        challengeId: a.challenge_id as string,
-        userId: a.user_id as string,
-        awardType: a.award_type as AwardType,
-        claimId: (a.claim_id as string) ?? undefined,
-        awardedAt: a.awarded_at as string,
-        userName: profileMap[a.user_id as string] ?? 'Пользователь',
-      }))
+      const awards: AwardWithProfile[] = (awardsResult.data ?? []).map((a: Record<string, unknown>) => mapAwardRow(a, profileMap))
 
       set({ detail: challenge, entries, awards })
     } catch (e) {
@@ -181,14 +235,118 @@ export const useChallengesStore = create<ChallengesState>((set) => ({
     }
   },
 
+  submitEntry: async (challengeId, user, payload) => {
+    const title = payload.title.trim()
+    const description = payload.description?.trim()
+    if (title.length < 3) {
+      showToast('error', 'Заявка слишком короткая')
+      throw new Error('entry title is too short')
+    }
+
+    const existing = useChallengesStore
+      .getState()
+      .entries
+      .find((entry) => entry.challengeId === challengeId && entry.userId === user.id && entry.isCurrent)
+
+    if (existing) {
+      const { data, error } = await supabase
+        .from('challenge_entries')
+        .update({
+          title,
+          description: description || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existing.id)
+        .select('*')
+        .single()
+      if (error) {
+        showToast('error', 'Не удалось обновить заявку')
+        throw error
+      }
+
+      if (existing.claimId) {
+        await supabase
+          .from('achievements')
+          .update({
+            title,
+            description: description || title,
+            year: new Date().getFullYear(),
+          })
+          .eq('id', existing.claimId)
+      }
+
+      const entry = mapEntryRow(data as Record<string, unknown>, { [user.id]: user.name })
+      set((s) => ({
+        entries: s.entries.map((item) => (item.id === existing.id ? entry : item)),
+      }))
+      showToast('success', 'Заявка обновлена')
+      return
+    }
+
+    const { data: claim, error: claimError } = await supabase
+      .from('achievements')
+      .insert({
+        user_id: user.id,
+        category: 'other',
+        title,
+        description: description || title,
+        year: new Date().getFullYear(),
+        proof_type: 'none',
+        proof_value: null,
+        claim_angle: 'judge',
+        status: 'pending',
+        meta: { challenge_id: challengeId, source: 'challenge_entry' },
+      })
+      .select('id')
+      .single()
+
+    if (claimError) {
+      showToast('error', 'Не удалось создать claim для челленджа')
+      throw claimError
+    }
+
+    const { data, error } = await supabase
+      .from('challenge_entries')
+      .insert({
+        challenge_id: challengeId,
+        user_id: user.id,
+        claim_id: claim.id,
+        title,
+        description: description || null,
+        version: 1,
+        is_current: true,
+      })
+      .select('*')
+      .single()
+
+    if (error) {
+      showToast('error', 'Не удалось подать заявку')
+      throw error
+    }
+
+    const entry = mapEntryRow(data as Record<string, unknown>, { [user.id]: user.name })
+    set((s) => ({
+      entries: [entry, ...s.entries],
+      statsByChallenge: {
+        ...s.statsByChallenge,
+        [challengeId]: {
+          entries: (s.statsByChallenge[challengeId]?.entries ?? 0) + 1,
+          awards: s.statsByChallenge[challengeId]?.awards ?? 0,
+        },
+      },
+    }))
+    showToast('success', 'Заявка принята в челлендж')
+  },
+
   reset: () => set({
     challenges: [],
     activeChallenges: [],
     upcomingChallenges: [],
     completedChallenges: [],
+    statsByChallenge: {},
     isLoading: false,
     error: null,
-    expertTier: { tier: null, reactions: 0, canPropose: false, votePower: 1 },
+    expertTier: getExpertProgress(0, []),
     detail: null,
     entries: [],
     awards: [],

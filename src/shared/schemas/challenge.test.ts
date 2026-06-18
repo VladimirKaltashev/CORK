@@ -44,6 +44,10 @@ describe('challengeEntrySchema', () => {
     expect(challengeEntrySchema.safeParse({ title, claimId }).success).toBe(true)
   })
 
+  it('принимает entry без claimId для новой заявки челленджа', () => {
+    expect(challengeEntrySchema.safeParse({ title: validEntry.title, description: validEntry.description }).success).toBe(true)
+  })
+
   it('отклоняет пустой title', () => {
     expect(challengeEntrySchema.safeParse({ ...validEntry, title: '' }).success).toBe(false)
   })

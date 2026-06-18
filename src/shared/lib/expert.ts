@@ -34,6 +34,58 @@ export function getExpertTier(
   }
 }
 
+export interface ExpertProgress {
+  tier: string | null
+  displayTier: string
+  icon: string
+  reactions: number
+  canPropose: boolean
+  votePower: number
+  currentMin: number
+  nextTier: string | null
+  nextMin: number | null
+  remainingToNext: number
+  progressCurrent: number
+  progressTarget: number
+  progressPct: number
+  isMaxTier: boolean
+}
+
+function normalizeThresholds(thresholds?: ExpertThreshold[]): ExpertThreshold[] {
+  return [...(thresholds ?? [])].sort((a, b) => a.minReactions - b.minReactions)
+}
+
+export function getExpertProgress(
+  totalReactions: number,
+  thresholds?: ExpertThreshold[],
+): ExpertProgress {
+  const reactions = Math.max(0, totalReactions)
+  const sorted = normalizeThresholds(thresholds)
+  const matched = sorted.filter((t) => reactions >= t.minReactions).at(-1) ?? null
+  const next = sorted.find((t) => reactions < t.minReactions) ?? null
+  const currentMin = matched?.minReactions ?? 0
+  const nextMin = next?.minReactions ?? null
+  const progressTarget = nextMin ? Math.max(nextMin - currentMin, 1) : 1
+  const progressCurrent = nextMin ? Math.min(Math.max(reactions - currentMin, 0), progressTarget) : progressTarget
+
+  return {
+    tier: matched?.tier ?? null,
+    displayTier: matched?.tier ?? 'Новичок',
+    icon: getTierIcon(matched?.tier),
+    reactions,
+    canPropose: matched?.canPropose ?? false,
+    votePower: matched?.votePower ?? 1,
+    currentMin,
+    nextTier: next?.tier ?? null,
+    nextMin,
+    remainingToNext: nextMin ? Math.max(nextMin - reactions, 0) : 0,
+    progressCurrent,
+    progressTarget,
+    progressPct: nextMin ? Math.round((progressCurrent / progressTarget) * 100) : 100,
+    isMaxTier: !next,
+  }
+}
+
 export const TIER_ICONS: Record<string, string> = {
   bronze: '🥉',
   silver: '🥈',
@@ -42,6 +94,6 @@ export const TIER_ICONS: Record<string, string> = {
 }
 
 export function getTierIcon(tier?: string | null): string {
-  if (!tier) return ''
+  if (!tier) return '⚪'
   return TIER_ICONS[tier.toLowerCase()] ?? '🏆'
 }

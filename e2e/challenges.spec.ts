@@ -69,6 +69,38 @@ test.beforeEach(async ({ page }) => {
       ]),
     })
   })
+
+  await page.route(/\/rest\/v1\/challenge_entries/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    })
+  })
+
+  await page.route(/\/rest\/v1\/challenge_awards/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    })
+  })
+
+  await page.route(/\/rest\/v1\/reactions/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    })
+  })
+
+  await page.route(/\/rest\/v1\/comments/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    })
+  })
 })
 
 test.describe('Challenges', () => {
@@ -173,7 +205,7 @@ test.describe('Challenges', () => {
 
     await page.goto('/challenges/11111111-1111-1111-1111-111111111111')
     await expect(page.getByRole('heading', { name: 'На велике — больше всех!' })).toBeVisible()
-    await expect(page.getByText('👥 Участники')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Заявки' })).toBeVisible()
     await expect(page.getByText('Моя заявка')).toBeVisible()
   })
 })

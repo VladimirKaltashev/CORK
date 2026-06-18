@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useChallengesStore } from '@/entities/challenges'
+import { useChallengesStore, type ChallengeStats } from '@/entities/challenges'
 import { useAuthStore } from '@/entities/auth'
-import { getTierIcon } from '@/shared/lib/expert'
 import type { Challenge } from '@/shared/types'
 
 function formatTimer(startsAt: string, endsAt: string, status: string): { label: string; urgent: boolean; icon: string } {
@@ -25,7 +24,7 @@ function formatTimer(startsAt: string, endsAt: string, status: string): { label:
     return { label: `Стартует через ${days}д`, urgent: false, icon: 'calendar' }
   }
 
-  return { label: '', urgent: false, icon: '' }
+  return { label: 'Итоги открыты', urgent: false, icon: 'done' }
 }
 
 function getStatusTag(status: string): { text: string; className: string } {
@@ -45,27 +44,50 @@ function getAwardTags(config: Record<string, unknown>): { icon: string; label: s
     king: { icon: '👑', label: 'king' },
     clown: { icon: '🤡', label: 'clown' },
     finder: { icon: '🔍', label: 'finder' },
-    best_comment: { icon: '💬', label: 'best comment' },
-    most_controversial: { icon: '🔥', label: 'most controversial' },
+    best_comment: { icon: '💬', label: 'argument' },
+    most_controversial: { icon: '🔥', label: 'controversy' },
     participant: { icon: '🎖', label: 'participant' },
   }
   return awards.map((a) => map[a] ?? { icon: '', label: a })
 }
 
-function ChallengeCard({ challenge }: { challenge: Challenge }) {
+function getActionLabel(status: Challenge['status']): string {
+  if (status === 'active') return 'Войти в арену'
+  if (status === 'scheduled') return 'Открыть правила'
+  return 'Смотреть итоги'
+}
+
+function ChallengeMeta({ challenge, stats }: { challenge: Challenge; stats: ChallengeStats }) {
   const timer = formatTimer(challenge.startsAt, challenge.endsAt, challenge.status)
+  return (
+    <div className="challenge-card__meta">
+      <span className={timer.urgent ? 'is-urgent' : ''}>{timer.label}</span>
+      <span>{stats.entries} заявок</span>
+      <span>{stats.awards} наград</span>
+      {challenge.status !== 'active' && (
+        <span>
+          {new Date(challenge.startsAt).toLocaleDateString('ru-RU')}
+          {' — '}
+          {new Date(challenge.endsAt).toLocaleDateString('ru-RU')}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function ChallengeCard({ challenge, stats }: { challenge: Challenge; stats: ChallengeStats }) {
   const statusTag = getStatusTag(challenge.status)
   const awardTags = getAwardTags(challenge.config)
 
   return (
-    <div className="cork-card">
-      <div className="cork-card__top">
-        <div className="cork-card__icon">🏆</div>
-        <div className="cork-card__body">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
+    <article className="challenge-card">
+      <div className="challenge-card__top">
+        <div className="challenge-card__icon">🏆</div>
+        <div className="challenge-card__body">
+          <div className="challenge-card__tags">
             <span className={`cork-tag ${statusTag.className}`}>{statusTag.text}</span>
-            {awardTags.map((t) => (
-              <span key={t.label} className="cork-tag">{t.icon} {t.label}</span>
+            {awardTags.map((tag) => (
+              <span key={tag.label} className="cork-tag">{tag.icon} {tag.label}</span>
             ))}
           </div>
           <h2 className="cork-title">
@@ -74,31 +96,77 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
           <p className="cork-desc">{challenge.description}</p>
         </div>
       </div>
-      <div className="cork-card__footer">
-        {timer.label && (
-          <span className="timer" style={timer.urgent ? { color: 'var(--cork-clown)' } : undefined}>
-            {timer.icon === 'calendar' ? (
-              <svg className="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="2" y="4" width="16" height="14" rx="2" />
-                <path d="M6 4V2m8 2V2" />
-              </svg>
-            ) : (
-              <svg className="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="10" cy="10" r="8" />
-                <path d="M10 6v4l2.5 2.5" />
-              </svg>
-            )}
-            {timer.label}
-          </span>
-        )}
-        <span className="spacer" />
-        {challenge.status !== 'active' && (
-          <span className="cork-meta">
-            {new Date(challenge.startsAt).toLocaleDateString('ru-RU')}
-            {' — '}
-            {new Date(challenge.endsAt).toLocaleDateString('ru-RU')}
-          </span>
-        )}
+
+      <div className="challenge-card__footer">
+        <ChallengeMeta challenge={challenge} stats={stats} />
+        <Link to={`/challenges/${challenge.id}`} className="cork-btn cork-btn-primary">
+          {getActionLabel(challenge.status)}
+        </Link>
+      </div>
+    </article>
+  )
+}
+
+function ChallengeSpotlight({ challenge, stats }: { challenge: Challenge; stats: ChallengeStats }) {
+  const statusTag = getStatusTag(challenge.status)
+  return (
+    <section className="challenge-spotlight">
+      <div>
+        <div className="challenge-card__tags">
+          <span className={`cork-tag ${statusTag.className}`}>Сейчас в арене</span>
+          {getAwardTags(challenge.config).map((tag) => (
+            <span key={tag.label} className="cork-tag">{tag.icon} {tag.label}</span>
+          ))}
+        </div>
+        <h2>{challenge.title}</h2>
+        <p>{challenge.description}</p>
+        <ChallengeMeta challenge={challenge} stats={stats} />
+      </div>
+      <Link to={`/challenges/${challenge.id}`} className="cork-btn cork-btn-primary">
+        {getActionLabel(challenge.status)}
+      </Link>
+    </section>
+  )
+}
+
+function RankHubCard({ isLoggedIn }: { isLoggedIn: boolean }) {
+  const rank = useChallengesStore((s) => s.expertTier)
+
+  if (!isLoggedIn) {
+    return (
+      <div className="rank-card rank-card--compact">
+        <div className="rank-card__top">
+          <span className="rank-card__icon">⚪</span>
+          <div className="rank-card__body">
+            <div className="rank-card__eyebrow">CORK Rank</div>
+            <div className="rank-card__title">Гость</div>
+          </div>
+        </div>
+        <p className="rank-card__hint">Войдите, чтобы подавать заявки и копить ранг судьи.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rank-card rank-card--compact">
+      <div className="rank-card__top">
+        <span className="rank-card__icon">{rank.icon}</span>
+        <div className="rank-card__body">
+          <div className="rank-card__eyebrow">CORK Rank</div>
+          <div className="rank-card__title">{rank.displayTier}</div>
+        </div>
+        <div className="rank-card__score">
+          <b>{rank.reactions}</b>
+          <span>реакций</span>
+        </div>
+      </div>
+      <div className="rank-meter" aria-label={`Прогресс ранга ${rank.progressPct}%`}>
+        <span style={{ width: `${rank.progressPct}%` }} />
+      </div>
+      <div className="rank-card__foot">
+        <span>{rank.isMaxTier ? 'макс. ранг' : `до ${rank.nextTier}: ${rank.remainingToNext}`}</span>
+        <span>голос ×{rank.votePower}</span>
+        <span>{rank.canPropose ? 'proposal unlocked' : 'proposal с Silver'}</span>
       </div>
     </div>
   )
@@ -108,7 +176,17 @@ const TABS = ['Все', 'Активные', 'Предстоящие', 'Заве�
 type Tab = typeof TABS[number]
 
 export function ChallengesPage() {
-  const { activeChallenges, upcomingChallenges, completedChallenges, isLoading, error, loadChallenges, expertTier, loadExpertTier } = useChallengesStore()
+  const {
+    activeChallenges,
+    upcomingChallenges,
+    completedChallenges,
+    statsByChallenge,
+    isLoading,
+    error,
+    loadChallenges,
+    expertTier,
+    loadExpertTier,
+  } = useChallengesStore()
   const user = useAuthStore((s) => s.user)
 
   useEffect(() => {
@@ -130,44 +208,55 @@ export function ChallengesPage() {
     }
   }, [activeTab, activeChallenges, upcomingChallenges, completedChallenges])
 
-  const tierIcon = getTierIcon(expertTier.tier)
+  const featured = activeChallenges[0] ?? upcomingChallenges[0] ?? completedChallenges[0]
+
+  const getStats = (challengeId: string): ChallengeStats =>
+    statsByChallenge[challengeId] ?? { entries: 0, awards: 0 }
 
   return (
     <div className="cork-page">
       <div className="cork-shell">
         <main className="cork-main">
+          <div className="challenge-hub-head">
+            <div>
+              <h1 className="cork-head" style={{ marginBottom: 6 }}>Челленджи</h1>
+              <p>
+                Временные арены CORK: принеси claim, собери вердикт, забери роль короля, скаута или автора лучшего аргумента.
+              </p>
+            </div>
+            <RankHubCard isLoggedIn={!!user} />
+          </div>
 
-          {/* Header */}
-          <div className="page-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-            <h1 className="cork-head" style={{ margin: 0 }}>
-              Челленджи
-            </h1>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              {expertTier.tier && (
-                <span style={{ fontSize: 11, color: 'var(--cork-text-mute)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  {tierIcon} {expertTier.tier} · голос ×{expertTier.votePower}
-                </span>
-              )}
-              <button className="cork-btn cork-btn-primary" disabled={!expertTier.canPropose} title={expertTier.canPropose ? '' : 'Только эксперты (Silver+)'}>
-                <span>+</span> Предложить челлендж
+          {featured && !isLoading && !error && (
+            <ChallengeSpotlight challenge={featured} stats={getStats(featured.id)} />
+          )}
+
+          <div className="challenge-toolbar">
+            <div className="cork-tabs">
+              {TABS.map((tab) => (
+                <button
+                  key={tab}
+                  className={`cork-tab${activeTab === tab ? ' active' : ''}`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+            <div className="challenge-proposal-gate">
+              <button
+                className="cork-btn cork-btn-primary"
+                disabled={!expertTier.canPropose}
+                title={expertTier.canPropose ? 'Форма предложений будет следующим шагом' : 'Только эксперты Silver+'}
+              >
+                + Предложить челлендж
               </button>
+              {!expertTier.canPropose && user && (
+                <span>Откроется с Silver: ещё {expertTier.remainingToNext} реакций</span>
+              )}
             </div>
           </div>
 
-          {/* Tabs */}
-          <div className="cork-tabs" style={{ marginBottom: 24 }}>
-            {TABS.map((tab) => (
-              <button
-                key={tab}
-                className={`cork-tab${activeTab === tab ? ' active' : ''}`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          {/* Loading */}
           {isLoading && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {[1, 2, 3].map((i) => (
@@ -180,7 +269,6 @@ export function ChallengesPage() {
             </div>
           )}
 
-          {/* Error */}
           {error && !isLoading && (
             <div className="cork-empty">
               <b>⚠️</b>
@@ -190,7 +278,6 @@ export function ChallengesPage() {
             </div>
           )}
 
-          {/* Empty */}
           {!isLoading && !error && visible.length === 0 && (
             <div className="cork-empty">
               <b>🏆</b>
@@ -198,56 +285,53 @@ export function ChallengesPage() {
             </div>
           )}
 
-          {/* Content */}
           {!isLoading && !error && visible.length > 0 && (
             <>
               {activeTab === 'Все' ? (
                 <>
                   {activeChallenges.length > 0 && (
-                    <div style={{ marginBottom: 32 }}>
+                    <section className="challenge-section">
                       <div className="cork-section-title">
                         🔥 Активные
                         <span className="count">{activeChallenges.length}</span>
                       </div>
-                      {activeChallenges.map((c) => <ChallengeCard key={c.id} challenge={c} />)}
-                    </div>
+                      {activeChallenges.map((challenge) => (
+                        <ChallengeCard key={challenge.id} challenge={challenge} stats={getStats(challenge.id)} />
+                      ))}
+                    </section>
                   )}
                   {upcomingChallenges.length > 0 && (
-                    <div style={{ marginBottom: 32 }}>
+                    <section className="challenge-section">
                       <div className="cork-section-title">
                         📅 Предстоящие
                         <span className="count">{upcomingChallenges.length}</span>
                       </div>
-                      {upcomingChallenges.map((c) => <ChallengeCard key={c.id} challenge={c} />)}
-                    </div>
+                      {upcomingChallenges.map((challenge) => (
+                        <ChallengeCard key={challenge.id} challenge={challenge} stats={getStats(challenge.id)} />
+                      ))}
+                    </section>
                   )}
                   {completedChallenges.length > 0 && (
-                    <div>
+                    <section className="challenge-section">
                       <div className="cork-section-title">
                         ✅ Завершённые
                         <span className="count">{completedChallenges.length}</span>
                       </div>
-                      {completedChallenges.map((c) => <ChallengeCard key={c.id} challenge={c} />)}
-                    </div>
+                      {completedChallenges.map((challenge) => (
+                        <ChallengeCard key={challenge.id} challenge={challenge} stats={getStats(challenge.id)} />
+                      ))}
+                    </section>
                   )}
                 </>
               ) : (
-                visible.map((c) => <ChallengeCard key={c.id} challenge={c} />)
+                <section className="challenge-section">
+                  {visible.map((challenge) => (
+                    <ChallengeCard key={challenge.id} challenge={challenge} stats={getStats(challenge.id)} />
+                  ))}
+                </section>
               )}
             </>
           )}
-
-          {/* Мои предложения */}
-          <div className="cork-section-title" style={{ marginTop: 32 }}>
-            💡 Мои предложения
-            <span className="count">0</span>
-          </div>
-          <div className="cork-empty">
-            <b>💬</b>
-            Вы ещё не предлагали челленджи.<br />
-            Достигните ранга <strong style={{ color: 'var(--cork-brand)' }}>Silver</strong> (20 реакций), чтобы предлагать челленджи сообществу.
-          </div>
-
         </main>
       </div>
     </div>

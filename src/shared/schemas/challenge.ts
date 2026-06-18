@@ -8,7 +8,7 @@ export const challengeProposalSchema = z.object({
 export const challengeEntrySchema = z.object({
   title: z.string().min(1, 'Обязательное поле').max(100, 'Максимум 100 символов'),
   description: z.string().max(500, 'Максимум 500 символов').optional(),
-  claimId: z.string().uuid('Неверный ID достижения'),
+  claimId: z.string().uuid('Неверный ID достижения').optional(),
 })
 
 export type ChallengeProposalFormData = z.infer<typeof challengeProposalSchema>

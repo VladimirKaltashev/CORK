@@ -7,7 +7,7 @@ import { useAchievementsStore } from '@/entities/achievements/store'
 import { useFriendsStore } from '@/entities/friends'
 import { useReactionsStore } from '@/entities/reactions'
 import { useScoutStore } from '@/entities/scout'
-import { getThresholds, getExpertTier, getTierIcon } from '@/shared/lib/expert'
+import { getThresholds, getExpertProgress } from '@/shared/lib/expert'
 import type { ExpertThreshold } from '@/shared/types'
 import { useCreateAchievementDialog } from '@/entities/achievements/createDialog'
 import { AvatarUpload } from '@/shared/ui/AvatarUpload'
@@ -231,20 +231,32 @@ export function ProfilePage() {
       {/* Expert Tier */}
       {thresholds && (() => {
         const total = (score?.crowns ?? 0) + (score?.clowns ?? 0)
-        const tier = getExpertTier(total, thresholds)
-        if (!tier.tier) return null
+        const rank = getExpertProgress(total, thresholds)
         return (
-          <div className="cork-panel flex items-center gap-3">
-            <span className="text-lg">{getTierIcon(tier.tier)}</span>
-            <span className="text-sm font-semibold" style={{ color: 'var(--cork-text-dim)' }}>
-              Ранг
-            </span>
-            <span className="text-lg font-bold" style={{ color: 'var(--cork-brand)' }}>
-              {tier.tier}
-            </span>
-            <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>
-              ({total} реакций · голос ×{tier.votePower}{tier.canPropose ? ' · может предлагать челленджи' : ''})
-            </span>
+          <div className="cork-panel rank-card">
+            <div className="rank-card__top">
+              <span className="rank-card__icon">{rank.icon}</span>
+              <div className="rank-card__body">
+                <div className="rank-card__eyebrow">CORK Rank</div>
+                <div className="rank-card__title">{rank.displayTier}</div>
+              </div>
+              <div className="rank-card__score">
+                <b>{rank.reactions}</b>
+                <span>реакций</span>
+              </div>
+            </div>
+            <div className="rank-meter" aria-label={`Прогресс ранга ${rank.progressPct}%`}>
+              <span style={{ width: `${rank.progressPct}%` }} />
+            </div>
+            <div className="rank-card__foot">
+              <span>
+                {rank.isMaxTier
+                  ? 'Максимальный ранг открыт'
+                  : `До ${rank.nextTier}: ${rank.remainingToNext}`}
+              </span>
+              <span>голос ×{rank.votePower}</span>
+              <span>{rank.canPropose ? 'может предлагать челленджи' : 'предложения с Silver'}</span>
+            </div>
           </div>
         )
       })()}

@@ -42,7 +42,7 @@ export interface ChallengeEntry {
   id: string
   challengeId: string
   userId: string
-  claimId: string
+  claimId?: string
   title: string
   description?: string
   version: number
