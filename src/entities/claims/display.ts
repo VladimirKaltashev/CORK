@@ -44,9 +44,17 @@ export function subjectTypeLabel(type: ClaimSubjectType): string {
   return SUBJECT_TYPE_LABELS[type]
 }
 
-export function shouldShowClaimBadge(claim: Claim): boolean {
-  if (claim.type !== 'self_achievement') return true
-  if (claim.subjectName?.trim()) return true
-  if (claim.thread?.trim()) return true
+export function shouldShowClaimBadgeParts(
+  type: ClaimType,
+  subjectName?: string,
+  thread?: string,
+): boolean {
+  if (type !== 'self_achievement') return true
+  if (subjectName?.trim()) return true
+  if (thread?.trim()) return true
   return false
+}
+
+export function shouldShowClaimBadge(claim: Claim): boolean {
+  return shouldShowClaimBadgeParts(claim.type, claim.subjectName, claim.thread)
 }

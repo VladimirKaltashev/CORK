@@ -8,7 +8,7 @@ import { ReactionBar } from '@/features/reactions'
 import { CommentSection } from '@/features/comments'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import { CategoryIcon, CheckIcon, HourglassIcon, CrossMarkIcon } from '@/shared/ui'
-import { achievementToClaim, claimTypeEmoji, claimTypeLabel, shouldShowClaimBadge } from '@/entities/claims'
+import { achievementToClaim, ClaimBadge } from '@/entities/claims'
 import type { Achievement, AchievementCategory, AchievementStatus, ClaimAngle } from '@/shared/types'
 
 type LabelVariant = 'default' | 'primary' | 'secondary' | 'accent' | 'success' | 'attention' | 'severe' | 'danger' | 'done' | 'sponsors'
@@ -126,22 +126,7 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
             )}
             <StatusBadge status={achievement.status} />
           </div>
-          {shouldShowClaimBadge(claim) && (
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs mb-1" style={{ color: 'var(--cork-text-mute)' }}>
-              <span>{claimTypeEmoji(claim.type)} {claimTypeLabel(claim.type)}</span>
-              {claim.subjectName && (
-                <>
-                  <span>·</span>
-                  <span>о: {claim.subjectName}</span>
-                </>
-              )}
-              {claim.thread && (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded" style={{ background: 'var(--cork-surface-2)', color: 'var(--cork-text-mute)' }}>
-                  # {claim.thread}
-                </span>
-              )}
-            </div>
-          )}
+          <ClaimBadge type={claim.type} subjectName={claim.subjectName} thread={claim.thread} className="mb-1" />
           <p className="font-semibold m-0" style={{ color: 'var(--cork-text)' }}>{achievement.title}</p>
           {descTruncated && (
             <p className="text-sm mt-0.5 m-0" style={{ color: 'var(--cork-text-dim)' }}>{descTruncated}</p>

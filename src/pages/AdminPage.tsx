@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button, FormControl, Textarea } from '@primer/react'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
+import { achievementToClaim, ClaimBadge } from '@/entities/claims'
 import { CategoryIcon } from '@/shared/ui'
 import type { Achievement } from '@/shared/types'
 
@@ -36,7 +37,7 @@ function RejectModal({
         style={{ background: 'var(--cork-surface)', border: '1px solid var(--cork-border)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--cork-text)' }}>Отклонить достижение</h2>
+        <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--cork-text)' }}>Отклонить заявку</h2>
         <p className="text-sm mb-4" style={{ color: 'var(--cork-text-mute)' }}>«{achievement.title}»</p>
         <form onSubmit={handleSubmit}>
           <FormControl required>
@@ -94,7 +95,7 @@ export function AdminPage() {
         }))
       )
     } catch {
-      showToast('error', 'Не удалось загрузить достижения')
+      showToast('error', 'Не удалось загрузить заявки')
     } finally {
       setIsLoading(false)
     }
@@ -115,7 +116,7 @@ export function AdminPage() {
       return
     }
     setPending((prev) => prev.filter((a) => a.id !== id))
-    showToast('success', 'Достижение подтверждено')
+    showToast('success', 'Заявка подтверждена')
   }
 
   const handleReject = async (id: string, reason: string) => {
@@ -129,14 +130,14 @@ export function AdminPage() {
     }
     setPending((prev) => prev.filter((a) => a.id !== id))
     setRejectTarget(null)
-    showToast('success', 'Достижение отклонено')
+    showToast('success', 'Заявка отклонена')
   }
 
   return (
     <div className="mx-auto max-w-3xl py-6 px-3" style={{ color: 'var(--cork-text)' }}>
       <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--cork-text)' }}>Админ-панель</h1>
       <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--cork-text)' }}>
-        Модерация достижений
+        Модерация заявок
         {!isLoading && (
           <span className="text-base font-normal ml-2" style={{ color: 'var(--cork-text-mute)' }}>({pending.length} на проверке)</span>
         )}
@@ -146,11 +147,13 @@ export function AdminPage() {
         <div className="py-10 text-center text-sm" style={{ color: 'var(--cork-text-mute)' }}>Загрузка...</div>
       ) : pending.length === 0 ? (
         <div className="cork-empty">
-          <span className="text-sm">Нет достижений на проверке</span>
+          <span className="text-sm">Нет заявок на проверке</span>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {pending.map((ach) => (
+          {pending.map((ach) => {
+            const claim = achievementToClaim(ach)
+            return (
             <div key={ach.id} className="cork-card">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -161,6 +164,7 @@ export function AdminPage() {
                     <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--cork-text-mute)' }}>{ach.category}</span>
                     <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>· {ach.year}</span>
                   </div>
+                  <ClaimBadge type={claim.type} subjectName={claim.subjectName} thread={claim.thread} className="mb-1" />
                   <h2 className="text-base font-semibold" style={{ color: 'var(--cork-text)' }}>{ach.title}</h2>
                   <p className="text-sm mt-1" style={{ color: 'var(--cork-text-dim)' }}>{ach.description}</p>
 
@@ -196,7 +200,8 @@ export function AdminPage() {
                 </div>
               </div>
             </div>
-          ))}
+          )
+          })}
         </div>
       )}
 

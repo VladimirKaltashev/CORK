@@ -12,6 +12,7 @@ import { useScoutStore } from '@/entities/scout'
 import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { CommentSection } from '@/features/comments'
+import { claimMetaFromAchievementMeta, ClaimBadge } from '@/entities/claims'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import type { AchievementCategory, ProofType } from '@/shared/types'
 
@@ -44,6 +45,7 @@ interface FeedItem {
   eventDate: string | null
   proofType: ProofType
   proofValue?: string
+  meta: Record<string, unknown>
   createdAt: string
 }
 
@@ -174,6 +176,7 @@ async function loadPage(
         description: row.description,
         year: row.year,
         eventDate: getEventDate(row.meta as Record<string, unknown> | null),
+        meta: (row.meta as Record<string, unknown> | null) ?? {},
         proofType: row.proof_type,
         proofValue: row.proof_value ?? undefined,
         createdAt: row.created_at,
@@ -367,7 +370,9 @@ export function FeedPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {items.map((item) => (
+            {items.map((item) => {
+              const claimMeta = claimMetaFromAchievementMeta(item.meta)
+              return (
               <div key={item.id} className="cork-card">
                 <div className="flex gap-3">
                   {/* Avatar */}
@@ -393,6 +398,7 @@ export function FeedPage() {
                         <span className="cork-meta">{item.category}</span>
                         <span className="cork-meta">· {formatAchievementDate(item.eventDate, item.year)}</span>
                       </div>
+                      <ClaimBadge type={claimMeta.claimType!} subjectName={claimMeta.subjectName} thread={claimMeta.thread} className="mt-0.5" />
                     </div>
 
                     <h2 className="cork-title">{item.title}</h2>
@@ -433,7 +439,8 @@ export function FeedPage() {
                   </div>
                 </div>
               </div>
-            ))}
+            )
+            })}
 
             {hasMore && (
               <div className="flex justify-center pt-2">

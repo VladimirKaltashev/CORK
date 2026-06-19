@@ -1,0 +1,1 @@
+export { ClaimBadge } from './ClaimBadge'

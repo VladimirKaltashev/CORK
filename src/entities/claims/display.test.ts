@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { claimTypeLabel, claimTypeEmoji, subjectTypeLabel, shouldShowClaimBadge } from './display'
+import { claimTypeLabel, claimTypeEmoji, subjectTypeLabel, shouldShowClaimBadge, shouldShowClaimBadgeParts } from './display'
 import type { Claim, ClaimSubjectType, ClaimType } from './types'
 
 describe('claimTypeLabel', () => {
@@ -111,5 +111,55 @@ describe('shouldShowClaimBadge', () => {
 
   it('whitespace thread is not significant', () => {
     expect(shouldShowClaimBadge(makeClaim({ thread: '   ' }))).toBe(false)
+  })
+})
+
+describe('shouldShowClaimBadgeParts', () => {
+  it('self_achievement without subjectName or thread returns false', () => {
+    expect(shouldShowClaimBadgeParts('self_achievement')).toBe(false)
+  })
+
+  it('self_achievement with subjectName returns true', () => {
+    expect(shouldShowClaimBadgeParts('self_achievement', 'Alice')).toBe(true)
+  })
+
+  it('self_achievement with thread returns true', () => {
+    expect(shouldShowClaimBadgeParts('self_achievement', undefined, 'Полезная находка')).toBe(true)
+  })
+
+  it('other_achievement without subjectName or thread returns true', () => {
+    expect(shouldShowClaimBadgeParts('other_achievement')).toBe(true)
+  })
+
+  it('fail returns true', () => {
+    expect(shouldShowClaimBadgeParts('fail')).toBe(true)
+  })
+
+  it('flex returns true', () => {
+    expect(shouldShowClaimBadgeParts('flex')).toBe(true)
+  })
+
+  it('discovery returns true', () => {
+    expect(shouldShowClaimBadgeParts('discovery')).toBe(true)
+  })
+
+  it('debate returns true', () => {
+    expect(shouldShowClaimBadgeParts('debate')).toBe(true)
+  })
+
+  it('absurd returns true', () => {
+    expect(shouldShowClaimBadgeParts('absurd')).toBe(true)
+  })
+
+  it('organization returns true', () => {
+    expect(shouldShowClaimBadgeParts('organization')).toBe(true)
+  })
+
+  it('whitespace subjectName is not significant', () => {
+    expect(shouldShowClaimBadgeParts('self_achievement', '   ')).toBe(false)
+  })
+
+  it('whitespace thread is not significant', () => {
+    expect(shouldShowClaimBadgeParts('self_achievement', undefined, '   ')).toBe(false)
   })
 })

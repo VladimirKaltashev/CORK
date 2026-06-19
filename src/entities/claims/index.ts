@@ -22,4 +22,7 @@ export {
   claimTypeEmoji,
   subjectTypeLabel,
   shouldShowClaimBadge,
+  shouldShowClaimBadgeParts,
 } from './display'
+
+export { ClaimBadge } from './ui'
