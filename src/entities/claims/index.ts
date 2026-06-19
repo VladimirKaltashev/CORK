@@ -26,3 +26,6 @@ export {
 } from './display'
 
 export { ClaimBadge } from './ui'
+
+export type { ClaimTypeFilter } from './filter'
+export { CLAIM_TYPE_FILTER_OPTIONS, matchesClaimTypeFilter, parseClaimTypeFilter } from './filter'

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { supabase } from '@/shared/lib/supabase'
@@ -12,7 +12,8 @@ import { useScoutStore } from '@/entities/scout'
 import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { CommentSection } from '@/features/comments'
-import { claimMetaFromAchievementMeta, ClaimBadge } from '@/entities/claims'
+import { claimMetaFromAchievementMeta, ClaimBadge, CLAIM_TYPE_FILTER_OPTIONS, matchesClaimTypeFilter, parseClaimTypeFilter } from '@/entities/claims'
+import type { ClaimTypeFilter } from '@/entities/claims'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import type { AchievementCategory, ProofType } from '@/shared/types'
 
@@ -208,6 +209,8 @@ export function FeedPage() {
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [feedMode, setFeedMode] = useState<FeedMode>('all')
   const [sort, setSort] = useState<ArenaSort>('new')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const claimTypeFilter = parseClaimTypeFilter(searchParams.get('claim'))
 
   const getFriendIds = (): string[] | undefined =>
     feedMode === 'friends' ? friendsStore.acceptedFriendIds() : undefined
@@ -279,6 +282,19 @@ export function FeedPage() {
     }
   }
 
+  const handleClaimTypeFilterChange = (next: ClaimTypeFilter) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev)
+      if (next === 'all') params.delete('claim')
+      else params.set('claim', next)
+      return params
+    })
+  }
+
+  const visibleItems = claimTypeFilter === 'all'
+    ? items
+    : items.filter((item) => matchesClaimTypeFilter(item.meta, claimTypeFilter))
+
   return (
     <div className="cork-shell">
       {/* Main content */}
@@ -320,24 +336,55 @@ export function FeedPage() {
           ))}
         </div>
 
-        {/* Category filters */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {FILTERS.map((f) => (
-            <button
-              key={f.value}
-              type="button"
-              onClick={() => handleFilterChange(f.value)}
-              className="cork-tag"
-              style={category === f.value ? {
-                background: 'var(--cork-brand)',
-                color: 'var(--cork-brand-ink)',
-                borderColor: 'var(--cork-brand)',
-              } : {}}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+          {/* Category filters */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {FILTERS.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                onClick={() => handleFilterChange(f.value)}
+                className="cork-tag"
+                style={category === f.value ? {
+                  background: 'var(--cork-brand)',
+                  color: 'var(--cork-brand-ink)',
+                  borderColor: 'var(--cork-brand)',
+                } : {}}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Claim type filter */}
+          {items.length > 0 && (
+            <div className="mb-4">
+              <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--cork-text-dim)' }}>Тип заявки</div>
+              <div className="flex flex-wrap gap-1.5">
+                {CLAIM_TYPE_FILTER_OPTIONS.map((opt) => {
+                  const active = opt.value === claimTypeFilter
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => handleClaimTypeFilterChange(opt.value)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs transition-colors"
+                      style={{
+                        borderRadius: 'var(--cork-radius-pill)',
+                        border: '1px solid',
+                        borderColor: active ? 'var(--cork-brand)' : 'var(--cork-border)',
+                        background: active ? 'var(--cork-surface-2)' : 'var(--cork-surface)',
+                        color: active ? 'var(--cork-brand)' : 'var(--cork-text-dim)',
+                        fontWeight: active ? 600 : 400,
+                      }}
+                    >
+                      <span>{opt.emoji}</span>
+                      <span>{opt.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
         {/* Create prompt */}
         {user && (
@@ -362,15 +409,17 @@ export function FeedPage() {
               </div>
             ))}
           </div>
-        ) : items.length === 0 ? (
-          <div className="cork-empty">
-            {feedMode === 'friends'
-              ? 'У вас пока нет друзей с заявками'
-              : 'Заявок пока нет'}
-          </div>
+          ) : items.length === 0 ? (
+            <div className="cork-empty">
+              {feedMode === 'friends'
+                ? 'У вас пока нет друзей с заявками'
+                : 'Заявок пока нет'}
+            </div>
+          ) : visibleItems.length === 0 ? (
+            <div className="cork-empty">Нет заявок этого типа.</div>
         ) : (
           <div className="flex flex-col gap-3">
-            {items.map((item) => {
+            {visibleItems.map((item) => {
               const claimMeta = claimMetaFromAchievementMeta(item.meta)
               return (
               <div key={item.id} className="cork-card">
