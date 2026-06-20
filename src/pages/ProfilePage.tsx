@@ -248,21 +248,23 @@ export function ProfilePage() {
             <div className="rank-meter" aria-label={`Прогресс ранга ${rank.progressPct}%`}>
               <span style={{ width: `${rank.progressPct}%` }} />
             </div>
-            <div className="rank-card__foot">
-              <span>
-                {rank.isMaxTier
-                  ? 'Максимальный ранг открыт'
-                  : `До ${rank.nextTier}: ${rank.remainingToNext}`}
-              </span>
-              <span>голос ×{rank.votePower}</span>
-              <span>{rank.canPropose ? 'может предлагать челленджи' : 'предложения с Silver'}</span>
-            </div>
+            {isOwn && (
+              <div className="rank-card__foot">
+                <span>
+                  {rank.isMaxTier
+                    ? 'Максимальный ранг открыт'
+                    : `До ${rank.nextTier}: ${rank.remainingToNext}`}
+                </span>
+                <span>голос ×{rank.votePower}</span>
+                <span>{rank.canPropose ? 'может предлагать челленджи' : 'предложения с Silver'}</span>
+              </div>
+            )}
           </div>
         )
       })()}
 
-      {/* Scout Score */}
-      {(scoutScore && scoutScore.scoutScore > 0) ? (
+      {/* Scout Score — only for own profile */}
+      {isOwn && (scoutScore && scoutScore.scoutScore > 0) ? (
         <div className="cork-panel flex items-center gap-3">
           <span className="text-sm font-semibold" style={{ color: 'var(--cork-text-dim)' }}>🔍 Scout Score</span>
           <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--cork-brand)' }}>{scoutScore.scoutScore}</span>
@@ -317,7 +319,7 @@ export function ProfilePage() {
         ) : (
           <div className="flex flex-col gap-2">
             {achievements.map((ach) => (
-              <AchievementCard key={ach.id} achievement={ach} />
+              <AchievementCard key={ach.id} achievement={ach} showModerationStatus={isOwn} />
             ))}
           </div>
         )}

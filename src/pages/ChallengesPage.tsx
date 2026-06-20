@@ -107,28 +107,6 @@ function ChallengeCard({ challenge, stats }: { challenge: Challenge; stats: Chal
   )
 }
 
-function ChallengeSpotlight({ challenge, stats }: { challenge: Challenge; stats: ChallengeStats }) {
-  const statusTag = getStatusTag(challenge.status)
-  return (
-    <section className="challenge-spotlight">
-      <div>
-        <div className="challenge-card__tags">
-          <span className={`cork-tag ${statusTag.className}`}>Сейчас в арене</span>
-          {getAwardTags(challenge.config).map((tag) => (
-            <span key={tag.label} className="cork-tag">{tag.icon} {tag.label}</span>
-          ))}
-        </div>
-        <h2>{challenge.title}</h2>
-        <p>{challenge.description}</p>
-        <ChallengeMeta challenge={challenge} stats={stats} />
-      </div>
-      <Link to={`/challenges/${challenge.id}`} className="cork-btn cork-btn-primary">
-        {getActionLabel(challenge.status)}
-      </Link>
-    </section>
-  )
-}
-
 function RankHubCard({ isLoggedIn }: { isLoggedIn: boolean }) {
   const rank = useChallengesStore((s) => s.expertTier)
 
@@ -208,8 +186,6 @@ export function ChallengesPage() {
     }
   }, [activeTab, activeChallenges, upcomingChallenges, completedChallenges])
 
-  const featured = activeChallenges[0] ?? upcomingChallenges[0] ?? completedChallenges[0]
-
   const getStats = (challengeId: string): ChallengeStats =>
     statsByChallenge[challengeId] ?? { entries: 0, awards: 0 }
 
@@ -226,10 +202,6 @@ export function ChallengesPage() {
             </div>
             <RankHubCard isLoggedIn={!!user} />
           </div>
-
-          {featured && !isLoading && !error && (
-            <ChallengeSpotlight challenge={featured} stats={getStats(featured.id)} />
-          )}
 
           <div className="challenge-toolbar">
             <div className="cork-tabs">

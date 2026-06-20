@@ -21,17 +21,7 @@ const PAGE_SIZE = 10
 
 type CategoryFilter = AchievementCategory | 'all'
 
-const FILTERS: { value: CategoryFilter; label: string }[] = [
-  { value: 'all',      label: 'Все' },
-  { value: 'olympiad', label: 'Олимпиады' },
-  { value: 'academic', label: 'Успеваемость' },
-  { value: 'it',       label: 'IT' },
-  { value: 'creative', label: 'Творчество' },
-  { value: 'sport',    label: 'Спорт' },
-  { value: 'movies',   label: 'Фильмы' },
-  { value: 'games',    label: 'Игры' },
-  { value: 'other',    label: 'Другое' },
-]
+// Category filter config kept in git history for easy restore
 
 interface FeedItem {
   id: string
@@ -39,7 +29,6 @@ interface FeedItem {
   userName: string
   userAvatar: string | null
   category: AchievementCategory
-  claimAngle: string
   title: string
   description: string
   year: number
@@ -70,25 +59,6 @@ function shouldShowDescription(title: string, description: string): boolean {
 
 function getInitials(name: string): string {
   return name.split(' ').map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase() || '?'
-}
-
-const ANGLE_META: Record<string, { label: string; emoji: string; color: string }> = {
-  king:  { label: 'На корону', emoji: '👑', color: 'var(--cork-king)' },
-  clown: { label: 'На клоуна', emoji: '🤡', color: 'var(--cork-clown)' },
-  judge: { label: 'Рассудите', emoji: '⚖️', color: 'var(--cork-text-mute)' },
-}
-
-function ClaimAngleBadge({ angle }: { angle: string }) {
-  const meta = ANGLE_META[angle] ?? ANGLE_META.judge
-  return (
-    <span
-      className="inline-flex items-center gap-0.5 text-[11px] font-semibold"
-      style={{ color: meta.color }}
-    >
-      <span>{meta.emoji}</span>
-      <span>{meta.label}</span>
-    </span>
-  )
 }
 
 function UserAvatar({ userId, name, avatar }: { userId: string; name: string; avatar: string | null }) {
@@ -130,7 +100,7 @@ async function loadPage(
 
   let query = supabase
     .from('arena_items')
-    .select('id, user_id, category, title, description, year, proof_type, proof_value, status, claim_angle, meta, created_at, crowns, clowns, comments, hot_score, controversy_score')
+    .select('id, user_id, category, title, description, year, proof_type, proof_value, status, meta, created_at, crowns, clowns, comments, hot_score, controversy_score')
     .eq('status', 'verified')
 
   if (category !== 'all') {
@@ -172,7 +142,6 @@ async function loadPage(
         userName: profileMap[row.user_id]?.name ?? 'Пользователь',
         userAvatar: profileMap[row.user_id]?.avatar ?? null,
         category: row.category,
-        claimAngle: row.claim_angle ?? 'king',
         title: row.title,
         description: row.description,
         year: row.year,
@@ -247,6 +216,7 @@ export function FeedPage() {
     setHasMore(true)
     fetchInitial(cat, feedMode, sort)
   }
+  void handleFilterChange // kept for future category filter restore
 
   const handleModeChange = (mode: FeedMode) => {
     if (mode === feedMode) return
@@ -336,29 +306,15 @@ export function FeedPage() {
           ))}
         </div>
 
-          {/* Category filters */}
-          <div className="flex flex-wrap gap-2 mb-3">
-            {FILTERS.map((f) => (
-              <button
-                key={f.value}
-                type="button"
-                onClick={() => handleFilterChange(f.value)}
-                className="cork-tag"
-                style={category === f.value ? {
-                  background: 'var(--cork-brand)',
-                  color: 'var(--cork-brand-ink)',
-                  borderColor: 'var(--cork-brand)',
-                } : {}}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-
           {/* Claim type filter */}
           {items.length > 0 && (
             <div className="mb-4">
-              <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--cork-text-dim)' }}>Тип заявки</div>
+              <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--cork-text-dim)' }}>
+                Фильтр по типу
+                {claimTypeFilter !== 'all' && (
+                  <> · {visibleItems.length} из {items.length}</>
+                )}
+              </div>
               <div className="flex flex-wrap gap-1.5">
                 {CLAIM_TYPE_FILTER_OPTIONS.map((opt) => {
                   const active = opt.value === claimTypeFilter
@@ -416,7 +372,9 @@ export function FeedPage() {
                 : 'Заявок пока нет'}
             </div>
           ) : visibleItems.length === 0 ? (
-            <div className="cork-empty">Нет заявок этого типа.</div>
+            <div className="cork-empty">
+              Нет заявок типа «{CLAIM_TYPE_FILTER_OPTIONS.find(o => o.value === claimTypeFilter)?.label ?? ''}» среди загруженных.
+            </div>
         ) : (
           <div className="flex flex-col gap-3">
             {visibleItems.map((item) => {
@@ -442,8 +400,6 @@ export function FeedPage() {
                         <span className="cork-meta">{formatRelativeTime(item.createdAt)}</span>
                       </div>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <ClaimAngleBadge angle={item.claimAngle} />
-                        <span className="cork-meta">·</span>
                         <span className="cork-meta">{item.category}</span>
                         <span className="cork-meta">· {formatAchievementDate(item.eventDate, item.year)}</span>
                       </div>

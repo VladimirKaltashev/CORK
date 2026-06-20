@@ -4,7 +4,7 @@ import { useAuthStore } from '@/entities/auth'
 import { useProfileStore } from '@/entities/profile'
 import { showToast } from '@/shared/lib/toast'
 import { CategoryIcon, CalendarIcon } from '@/shared/ui'
-import type { AchievementCategory, ClaimAngle, ProofType } from '@/shared/types'
+import type { AchievementCategory, ProofType } from '@/shared/types'
 import type { ClaimSubjectType, ClaimType } from '@/entities/claims'
 import { buildClaimMeta, defaultSubjectTypeForClaimType } from '@/entities/claims'
 
@@ -59,14 +59,8 @@ const THREADS: { value: string; label: string }[] = [
   { value: '__custom__',         label: 'Своя тема' },
 ]
 
-const ANGLES: { value: ClaimAngle; label: string; emoji: string }[] = [
-  { value: 'king',  label: 'На корону', emoji: '👑' },
-  { value: 'clown', label: 'На клоуна', emoji: '🤡' },
-  { value: 'judge', label: 'Рассудите', emoji: '⚖️' },
-]
-
 const PLACEHOLDERS = [
-  'Что выносим? Достижение, фейл, понт, находку — что угодно.',
+  'Что выносим? Фейл, flex, находку, спорный кейс или проект.',
   'Собрал куб за 14.8 — король или повезло?',
   'Официант уронил 10 тарелок. Легендарный фейл?',
   'Нашёл проект, который заслуживает короны.',
@@ -103,7 +97,6 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const [text, setText] = useState('')
-  const [claimAngle, setClaimAngle] = useState<ClaimAngle>('judge')
   const [claimType, setClaimType] = useState<ClaimType>('self_achievement')
   const [subjectType, setSubjectType] = useState<ClaimSubjectType>('self')
   const [subjectName, setSubjectName] = useState('')
@@ -179,13 +172,13 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
         year: effectiveYear,
         proofType,
         proofValue: proofValue?.trim() || undefined,
-        claimAngle,
+        claimAngle: 'judge',
         meta,
       })
-      showToast('success', 'Вынесено на суд')
+      showToast('success', 'Заявка отправлена на проверку')
       onClose()
     } catch {
-      showToast('error', 'Не удалось вынести на суд')
+      showToast('error', 'Не удалось отправить заявку')
     } finally {
       setSubmitting(false)
     }
@@ -211,7 +204,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--cork-border-light)' }}>
-          <span className="text-sm font-semibold" style={{ color: 'var(--cork-text)' }}>На суд</span>
+          <span className="text-sm font-semibold" style={{ color: 'var(--cork-text)' }}>Новая заявка</span>
           <button
             type="button"
             onClick={onClose}
@@ -247,34 +240,6 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                 className="w-full resize-none border-0 outline-none text-base leading-relaxed bg-transparent"
                 style={{ color: 'var(--cork-text)' }}
               />
-            </div>
-          </div>
-
-          {/* Claim angle chips */}
-          <div className="mt-3">
-            <div className="flex flex-wrap gap-1.5">
-              {ANGLES.map((a) => {
-                const active = a.value === claimAngle
-                return (
-                  <button
-                    key={a.value}
-                    type="button"
-                    onClick={() => setClaimAngle(a.value)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs transition-colors"
-                    style={{
-                      borderRadius: 'var(--cork-radius-pill)',
-                      border: '1px solid',
-                      borderColor: active ? 'var(--cork-brand)' : 'var(--cork-border)',
-                      background: active ? 'var(--cork-surface-2)' : 'var(--cork-surface)',
-                      color: active ? 'var(--cork-brand)' : 'var(--cork-text-dim)',
-                      fontWeight: active ? 600 : 400,
-                    }}
-                  >
-                    <span>{a.emoji}</span>
-                    <span>{a.label}</span>
-                  </button>
-                )
-              })}
             </div>
           </div>
 
@@ -359,7 +324,8 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
 
           {/* Thread chips */}
           <div className="mt-3">
-            <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--cork-text-dim)' }}>Ветка</div>
+            <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--cork-text-dim)' }}>Ветка карточки</div>
+            <div className="text-[11px] mb-2" style={{ color: 'var(--cork-text-mute)' }}>Пока только отображается на карточке. Фильтр по веткам появится позже.</div>
             <div className="flex flex-wrap gap-1.5">
               {THREADS.map((t) => {
                 const active = t.value === thread
@@ -445,6 +411,8 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
 
           {/* Category chips */}
           <div className="mt-4">
+            <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--cork-text-dim)' }}>Раздел архива</div>
+            <div className="text-[11px] mb-2" style={{ color: 'var(--cork-text-mute)' }}>Для старой ленты и совместимости. Главный смысл задаётся типом заявки выше.</div>
             <div className="flex flex-wrap gap-1.5">
               {CATEGORIES.map((c) => {
                 const active = c.value === category
@@ -587,7 +555,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                 cursor: canSubmit ? 'pointer' : 'not-allowed',
               }}
             >
-              {submitting ? 'Отправка...' : 'Вынести на суд'}
+              {submitting ? 'Отправка...' : 'Отправить на проверку'}
             </button>
           </div>
         </div>

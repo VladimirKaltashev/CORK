@@ -9,7 +9,7 @@ import { CommentSection } from '@/features/comments'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import { CategoryIcon, CheckIcon, HourglassIcon, CrossMarkIcon } from '@/shared/ui'
 import { achievementToClaim, ClaimBadge } from '@/entities/claims'
-import type { Achievement, AchievementCategory, AchievementStatus, ClaimAngle } from '@/shared/types'
+import type { Achievement, AchievementCategory, AchievementStatus } from '@/shared/types'
 
 type LabelVariant = 'default' | 'primary' | 'secondary' | 'accent' | 'success' | 'attention' | 'severe' | 'danger' | 'done' | 'sponsors'
 
@@ -22,22 +22,6 @@ const CATEGORY_META: Record<AchievementCategory, { label: string; variant: Label
   movies:   { label: 'Фильмы',       variant: 'done' },
   games:    { label: 'Игры',         variant: 'severe' },
   other:    { label: 'Интересное',   variant: 'secondary' },
-}
-
-const ANGLE_META: Record<string, { label: string; emoji: string; color: string }> = {
-  king:  { label: 'На корону', emoji: '👑', color: 'var(--cork-king)' },
-  clown: { label: 'На клоуна', emoji: '🤡', color: 'var(--cork-clown)' },
-  judge: { label: 'Рассудите', emoji: '⚖️', color: 'var(--cork-text-mute)' },
-}
-
-function ClaimAngleBadge({ angle }: { angle?: ClaimAngle }) {
-  const meta = ANGLE_META[angle ?? 'king'] ?? ANGLE_META.king
-  return (
-    <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold" style={{ color: meta.color }}>
-      <span>{meta.emoji}</span>
-      <span>{meta.label}</span>
-    </span>
-  )
 }
 
 function StatusBadge({ status }: { status: AchievementStatus }) {
@@ -70,9 +54,10 @@ function StatusBadge({ status }: { status: AchievementStatus }) {
 
 interface AchievementCardProps {
   achievement: Achievement
+  showModerationStatus?: boolean
 }
 
-export function AchievementCard({ achievement }: AchievementCardProps) {
+export function AchievementCard({ achievement, showModerationStatus = true }: AchievementCardProps) {
   const meta = CATEGORY_META[achievement.category]
   const { user } = useAuthStore()
   const { updateAchievementStatus } = useAchievementsStore()
@@ -117,14 +102,12 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1 mb-1">
-            <ClaimAngleBadge angle={achievement.claimAngle} />
-            <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>·</span>
             <Label variant={meta.variant}>{meta.label}</Label>
             <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>{formatAchievementDate(getEventDate(achievement.meta), achievement.year)}</span>
             {achievement.status === 'pending' && (
               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'var(--cork-surface-3)', color: 'var(--cork-text-mute)' }}>На модерации</span>
             )}
-            <StatusBadge status={achievement.status} />
+            {showModerationStatus && <StatusBadge status={achievement.status} />}
           </div>
           <ClaimBadge type={claim.type} subjectName={claim.subjectName} thread={claim.thread} className="mb-1" />
           <p className="font-semibold m-0" style={{ color: 'var(--cork-text)' }}>{achievement.title}</p>

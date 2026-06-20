@@ -68,13 +68,7 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md', comp
             <div
               className="cork-verdict-king"
               style={{ width: `${kingPct}%` }}
-            >
-              {!compact && (
-                <span className="flex items-center gap-1">
-                  <CrownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
-                </span>
-              )}
-            </div>
+            />
           )}
           {/* Center label — only for non-compact */}
           {!compact && (
@@ -97,13 +91,7 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md', comp
             <div
               className="cork-verdict-clown"
               style={{ width: `${clownPct}%`, marginLeft: 'auto' }}
-            >
-              {!compact && (
-                <span className="flex items-center gap-1">
-                  <ClownIcon className={isSm ? 'w-3 h-3' : 'w-4 h-4'} />
-                </span>
-              )}
-            </div>
+            />
           )}
         </div>
       </div>
