@@ -242,6 +242,19 @@ export function ProfilePage() {
         </div>
       </div>
 
+      {/* Bio block */}
+      {liveProfile.bio ? (
+        <div className="cork-card">
+          <h2 className="text-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--cork-text-mute)' }}>О себе</h2>
+          <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--cork-text)' }}>{liveProfile.bio}</p>
+        </div>
+      ) : isOwn ? (
+        <div className="border border-dashed rounded-md py-4 px-4 flex items-center justify-between" style={{ borderColor: 'var(--cork-border)' }}>
+          <span className="text-sm" style={{ color: 'var(--cork-text-mute)' }}>Расскажите о себе</span>
+          <Button size="small" onClick={() => setShowEdit(true)}>Добавить описание</Button>
+        </div>
+      ) : null}
+
       {/* Score */}
       <ScoreBlock crowns={score?.crowns ?? 0} clowns={score?.clowns ?? 0} />
 
@@ -320,19 +333,6 @@ export function ProfilePage() {
           )}
         </div>
       )}
-
-      {/* Bio block */}
-      {liveProfile.bio ? (
-        <div className="cork-card">
-          <h2 className="text-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--cork-text-mute)' }}>О себе</h2>
-          <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--cork-text)' }}>{liveProfile.bio}</p>
-        </div>
-      ) : isOwn ? (
-        <div className="border border-dashed rounded-md py-4 px-4 flex items-center justify-between" style={{ borderColor: 'var(--cork-border)' }}>
-          <span className="text-sm" style={{ color: 'var(--cork-text-mute)' }}>Расскажите о себе</span>
-          <Button size="small" onClick={() => setShowEdit(true)}>Добавить описание</Button>
-        </div>
-      ) : null}
 
       {showEdit && (
         <EditProfileModal

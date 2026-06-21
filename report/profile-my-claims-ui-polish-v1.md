@@ -90,11 +90,17 @@
 - Removed the large own-claims stat tile block from the own profile.
 - Removed the duplicate claim creation CTA from the own profile.
 - Hid `Scout Score` from the own profile in this pass to reduce dashboard noise.
-- Kept the own profile focused on:
+- Moved the `О себе` block above `Репутация` so the own profile reads less like a stats dashboard and closer to:
   - profile hero
+  - about/bio
   - reputation
   - CORK rank
+  - my claims link
+- Kept the own profile focused on:
+  - profile hero
   - bio / about
+  - reputation
+  - CORK rank
   - a small CTA link to `/me`
 - Public profiles still show reputation and public claims as before.
 
