@@ -88,6 +88,7 @@ export function AchievementCard({ achievement, showModerationStatus = true }: Ac
     achievement.proofType !== 'none' && achievement.proofValue
       ? achievement.proofValue
       : undefined
+  const isOwner = achievement.userId === user?.id
 
   const descTruncated =
     achievement.description.length > 100
@@ -136,7 +137,7 @@ export function AchievementCard({ achievement, showModerationStatus = true }: Ac
             )}
             {achievement.status === 'verified' && (
               <div className="ml-auto">
-                <ReactionBar achievementId={achievement.id} disabled={!user} size="sm" compact />
+                <ReactionBar achievementId={achievement.id} disabled={!user} size="sm" compact isOwner={isOwner} />
               </div>
             )}
           </div>

@@ -1,6 +1,7 @@
 export const ROUTES = {
   HOME: '/',
   FEED: '/feed',
+  MY_CLAIMS: '/me',
   LOGIN: '/login',
   REGISTER: '/register',
   GROUPS: '/groups',

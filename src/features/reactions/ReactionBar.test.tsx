@@ -67,4 +67,10 @@ describe('ReactionBar', () => {
     buttons[0].click()
     expect(mockToggle).not.toHaveBeenCalled()
   })
+
+  it('renders owner message instead of reaction buttons for own claim', () => {
+    render(<ReactionBar achievementId="a1" isOwner />)
+    expect(screen.getByText('Это ваша заявка. Арена решит исход.')).toBeInTheDocument()
+    expect(screen.queryByTestId('crown-icon')).not.toBeInTheDocument()
+  })
 })

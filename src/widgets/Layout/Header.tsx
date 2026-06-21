@@ -130,6 +130,7 @@ export function Header() {
                   <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--cork-border-light)' }}>
                     <p className="text-xs font-medium truncate" style={{ color: 'var(--cork-text)' }}>{name}</p>
                   </div>
+                  <NavLink to="/me" onClick={() => setDropdownOpen(false)}>Моё</NavLink>
                   <NavLink to="/profile/me" onClick={() => setDropdownOpen(false)}>Мой профиль</NavLink>
                   <NavLink to="/friends" onClick={() => setDropdownOpen(false)}>
                     Заявки
@@ -176,6 +177,7 @@ export function Header() {
           <NavLink to="/feed" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Арена</NavLink>
           <NavLink to="/leaderboard" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Рейтинг</NavLink>
           <NavLink to="/challenges" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Челленджи</NavLink>
+          <NavLink to="/me" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Моё</NavLink>
           <NavLink to="/profile/me" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Профиль</NavLink>
           {token && user?.role === 'admin' && (
             <NavLink to="/admin" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Модерация</NavLink>

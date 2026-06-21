@@ -29,3 +29,6 @@ export { ClaimBadge } from './ui'
 
 export type { ClaimTypeFilter } from './filter'
 export { CLAIM_TYPE_FILTER_OPTIONS, matchesClaimTypeFilter, parseClaimTypeFilter } from './filter'
+
+export type { OwnClaimsFilter, OwnClaimsStats, ClaimVerdictAggregate } from './owner'
+export { buildOwnClaimsStats, matchesOwnClaimsFilter, isCrownedClaim, isClownedClaim } from './owner'

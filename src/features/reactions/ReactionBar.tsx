@@ -7,9 +7,18 @@ interface ReactionBarProps {
   disabled?: boolean
   size?: 'sm' | 'md'
   compact?: boolean
+  isOwner?: boolean
+  ownerMessage?: string
 }
 
-export function ReactionBar({ achievementId, disabled = false, size = 'md', compact = false }: ReactionBarProps) {
+export function ReactionBar({
+  achievementId,
+  disabled = false,
+  size = 'md',
+  compact = false,
+  isOwner = false,
+  ownerMessage = 'Это ваша заявка. Арена решит исход.',
+}: ReactionBarProps) {
   const agg = useReactionsStore((s) => s.byAchievement[achievementId])
   const pending = useReactionsStore((s) => s.pending.has(achievementId))
   const budgetRemaining = useReactionsStore((s) => s.budgetRemaining)
@@ -97,7 +106,7 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md', comp
       </div>
 
       {/* Buttons */}
-      {!compact && (
+      {!compact && !isOwner && (
         <div className="flex items-center gap-1.5">
           <ReactionButton
             Icon={CrownIcon}
@@ -126,6 +135,15 @@ export function ReactionBar({ achievementId, disabled = false, size = 'md', comp
               Войти
             </span>
           )}
+        </div>
+      )}
+
+      {isOwner && (
+        <div
+          className={compact ? 'text-[11px]' : 'text-xs'}
+          style={{ color: 'var(--cork-text-mute)' }}
+        >
+          {ownerMessage}
         </div>
       )}
     </div>

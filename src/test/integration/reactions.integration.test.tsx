@@ -150,4 +150,11 @@ describe('Reactions integration', () => {
 
     expect(mockToggle).toHaveBeenCalledWith('a1', 'crown')
   })
+
+  it('shows owner state instead of voting controls for own claim', () => {
+    render(<ReactionBar achievementId="a1" isOwner />)
+
+    expect(screen.getByText('Это ваша заявка. Арена решит исход.')).toBeInTheDocument()
+    expect(screen.queryAllByRole('button')).toHaveLength(0)
+  })
 })

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useParams } from 'react-router-dom'
 import { Button } from '@primer/react'
 import { useAuthStore } from '@/entities/auth'
@@ -8,6 +9,7 @@ import { useFriendsStore } from '@/entities/friends'
 import { useReactionsStore } from '@/entities/reactions'
 import { useScoutStore } from '@/entities/scout'
 import { getThresholds, getExpertProgress } from '@/shared/lib/expert'
+import { buildOwnClaimsStats } from '@/entities/claims'
 import type { ExpertThreshold } from '@/shared/types'
 import { useCreateAchievementDialog } from '@/entities/achievements/createDialog'
 import { AvatarUpload } from '@/shared/ui/AvatarUpload'
@@ -63,6 +65,7 @@ export function ProfilePage() {
   const loadReactions = useReactionsStore((s) => s.loadForAchievements)
   const loadScoresFor = useReactionsStore((s) => s.loadScoresFor)
   const score = useReactionsStore((s) => (profileId ? s.userScores[profileId] : undefined))
+  const verdicts = useReactionsStore((s) => s.byAchievement)
   const { scores: scoutScores, loadScoutScore } = useScoutStore()
   const scoutScore = profileId ? scoutScores[profileId] : undefined
   const openCreateDialog = useCreateAchievementDialog((s) => s.open)
@@ -126,6 +129,7 @@ export function ProfilePage() {
 
   const contacts = liveProfile.contacts
   const hasContacts = contacts && Object.values(contacts).some(Boolean)
+  const ownClaimStats = buildOwnClaimsStats(allAchievements, verdicts)
 
   return (
     <div className="mx-auto max-w-2xl py-4 px-3 flex flex-col gap-4">
@@ -287,43 +291,62 @@ export function ProfilePage() {
         </div>
       ) : null}
 
-      {/* Achievements / Claims */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-semibold" style={{ color: 'var(--cork-text)' }}>
-            Заявки
-            {achievements.length > 0 && (
-              <span className="text-sm font-normal ml-1" style={{ color: 'var(--cork-text-mute)' }}>({achievements.length})</span>
-            )}
-          </h2>
-          {isOwn && (
-            <button
-              type="button"
-              onClick={openCreateDialog}
-              className="cork-btn cork-btn-primary"
-              style={{ textTransform: 'none', letterSpacing: 'normal' }}
-            >
-              + Вынести на суд
-            </button>
+      {isOwn ? (
+        <div className="cork-card">
+          <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
+            <div>
+              <h2 className="text-xl font-semibold m-0" style={{ color: 'var(--cork-text)' }}>Мои заявки</h2>
+              <p className="text-sm mt-2 mb-0" style={{ color: 'var(--cork-text-dim)' }}>
+                Профиль показывает репутацию. За своими заявками и исходами следите в отдельном разделе.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link to="/me" className="cork-btn cork-btn-primary" style={{ textTransform: 'none', letterSpacing: 'normal' }}>
+                Открыть Моё
+              </Link>
+              <button
+                type="button"
+                onClick={openCreateDialog}
+                className="cork-btn"
+                style={{ textTransform: 'none', letterSpacing: 'normal' }}
+              >
+                Новая заявка
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="cork-stat"><b>{ownClaimStats.totalClaims}</b><small>всего</small></div>
+            <div className="cork-stat"><b>{ownClaimStats.activeCount}</b><small>на арене</small></div>
+            <div className="cork-stat"><b>{ownClaimStats.crownedCount}</b><small>коронованы</small></div>
+            <div className="cork-stat"><b>{ownClaimStats.clownedCount}</b><small>заклоунены</small></div>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-semibold" style={{ color: 'var(--cork-text)' }}>
+              Заявки пользователя
+              {achievements.length > 0 && (
+                <span className="text-sm font-normal ml-1" style={{ color: 'var(--cork-text-mute)' }}>({achievements.length})</span>
+              )}
+            </h2>
+          </div>
+
+          {achLoading ? (
+            <div className="py-5 text-center text-sm" style={{ color: 'var(--cork-text-mute)' }}>Загрузка...</div>
+          ) : achievements.length === 0 ? (
+            <div className="cork-empty">
+              <span className="text-sm">Публичных заявок пока нет</span>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {achievements.map((ach) => (
+                <AchievementCard key={ach.id} achievement={ach} showModerationStatus={false} />
+              ))}
+            </div>
           )}
         </div>
-
-        {achLoading ? (
-          <div className="py-5 text-center text-sm" style={{ color: 'var(--cork-text-mute)' }}>Загрузка...</div>
-        ) : achievements.length === 0 ? (
-          <div className="cork-empty">
-            <span className="text-sm">
-              {isOwn ? 'Нет заявок. Добавьте первую!' : 'Заявок пока нет'}
-            </span>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {achievements.map((ach) => (
-              <AchievementCard key={ach.id} achievement={ach} showModerationStatus={isOwn} />
-            ))}
-          </div>
-        )}
-      </div>
+      )}
 
       {showEdit && (
         <EditProfileModal

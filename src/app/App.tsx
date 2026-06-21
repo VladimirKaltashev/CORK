@@ -12,7 +12,7 @@ import { SearchPage } from '@/pages/SearchPage'
 import { FriendsPage } from '@/pages/FriendsPage'
 import { LeaderboardPage } from '@/pages/LeaderboardPage'
 import { SettingsPage } from '@/pages/SettingsPage'
-import { ChallengesPage, ChallengeDetailPage } from '@/pages'
+import { ChallengesPage, ChallengeDetailPage, MyClaimsPage } from '@/pages'
 import { ThemeApplier, useThemeStore } from '@/entities/theme'
 import '@/styles/theme-tokens.css'
 import '@/styles/theme-components.css'
@@ -49,6 +49,7 @@ export function App() {
 
               {/* Protected routes — require auth */}
               <Route element={<ProtectedRoute />}>
+                <Route path="/me" element={<MyClaimsPage />} />
                 <Route path="/profile/me" element={<ProfilePage />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/friends" element={<FriendsPage />} />

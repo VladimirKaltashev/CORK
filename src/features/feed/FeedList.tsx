@@ -8,7 +8,7 @@ import { cn } from '@/shared/lib/cn'
 const FILTERS: { value: FilterType; label: string }[] = [
   { value: 'all', label: 'Все' },
   { value: 'session', label: '📚 Сессии' },
-  { value: 'achievement', label: '🏅 Достижения' },
+  { value: 'achievement', label: '⚖️ Заявки' },
   { value: 'post', label: '💬 Посты' },
 ]
 

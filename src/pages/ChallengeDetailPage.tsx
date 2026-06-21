@@ -151,12 +151,14 @@ function EntryCard({
   disabled,
   reactions,
   comments,
+  currentUserId,
 }: {
   entry: EntryWithProfile
   awards: ReturnType<typeof useChallengesStore.getState>['awards']
   disabled: boolean
   reactions: ReturnType<typeof useReactionsStore.getState>['byAchievement']
   comments: Record<string, number>
+  currentUserId?: string
 }) {
   const agg = entry.claimId ? reactions[entry.claimId] : null
   const commentCount = entry.claimId ? comments[entry.claimId] ?? 0 : 0
@@ -179,7 +181,7 @@ function EntryCard({
         {entry.claimId ? (
           <>
             <div className="challenge-entry__verdict">
-              <ReactionBar achievementId={entry.claimId} disabled={disabled} size="sm" />
+              <ReactionBar achievementId={entry.claimId} disabled={disabled} size="sm" isOwner={entry.userId === currentUserId} />
             </div>
             <div className="challenge-entry__numbers">
               <span>👑 {agg?.crowns ?? 0}</span>
@@ -452,6 +454,7 @@ export function ChallengeDetailPage() {
                         disabled={!user}
                         reactions={reactions}
                         comments={commentCounts}
+                        currentUserId={user?.id}
                       />
                     ))
                   )}

@@ -25,13 +25,13 @@ export function CreateAchievementForm() {
 
   const onSubmit = async (data: CreateAchievementData) => {
     if (!user || !hasMinRole(user.role, 'admin')) {
-      showToast('error', 'Только администратор может добавлять достижения')
+      showToast('error', 'Только администратор может добавлять заявки')
       return
     }
     try {
       const res = await api.post<FeedItem>('/achievements', data)
       addItem(res.data)
-      showToast('success', 'Достижение добавлено!')
+      showToast('success', 'Заявка добавлена!')
       close()
     } catch { /* обрабатывается interceptor */ }
   }
@@ -67,7 +67,7 @@ export function CreateAchievementForm() {
       </div>
       <button type="submit" disabled={isSubmitting}
         className="cork-btn-primary mt-1">
-        {isSubmitting ? 'Создание...' : 'Добавить достижение'}
+        {isSubmitting ? 'Создание...' : 'Добавить заявку'}
       </button>
     </form>
   )

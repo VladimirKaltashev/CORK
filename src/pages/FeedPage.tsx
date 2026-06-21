@@ -433,7 +433,7 @@ export function FeedPage() {
 
                     {/* Verdict bar + buttons — full width under content */}
                     <div className="mt-3">
-                      <ReactionBar achievementId={item.id} disabled={!user} size="sm" />
+                      <ReactionBar achievementId={item.id} disabled={!user} size="sm" isOwner={item.userId === user?.id} />
                     </div>
 
                     {/* Comments */}
