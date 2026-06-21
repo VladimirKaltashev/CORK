@@ -17,7 +17,7 @@ export function ReactionBar({
   size = 'md',
   compact = false,
   isOwner = false,
-  ownerMessage = 'Это ваша заявка. Арена решит исход.',
+  ownerMessage = 'Вы не можете голосовать за своё. Арена решит исход.',
 }: ReactionBarProps) {
   const agg = useReactionsStore((s) => s.byAchievement[achievementId])
   const pending = useReactionsStore((s) => s.pending.has(achievementId))
@@ -45,13 +45,13 @@ export function ReactionBar({
 
   let verdictLabel: string
   if (total === 0) {
-    verdictLabel = 'НЕТ ВЕРДИКТА'
-  } else if (kingPct >= 70) {
-    verdictLabel = `КОРОЛЬ ${Math.round(kingPct)}%`
-  } else if (clownPct >= 70) {
-    verdictLabel = `ШУТ ${Math.round(clownPct)}%`
+    verdictLabel = 'Нет голосов'
+  } else if (crowns === clowns) {
+    verdictLabel = 'Ровно 50/50'
+  } else if (crowns > clowns) {
+    verdictLabel = `Корона ведёт ${Math.round(kingPct)}%`
   } else {
-    verdictLabel = `СПОРНО ${Math.round(kingPct)}/${Math.round(clownPct)}`
+    verdictLabel = `Клоун ведёт ${Math.round(clownPct)}%`
   }
 
   return (
@@ -140,10 +140,11 @@ export function ReactionBar({
 
       {isOwner && (
         <div
-          className={compact ? 'text-[11px]' : 'text-xs'}
+          className={compact ? 'text-[11px] flex flex-col gap-0.5' : 'text-xs flex flex-col gap-0.5'}
           style={{ color: 'var(--cork-text-mute)' }}
         >
-          {ownerMessage}
+          <span style={{ color: 'var(--cork-text)' }}>Это ваша заявка</span>
+          <span>{ownerMessage}</span>
         </div>
       )}
     </div>

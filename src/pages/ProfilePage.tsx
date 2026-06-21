@@ -7,11 +7,8 @@ import { useProfileStore, type LocalProfile } from '@/entities/profile'
 import { useAchievementsStore } from '@/entities/achievements/store'
 import { useFriendsStore } from '@/entities/friends'
 import { useReactionsStore } from '@/entities/reactions'
-import { useScoutStore } from '@/entities/scout'
 import { getThresholds, getExpertProgress } from '@/shared/lib/expert'
-import { buildOwnClaimsStats } from '@/entities/claims'
 import type { ExpertThreshold } from '@/shared/types'
-import { useCreateAchievementDialog } from '@/entities/achievements/createDialog'
 import { AvatarUpload } from '@/shared/ui/AvatarUpload'
 import { CrownIcon, ClownIcon } from '@/shared/ui'
 import { EditProfileModal } from '@/features/profile/EditProfileModal'
@@ -32,20 +29,38 @@ function ContactLink({ href, label, children }: { href: string; label?: string; 
 }
 
 function ScoreBlock({ crowns, clowns }: { crowns: number; clowns: number }) {
-  if (crowns === 0 && clowns === 0) return null
   const ratio = clowns === 0 ? null : (crowns / clowns).toFixed(1)
+  const hasReactions = crowns > 0 || clowns > 0
   return (
-    <div className="cork-panel flex items-center gap-4">
-      <div className="flex items-center gap-1.5">
-        <CrownIcon className="w-7 h-7" />
-        <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--cork-king)' }}>{crowns}</span>
+    <div className="cork-panel flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--cork-text-mute)' }}>
+            Репутация
+          </div>
+          <div className="text-sm" style={{ color: 'var(--cork-text-dim)' }}>
+            Арена считает короны и клоунов по вашим заявкам.
+          </div>
+        </div>
+        <div className="text-sm" style={{ color: 'var(--cork-text-dim)' }}>
+          {hasReactions
+            ? (
+                ratio !== null
+                  ? <>ratio <span className="font-semibold tabular-nums" style={{ color: 'var(--cork-text)' }}>{ratio}</span></>
+                  : <span style={{ color: 'var(--cork-text-mute)' }}>пока без клоунов</span>
+              )
+            : <span style={{ color: 'var(--cork-text-mute)' }}>пока без реакций</span>}
+        </div>
       </div>
-      <div className="flex items-center gap-1.5">
-        <ClownIcon className="w-7 h-7" />
-        <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--cork-clown)' }}>{clowns}</span>
-      </div>
-      <div className="ml-auto text-sm" style={{ color: 'var(--cork-text-dim)' }}>
-        {ratio !== null ? <>ratio <span className="font-semibold tabular-nums" style={{ color: 'var(--cork-text)' }}>{ratio}</span></> : <span style={{ color: 'var(--cork-text-mute)' }}>пока без клоунов</span>}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5">
+          <CrownIcon className="w-7 h-7" />
+          <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--cork-king)' }}>{crowns}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <ClownIcon className="w-7 h-7" />
+          <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--cork-clown)' }}>{clowns}</span>
+        </div>
       </div>
     </div>
   )
@@ -65,10 +80,6 @@ export function ProfilePage() {
   const loadReactions = useReactionsStore((s) => s.loadForAchievements)
   const loadScoresFor = useReactionsStore((s) => s.loadScoresFor)
   const score = useReactionsStore((s) => (profileId ? s.userScores[profileId] : undefined))
-  const verdicts = useReactionsStore((s) => s.byAchievement)
-  const { scores: scoutScores, loadScoutScore } = useScoutStore()
-  const scoutScore = profileId ? scoutScores[profileId] : undefined
-  const openCreateDialog = useCreateAchievementDialog((s) => s.open)
 
   const [showEdit, setShowEdit] = useState(false)
   const [friendBusy, setFriendBusy] = useState(false)
@@ -81,30 +92,33 @@ export function ProfilePage() {
   useEffect(() => {
     if (!profileId) return
     profileStore.loadProfile(profileId)
-    loadAchievements(profileId)
     loadScoresFor(profileId)
-    loadScoutScore(profileId)
+    if (!isOwn) {
+      loadAchievements(profileId)
+    }
   }, [profileId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const verifiedIds = allAchievements.filter((a) => a.status === 'verified').map((a) => a.id)
+    if (isOwn) return
+    const verifiedIds = achievements.filter((a) => a.status === 'verified').map((a) => a.id)
     if (verifiedIds.length === 0) return
     loadReactions(verifiedIds, authUser?.id)
-  }, [allAchievements, authUser?.id, loadReactions])
+  }, [achievements, authUser?.id, isOwn, loadReactions])
 
   const liveProfile: LocalProfile | null = profileStore.profiles[profileId] ?? null
 
-  const handleSaveProfile = (data: Pick<LocalProfile, 'name' | 'bio' | 'avatar' | 'contacts'>) => {
-    if (!profileId) return
-    profileStore.updateProfile(profileId, data)
-    if (isOwn && data.name) {
+  const handleSaveProfile = async (data: Pick<LocalProfile, 'name' | 'bio' | 'avatar' | 'contacts'>) => {
+    if (!profileId) return false
+    const saved = await profileStore.updateProfile(profileId, data)
+    if (saved && isOwn && data.name) {
       updateUser({ name: data.name })
     }
+    return saved
   }
 
-  const handleAvatarChange = (base64: string) => {
+  const handleAvatarChange = async (base64: string) => {
     if (!profileId || !isOwn) return
-    profileStore.updateProfile(profileId, { avatar: base64 })
+    await profileStore.updateProfile(profileId, { avatar: base64 })
   }
 
   if (!profileId || profileStore.isLoading) {
@@ -129,7 +143,6 @@ export function ProfilePage() {
 
   const contacts = liveProfile.contacts
   const hasContacts = contacts && Object.values(contacts).some(Boolean)
-  const ownClaimStats = buildOwnClaimsStats(allAchievements, verdicts)
 
   return (
     <div className="mx-auto max-w-2xl py-4 px-3 flex flex-col gap-4">
@@ -267,59 +280,19 @@ export function ProfilePage() {
         )
       })()}
 
-      {/* Scout Score — only for own profile */}
-      {isOwn && (scoutScore && scoutScore.scoutScore > 0) ? (
-        <div className="cork-panel flex items-center gap-3">
-          <span className="text-sm font-semibold" style={{ color: 'var(--cork-text-dim)' }}>🔍 Scout Score</span>
-          <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--cork-brand)' }}>{scoutScore.scoutScore}</span>
-          <span className="text-xs ml-auto" style={{ color: 'var(--cork-text-mute)' }}>
-            {scoutScore.submittedCount} принесено · {scoutScore.crownsBrought}👑 {scoutScore.clownsBrought}🤡 {scoutScore.commentsBrought}💬
-          </span>
-        </div>
-      ) : null}
-
-      {/* Bio block */}
-      {liveProfile.bio ? (
-        <div className="cork-card">
-          <h2 className="text-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--cork-text-mute)' }}>О себе</h2>
-          <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--cork-text)' }}>{liveProfile.bio}</p>
-        </div>
-      ) : isOwn ? (
-        <div className="border border-dashed rounded-md py-4 px-4 flex items-center justify-between" style={{ borderColor: 'var(--cork-border)' }}>
-          <span className="text-sm" style={{ color: 'var(--cork-text-mute)' }}>Расскажите о себе</span>
-          <Button size="small" onClick={() => setShowEdit(true)}>Добавить описание</Button>
-        </div>
-      ) : null}
-
       {isOwn ? (
-        <div className="cork-card">
-          <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
-            <div>
-              <h2 className="text-xl font-semibold m-0" style={{ color: 'var(--cork-text)' }}>Мои заявки</h2>
-              <p className="text-sm mt-2 mb-0" style={{ color: 'var(--cork-text-dim)' }}>
-                Профиль показывает репутацию. За своими заявками и исходами следите в отдельном разделе.
-              </p>
+        <div className="cork-panel flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--cork-text-mute)' }}>
+              Мои заявки
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Link to="/me" className="cork-btn cork-btn-primary" style={{ textTransform: 'none', letterSpacing: 'normal' }}>
-                Открыть Моё
-              </Link>
-              <button
-                type="button"
-                onClick={openCreateDialog}
-                className="cork-btn"
-                style={{ textTransform: 'none', letterSpacing: 'normal' }}
-              >
-                Новая заявка
-              </button>
-            </div>
+            <p className="text-sm mt-1 mb-0" style={{ color: 'var(--cork-text-dim)' }}>
+              Следите за своими заявками и исходами в отдельном разделе.
+            </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="cork-stat"><b>{ownClaimStats.totalClaims}</b><small>всего</small></div>
-            <div className="cork-stat"><b>{ownClaimStats.activeCount}</b><small>на арене</small></div>
-            <div className="cork-stat"><b>{ownClaimStats.crownedCount}</b><small>коронованы</small></div>
-            <div className="cork-stat"><b>{ownClaimStats.clownedCount}</b><small>заклоунены</small></div>
-          </div>
+          <Link to="/me" className="cork-link text-sm font-semibold">
+            Открыть мои заявки
+          </Link>
         </div>
       ) : (
         <div>
@@ -347,6 +320,19 @@ export function ProfilePage() {
           )}
         </div>
       )}
+
+      {/* Bio block */}
+      {liveProfile.bio ? (
+        <div className="cork-card">
+          <h2 className="text-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--cork-text-mute)' }}>О себе</h2>
+          <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--cork-text)' }}>{liveProfile.bio}</p>
+        </div>
+      ) : isOwn ? (
+        <div className="border border-dashed rounded-md py-4 px-4 flex items-center justify-between" style={{ borderColor: 'var(--cork-border)' }}>
+          <span className="text-sm" style={{ color: 'var(--cork-text-mute)' }}>Расскажите о себе</span>
+          <Button size="small" onClick={() => setShowEdit(true)}>Добавить описание</Button>
+        </div>
+      ) : null}
 
       {showEdit && (
         <EditProfileModal

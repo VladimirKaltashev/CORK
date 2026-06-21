@@ -55,9 +55,14 @@ function StatusBadge({ status }: { status: AchievementStatus }) {
 interface AchievementCardProps {
   achievement: Achievement
   showModerationStatus?: boolean
+  showModerationActions?: boolean
 }
 
-export function AchievementCard({ achievement, showModerationStatus = true }: AchievementCardProps) {
+export function AchievementCard({
+  achievement,
+  showModerationStatus = true,
+  showModerationActions = false,
+}: AchievementCardProps) {
   const meta = CATEGORY_META[achievement.category]
   const { user } = useAuthStore()
   const { updateAchievementStatus } = useAchievementsStore()
@@ -129,7 +134,7 @@ export function AchievementCard({ achievement, showModerationStatus = true }: Ac
                 Открыть доказательство
               </a>
             )}
-            {isAdmin && achievement.status === 'pending' && !showRejectForm && (
+            {showModerationActions && isAdmin && achievement.status === 'pending' && !showRejectForm && (
               <>
                 <Button size="small" variant="primary" onClick={handleApprove}>Подтвердить</Button>
                 <Button size="small" variant="danger" onClick={() => setShowRejectForm(true)}>Отклонить</Button>
@@ -152,7 +157,7 @@ export function AchievementCard({ achievement, showModerationStatus = true }: Ac
         </div>
       </div>
 
-      {showRejectForm && (
+      {showModerationActions && showRejectForm && (
         <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--cork-border-light)' }}>
           <label className="block text-sm font-medium mb-1" style={{ color: 'var(--cork-text-dim)' }}>Причина отклонения (необязательно)</label>
           <textarea

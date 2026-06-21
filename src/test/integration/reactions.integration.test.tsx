@@ -154,7 +154,8 @@ describe('Reactions integration', () => {
   it('shows owner state instead of voting controls for own claim', () => {
     render(<ReactionBar achievementId="a1" isOwner />)
 
-    expect(screen.getByText('Это ваша заявка. Арена решит исход.')).toBeInTheDocument()
+    expect(screen.getByText('Это ваша заявка')).toBeInTheDocument()
+    expect(screen.getByText('Вы не можете голосовать за своё. Арена решит исход.')).toBeInTheDocument()
     expect(screen.queryAllByRole('button')).toHaveLength(0)
   })
 })

@@ -5,7 +5,7 @@ import type { LocalProfile, ProfileContacts } from '@/entities/profile'
 
 interface EditProfileModalProps {
   profile: LocalProfile
-  onSave: (data: Pick<LocalProfile, 'name' | 'bio' | 'avatar' | 'contacts'>) => void
+  onSave: (data: Pick<LocalProfile, 'name' | 'bio' | 'avatar' | 'contacts'>) => Promise<boolean>
   onClose: () => void
 }
 
@@ -18,9 +18,11 @@ export function EditProfileModal({ profile, onSave, onClose }: EditProfileModalP
   const [email, setEmail] = useState(profile.contacts?.email ?? '')
   const [custom, setCustom] = useState(profile.contacts?.custom ?? '')
   const [nameError, setNameError] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isSaving) return
     if (!name.trim()) { setNameError('Имя обязательно'); return }
 
     const contacts: ProfileContacts = {}
@@ -29,13 +31,15 @@ export function EditProfileModal({ profile, onSave, onClose }: EditProfileModalP
     if (email.trim()) contacts.email = email.trim()
     if (custom.trim()) contacts.custom = custom.trim()
 
-    onSave({
+    setIsSaving(true)
+    const saved = await onSave({
       name: name.trim(),
       bio: bio.trim() || undefined,
       avatar,
       contacts: Object.keys(contacts).length > 0 ? contacts : undefined,
     })
-    onClose()
+    setIsSaving(false)
+    if (saved) onClose()
   }
 
   return (
@@ -132,14 +136,16 @@ export function EditProfileModal({ profile, onSave, onClose }: EditProfileModalP
                 type="button"
                 onClick={onClose}
                 className="cork-btn flex-1"
+                disabled={isSaving}
               >
                 Отмена
               </button>
               <button
                 type="submit"
                 className="cork-btn-primary flex-1"
+                disabled={isSaving}
               >
-                Сохранить
+                {isSaving ? 'Сохранение...' : 'Сохранить'}
               </button>
             </div>
           </div>

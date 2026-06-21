@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { useProfileStore } from './store'
+import { showToast } from '@/shared/lib/toast'
 
 vi.mock('@/shared/lib/supabase', () => ({
   supabase: {
@@ -67,10 +68,28 @@ describe('useProfileStore', () => {
         eq: vi.fn().mockResolvedValueOnce({ error: null }),
       })),
     })
-    await useProfileStore.getState().updateProfile('u1', { name: 'New', bio: 'new bio' })
+    const result = await useProfileStore.getState().updateProfile('u1', { name: 'New', bio: 'new bio' })
     const s = useProfileStore.getState()
+    expect(result).toBe(true)
     expect(s.profiles['u1'].name).toBe('New')
     expect(s.profiles['u1'].bio).toBe('new bio')
+  })
+
+  it('updateProfile returns false and surfaces backend error details on failure', async () => {
+    useProfileStore.setState({
+      profiles: { u1: { id: 'u1', name: 'Old', bio: 'old', avatar: null, registeredAt: '2024-01-01' } },
+    })
+    mockSupabase.from.mockReturnValueOnce({
+      update: vi.fn(() => ({
+        eq: vi.fn().mockResolvedValueOnce({ error: new Error('permission denied for table profiles') }),
+      })),
+    })
+
+    const result = await useProfileStore.getState().updateProfile('u1', { bio: 'new bio' })
+
+    expect(result).toBe(false)
+    expect(useProfileStore.getState().profiles['u1'].bio).toBe('old')
+    expect(showToast).toHaveBeenCalledWith('error', 'Не удалось сохранить профиль: permission denied for table profiles')
   })
 
   it('getProfile returns existing profile', () => {

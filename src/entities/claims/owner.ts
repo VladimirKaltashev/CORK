@@ -14,6 +14,14 @@ export interface OwnClaimsStats {
   activeCount: number
 }
 
+export function filterArenaItemsForViewer<T extends { userId: string }>(
+  items: T[],
+  viewerId?: string,
+): T[] {
+  if (!viewerId) return items
+  return items.filter((item) => item.userId !== viewerId)
+}
+
 function isOnArena(achievement: Achievement): boolean {
   return achievement.status === 'verified'
 }

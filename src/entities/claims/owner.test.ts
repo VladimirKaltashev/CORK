@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildOwnClaimsStats, isClownedClaim, isCrownedClaim, matchesOwnClaimsFilter } from './owner'
+import { buildOwnClaimsStats, filterArenaItemsForViewer, isClownedClaim, isCrownedClaim, matchesOwnClaimsFilter } from './owner'
 import type { Achievement } from '@/shared/types'
 
 function makeAchievement(overrides: Partial<Achievement> = {}): Achievement {
@@ -62,5 +62,16 @@ describe('own claims helpers', () => {
       clownedCount: 1,
       activeCount: 3,
     })
+  })
+
+  it('filters current user claims out of arena items', () => {
+    const items = [
+      { id: 'a1', userId: 'u1' },
+      { id: 'a2', userId: 'u2' },
+      { id: 'a3', userId: 'u1' },
+    ]
+
+    expect(filterArenaItemsForViewer(items, 'u1')).toEqual([{ id: 'a2', userId: 'u2' }])
+    expect(filterArenaItemsForViewer(items)).toEqual(items)
   })
 })

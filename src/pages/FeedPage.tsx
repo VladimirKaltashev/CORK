@@ -12,7 +12,7 @@ import { useScoutStore } from '@/entities/scout'
 import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { CommentSection } from '@/features/comments'
-import { claimMetaFromAchievementMeta, ClaimBadge, CLAIM_TYPE_FILTER_OPTIONS, matchesClaimTypeFilter, parseClaimTypeFilter } from '@/entities/claims'
+import { claimMetaFromAchievementMeta, ClaimBadge, CLAIM_TYPE_FILTER_OPTIONS, filterArenaItemsForViewer, matchesClaimTypeFilter, parseClaimTypeFilter } from '@/entities/claims'
 import type { ClaimTypeFilter } from '@/entities/claims'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import type { AchievementCategory, ProofType } from '@/shared/types'
@@ -93,6 +93,7 @@ async function loadPage(
   category: CategoryFilter,
   sort: ArenaSort,
   friendIds?: string[],
+  viewerId?: string,
 ): Promise<{ items: FeedItem[]; hasMore: boolean }> {
   if (friendIds !== undefined && friendIds.length === 0) {
     return { items: [], hasMore: false }
@@ -102,6 +103,10 @@ async function loadPage(
     .from('arena_items')
     .select('id, user_id, category, title, description, year, proof_type, proof_value, status, meta, created_at, crowns, clowns, comments, hot_score, controversy_score')
     .eq('status', 'verified')
+
+  if (viewerId) {
+    query = query.neq('user_id', viewerId)
+  }
 
   if (category !== 'all') {
     query = query.eq('category', category)
@@ -135,8 +140,7 @@ async function loadPage(
     (profilesData ?? []).map((p) => [p.id, { name: p.name, avatar: p.avatar ?? null }])
   )
 
-    return {
-      items: achData.map((row) => ({
+  const mappedItems = achData.map((row) => ({
         id: row.id,
         userId: row.user_id,
         userName: profileMap[row.user_id]?.name ?? 'Пользователь',
@@ -150,9 +154,12 @@ async function loadPage(
         proofType: row.proof_type,
         proofValue: row.proof_value ?? undefined,
         createdAt: row.created_at,
-      })),
-      hasMore: achData.length === PAGE_SIZE,
-    }
+      }))
+
+  return {
+    items: filterArenaItemsForViewer(mappedItems, viewerId),
+    hasMore: achData.length === PAGE_SIZE,
+  }
 }
 
 type FeedMode = 'all' | 'friends'
@@ -187,7 +194,7 @@ export function FeedPage() {
   const fetchInitial = (cat: CategoryFilter, mode: FeedMode, srt: ArenaSort) => {
     const fIds = mode === 'friends' ? friendsStore.acceptedFriendIds() : undefined
     setIsLoading(true)
-    loadPage(0, cat, srt, fIds)
+    loadPage(0, cat, srt, fIds, user?.id)
       .then(({ items: loaded, hasMore: more }) => {
         setItems(loaded)
         setOffset(loaded.length)
@@ -239,7 +246,7 @@ export function FeedPage() {
   const handleLoadMore = async () => {
     setLoadingMore(true)
     try {
-      const { items: more, hasMore: moreExists } = await loadPage(offset, category, sort, getFriendIds())
+      const { items: more, hasMore: moreExists } = await loadPage(offset, category, sort, getFriendIds(), user?.id)
       setItems((prev) => [...prev, ...more])
       setOffset((prev) => prev + more.length)
       setHasMore(moreExists)
@@ -369,7 +376,7 @@ export function FeedPage() {
             <div className="cork-empty">
               {feedMode === 'friends'
                 ? 'У вас пока нет друзей с заявками'
-                : 'Заявок пока нет'}
+                : user ? 'Чужих заявок пока нет' : 'Заявок пока нет'}
             </div>
           ) : visibleItems.length === 0 ? (
             <div className="cork-empty">

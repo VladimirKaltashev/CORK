@@ -22,7 +22,7 @@ interface ProfileLocalState {
   profiles: Record<string, LocalProfile>
   isLoading: boolean
   loadProfile: (userId: string) => Promise<void>
-  updateProfile: (id: string, data: Partial<Omit<LocalProfile, 'id' | 'registeredAt'>>) => Promise<void>
+  updateProfile: (id: string, data: Partial<Omit<LocalProfile, 'id' | 'registeredAt'>>) => Promise<boolean>
   getProfile: (id: string) => LocalProfile | undefined
 }
 
@@ -74,8 +74,11 @@ export const useProfileStore = create<ProfileLocalState>()((set, get) => ({
         return { profiles: { ...s.profiles, [id]: { ...existing, ...data } } }
       })
       showToast('success', 'Профиль сохранён')
-    } catch {
-      showToast('error', 'Не удалось сохранить профиль')
+      return true
+    } catch (error) {
+      const details = error instanceof Error ? error.message : 'unknown error'
+      showToast('error', `Не удалось сохранить профиль: ${details}`)
+      return false
     }
   },
 

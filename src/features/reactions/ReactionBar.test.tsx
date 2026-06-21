@@ -38,12 +38,14 @@ describe('ReactionBar', () => {
     mockState.byAchievement = { a1: { crowns: 5, clowns: 1, myKind: 'crown' } }
     render(<ReactionBar achievementId="a1" />)
     expect(screen.getAllByText('5').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('Корона ведёт 83%')).toBeInTheDocument()
   })
 
   it('renders active clown', () => {
     mockState.byAchievement = { a1: { crowns: 2, clowns: 3, myKind: 'clown' } }
     render(<ReactionBar achievementId="a1" />)
     expect(screen.getAllByText('3').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('Клоун ведёт 60%')).toBeInTheDocument()
   })
 
   it('calls toggle on crown click', () => {
@@ -70,7 +72,14 @@ describe('ReactionBar', () => {
 
   it('renders owner message instead of reaction buttons for own claim', () => {
     render(<ReactionBar achievementId="a1" isOwner />)
-    expect(screen.getByText('Это ваша заявка. Арена решит исход.')).toBeInTheDocument()
+    expect(screen.getByText('Это ваша заявка')).toBeInTheDocument()
+    expect(screen.getByText('Вы не можете голосовать за своё. Арена решит исход.')).toBeInTheDocument()
     expect(screen.queryByTestId('crown-icon')).not.toBeInTheDocument()
+  })
+
+  it('renders balanced verdict copy when votes are equal', () => {
+    mockState.byAchievement = { a1: { crowns: 2, clowns: 2, myKind: null } }
+    render(<ReactionBar achievementId="a1" />)
+    expect(screen.getByText('Ровно 50/50')).toBeInTheDocument()
   })
 })
