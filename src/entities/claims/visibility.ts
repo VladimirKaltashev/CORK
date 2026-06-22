@@ -1,7 +1,8 @@
 import type { Achievement, AchievementStatus } from '@/shared/types'
+import { isLiveArenaStatus } from './arena'
 
 export function isClaimVisibleOnNormalSurface(status: AchievementStatus): boolean {
-  return status === 'pending' || status === 'verified'
+  return isLiveArenaStatus(status)
 }
 
 export function isClaimVisibleInModerationQueue(status: AchievementStatus): boolean {

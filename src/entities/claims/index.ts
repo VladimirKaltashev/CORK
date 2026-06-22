@@ -29,6 +29,8 @@ export { ClaimBadge } from './ui'
 
 export type { ClaimTypeFilter } from './filter'
 export { CLAIM_TYPE_FILTER_OPTIONS, matchesClaimTypeFilter, parseClaimTypeFilter } from './filter'
+export type { ArenaSort, ArenaSortConfig } from './arena'
+export { getArenaSortConfig, isLiveArenaStatus, LIVE_ARENA_STATUSES } from './arena'
 export {
   isClaimVisibleInArena,
   isClaimVisibleInChallenge,
