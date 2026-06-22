@@ -54,7 +54,7 @@ export const useAchievementsStore = create<AchievementsState>((set) => ({
       }))
       set({ achievements: items })
     } catch {
-      showToast('error', 'Не удалось загрузить достижения')
+      showToast('error', 'Не удалось загрузить заявки')
     } finally {
       set({ isLoading: false })
     }
@@ -108,7 +108,7 @@ export const useAchievementsStore = create<AchievementsState>((set) => ({
           a.id === id ? { ...a, status, rejectionReason } : a
         ),
       }))
-      showToast('success', status === 'verified' ? 'Достижение подтверждено' : 'Достижение отклонено')
+      showToast('success', status === 'verified' ? 'Заявка подтверждена' : 'Заявка отклонена')
     } catch {
       showToast('error', 'Не удалось обновить статус')
     }

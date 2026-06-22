@@ -8,7 +8,7 @@ import { ReactionBar } from '@/features/reactions'
 import { CommentSection } from '@/features/comments'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import { CategoryIcon, CheckIcon, HourglassIcon, CrossMarkIcon } from '@/shared/ui'
-import { achievementToClaim, ClaimBadge } from '@/entities/claims'
+import { achievementToClaim, ClaimBadge, isClaimVisibleOnNormalSurface } from '@/entities/claims'
 import type { Achievement, AchievementCategory, AchievementStatus } from '@/shared/types'
 
 type LabelVariant = 'default' | 'primary' | 'secondary' | 'accent' | 'success' | 'attention' | 'severe' | 'danger' | 'done' | 'sponsors'
@@ -69,12 +69,13 @@ export function AchievementCard({
   const reactionByAchievement = useReactionsStore((s) => s.byAchievement)
   const isAdmin = user?.role === 'admin'
   const claim = achievementToClaim(achievement)
+  const isLiveClaim = isClaimVisibleOnNormalSurface(achievement.status)
 
   useEffect(() => {
-    if (achievement.status === 'verified') {
+    if (isLiveClaim) {
       useCommentsStore.getState().loadCounts([achievement.id])
     }
-  }, [achievement.id, achievement.status])
+  }, [achievement.id, isLiveClaim])
 
   const [showRejectForm, setShowRejectForm] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
@@ -140,7 +141,7 @@ export function AchievementCard({
                 <Button size="small" variant="danger" onClick={() => setShowRejectForm(true)}>Отклонить</Button>
               </>
             )}
-            {achievement.status === 'verified' && (
+            {isLiveClaim && (
               <div className="ml-auto">
                 <ReactionBar achievementId={achievement.id} disabled={!user} size="sm" compact isOwner={isOwner} />
               </div>
@@ -148,7 +149,7 @@ export function AchievementCard({
           </div>
 
           {/* Comments */}
-          {achievement.status === 'verified' && (
+          {isLiveClaim && (
             <CommentSection
               achievementId={achievement.id}
               currentUserReaction={reactionByAchievement[achievement.id]?.myKind ?? null}

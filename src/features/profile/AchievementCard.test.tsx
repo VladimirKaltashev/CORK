@@ -60,6 +60,7 @@ vi.mock('@/shared/ui', () => ({
 
 vi.mock('@/entities/claims', () => ({
   achievementToClaim: () => ({ type: 'self_achievement', subjectName: 'Я', thread: null }),
+  isClaimVisibleOnNormalSurface: (status: string) => status === 'pending' || status === 'verified',
   ClaimBadge: () => <div>ClaimBadge</div>,
 }))
 
@@ -93,5 +94,12 @@ describe('Profile AchievementCard moderation actions', () => {
 
     expect(screen.getByText('Подтвердить')).toBeInTheDocument()
     expect(screen.getByText('Отклонить')).toBeInTheDocument()
+  })
+
+  it('keeps pending claims live on normal surfaces', () => {
+    render(<AchievementCard achievement={makeAchievement()} />)
+
+    expect(screen.getByText('ReactionBar')).toBeInTheDocument()
+    expect(screen.getByText('CommentSection')).toBeInTheDocument()
   })
 })

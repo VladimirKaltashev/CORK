@@ -13,6 +13,7 @@ import { AvatarUpload } from '@/shared/ui/AvatarUpload'
 import { CrownIcon, ClownIcon } from '@/shared/ui'
 import { EditProfileModal } from '@/features/profile/EditProfileModal'
 import { AchievementCard } from '@/features/profile/AchievementCard'
+import { isClaimVisibleInPublicProfile } from '@/entities/claims'
 
 function ContactLink({ href, label, children }: { href: string; label?: string; children: React.ReactNode }) {
   return (
@@ -75,7 +76,7 @@ export function ProfilePage() {
 
   const profileStore = useProfileStore()
   const { achievements: allAchievements, isLoading: achLoading, loadAchievements } = useAchievementsStore()
-  const achievements = isOwn ? allAchievements : allAchievements.filter((a) => a.status === 'verified')
+  const achievements = isOwn ? allAchievements : allAchievements.filter((a) => isClaimVisibleInPublicProfile(a))
   const { getRelationship, sendRequest, acceptRequest, removeRecord } = useFriendsStore()
   const loadReactions = useReactionsStore((s) => s.loadForAchievements)
   const loadScoresFor = useReactionsStore((s) => s.loadScoresFor)
@@ -100,9 +101,9 @@ export function ProfilePage() {
 
   useEffect(() => {
     if (isOwn) return
-    const verifiedIds = achievements.filter((a) => a.status === 'verified').map((a) => a.id)
-    if (verifiedIds.length === 0) return
-    loadReactions(verifiedIds, authUser?.id)
+    const liveIds = achievements.filter((a) => isClaimVisibleInPublicProfile(a)).map((a) => a.id)
+    if (liveIds.length === 0) return
+    loadReactions(liveIds, authUser?.id)
   }, [achievements, authUser?.id, isOwn, loadReactions])
 
   const liveProfile: LocalProfile | null = profileStore.profiles[profileId] ?? null

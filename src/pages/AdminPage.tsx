@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button, FormControl, Textarea } from '@primer/react'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
-import { achievementToClaim, ClaimBadge } from '@/entities/claims'
+import { achievementToClaim, ClaimBadge, isClaimVisibleInModerationQueue } from '@/entities/claims'
 import { CategoryIcon } from '@/shared/ui'
 import type { Achievement } from '@/shared/types'
 
@@ -92,7 +92,7 @@ export function AdminPage() {
           rejectionReason: row.rejection_reason ?? undefined,
           meta: row.meta ?? {},
           createdAt: row.created_at,
-        }))
+        })).filter((achievement) => isClaimVisibleInModerationQueue(achievement.status))
       )
     } catch {
       showToast('error', 'Не удалось загрузить заявки')

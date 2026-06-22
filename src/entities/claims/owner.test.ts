@@ -22,11 +22,13 @@ describe('own claims helpers', () => {
   it('detects crowned claim only on arena with positive lead', () => {
     expect(isCrownedClaim(makeAchievement(), { crowns: 3, clowns: 1 })).toBe(true)
     expect(isCrownedClaim(makeAchievement(), { crowns: 0, clowns: 0 })).toBe(false)
-    expect(isCrownedClaim(makeAchievement({ status: 'pending' }), { crowns: 3, clowns: 1 })).toBe(false)
+    expect(isCrownedClaim(makeAchievement({ status: 'pending' }), { crowns: 3, clowns: 1 })).toBe(true)
+    expect(isCrownedClaim(makeAchievement({ status: 'rejected' }), { crowns: 3, clowns: 1 })).toBe(false)
   })
 
   it('detects clowned claim only on arena with positive lead', () => {
     expect(isClownedClaim(makeAchievement(), { crowns: 1, clowns: 4 })).toBe(true)
+    expect(isClownedClaim(makeAchievement({ status: 'pending' }), { crowns: 1, clowns: 4 })).toBe(true)
     expect(isClownedClaim(makeAchievement(), { crowns: 2, clowns: 2 })).toBe(false)
     expect(isClownedClaim(makeAchievement({ status: 'rejected' }), { crowns: 1, clowns: 4 })).toBe(false)
   })
@@ -34,10 +36,12 @@ describe('own claims helpers', () => {
   it('matches own claims filters', () => {
     const verified = makeAchievement()
     const pending = makeAchievement({ id: 'a2', status: 'pending' })
+    const rejected = makeAchievement({ id: 'a3', status: 'rejected' })
 
     expect(matchesOwnClaimsFilter(verified, 'all')).toBe(true)
     expect(matchesOwnClaimsFilter(verified, 'arena')).toBe(true)
-    expect(matchesOwnClaimsFilter(pending, 'arena')).toBe(false)
+    expect(matchesOwnClaimsFilter(pending, 'arena')).toBe(true)
+    expect(matchesOwnClaimsFilter(rejected, 'arena')).toBe(false)
     expect(matchesOwnClaimsFilter(verified, 'crowned', { crowns: 5, clowns: 1 })).toBe(true)
     expect(matchesOwnClaimsFilter(verified, 'clowned', { crowns: 5, clowns: 1 })).toBe(false)
   })
@@ -60,7 +64,7 @@ describe('own claims helpers', () => {
       totalClaims: 4,
       crownedCount: 1,
       clownedCount: 1,
-      activeCount: 3,
+      activeCount: 4,
     })
   })
 

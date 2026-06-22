@@ -29,6 +29,14 @@ export { ClaimBadge } from './ui'
 
 export type { ClaimTypeFilter } from './filter'
 export { CLAIM_TYPE_FILTER_OPTIONS, matchesClaimTypeFilter, parseClaimTypeFilter } from './filter'
+export {
+  isClaimVisibleInArena,
+  isClaimVisibleInChallenge,
+  isClaimVisibleInModerationQueue,
+  isClaimVisibleInOwnerView,
+  isClaimVisibleInPublicProfile,
+  isClaimVisibleOnNormalSurface,
+} from './visibility'
 
 export type { OwnClaimsFilter, OwnClaimsStats, ClaimVerdictAggregate } from './owner'
 export { buildOwnClaimsStats, filterArenaItemsForViewer, matchesOwnClaimsFilter, isCrownedClaim, isClownedClaim } from './owner'

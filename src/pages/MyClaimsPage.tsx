@@ -3,7 +3,7 @@ import { useAuthStore } from '@/entities/auth'
 import { useAchievementsStore } from '@/entities/achievements/store'
 import { useReactionsStore } from '@/entities/reactions'
 import { AchievementCard } from '@/features/profile/AchievementCard'
-import { buildOwnClaimsStats, matchesOwnClaimsFilter, type OwnClaimsFilter } from '@/entities/claims'
+import { buildOwnClaimsStats, isClaimVisibleInOwnerView, matchesOwnClaimsFilter, type OwnClaimsFilter } from '@/entities/claims'
 
 const FILTERS: Array<{ value: OwnClaimsFilter; label: string }> = [
   { value: 'all', label: 'Все' },
@@ -25,13 +25,14 @@ export function MyClaimsPage() {
   }, [user?.id, loadAchievements])
 
   useEffect(() => {
-    const verifiedIds = achievements.filter((achievement) => achievement.status === 'verified').map((achievement) => achievement.id)
-    if (verifiedIds.length === 0) return
-    loadReactions(verifiedIds, user?.id)
+    const liveIds = achievements.filter((achievement) => isClaimVisibleInOwnerView(achievement)).map((achievement) => achievement.id)
+    if (liveIds.length === 0) return
+    loadReactions(liveIds, user?.id)
   }, [achievements, loadReactions, user?.id])
 
-  const stats = buildOwnClaimsStats(achievements, verdicts)
-  const visibleClaims = achievements.filter((achievement) =>
+  const visibleOwnClaims = achievements.filter((achievement) => isClaimVisibleInOwnerView(achievement))
+  const stats = buildOwnClaimsStats(visibleOwnClaims, verdicts)
+  const visibleClaims = visibleOwnClaims.filter((achievement) =>
     matchesOwnClaimsFilter(achievement, filter, verdicts[achievement.id])
   )
 

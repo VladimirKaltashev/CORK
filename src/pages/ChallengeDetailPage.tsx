@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useChallengesStore, type EntryWithProfile } from '@/entities/challenges'
+import { isClaimVisibleInChallenge } from '@/entities/claims'
 import { getThresholds, getExpertProgress, type ExpertProgress } from '@/shared/lib/expert'
 import { useAuthStore } from '@/entities/auth'
 import { useReactionsStore } from '@/entities/reactions'
@@ -8,6 +9,7 @@ import { useCommentsStore } from '@/entities/comments'
 import { ReactionBar } from '@/features/reactions'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
+import type { AchievementStatus } from '@/shared/types'
 
 const AWARD_ICONS: Record<string, { icon: string; desc: string; label: string }> = {
   king: { icon: '👑', label: 'Король', desc: 'Победитель арены' },
@@ -273,6 +275,7 @@ export function ChallengeDetailPage() {
   const [rank, setRank] = useState<ExpertProgress | null>(null)
   const [activeTab, setActiveTab] = useState<DetailTab>('Заявки')
   const [entryModalOpen, setEntryModalOpen] = useState(false)
+  const [claimStatuses, setClaimStatuses] = useState<Record<string, AchievementStatus>>({})
 
   useEffect(() => {
     if (id) loadDetail(id)
@@ -306,14 +309,48 @@ export function ChallengeDetailPage() {
 
   useEffect(() => {
     if (claimIds.length === 0) return
-    loadReactions(claimIds, user?.id)
-    useCommentsStore.getState().loadCounts(claimIds)
-  }, [claimIdsKey, loadReactions, user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+    ;(async () => {
+      const { data, error } = await supabase
+        .from('achievements')
+        .select('id, status')
+        .in('id', claimIds)
+      if (error) return
+      const next = Object.fromEntries(
+        (data ?? []).map((row) => [row.id as string, row.status as AchievementStatus])
+      )
+      setClaimStatuses(next)
+    })()
+  }, [claimIdsKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const myEntry = user ? entries.find((entry) => entry.userId === user.id && entry.isCurrent) : undefined
+  const visibleEntries = useMemo(
+    () =>
+      entries.filter((entry) => {
+        if (!entry.claimId) return true
+        const status = claimStatuses[entry.claimId]
+        return !status || isClaimVisibleInChallenge({ status })
+      }),
+    [claimStatuses, entries],
+  )
+  const visibleClaimIds = useMemo(
+    () =>
+      claimIds.filter((claimId) => {
+        const status = claimStatuses[claimId]
+        return !status || isClaimVisibleInChallenge({ status })
+      }),
+    [claimIds, claimStatuses],
+  )
+  const visibleClaimIdsKey = visibleClaimIds.join(',')
+
+  useEffect(() => {
+    if (visibleClaimIds.length === 0) return
+    loadReactions(visibleClaimIds, user?.id)
+    useCommentsStore.getState().loadCounts(visibleClaimIds)
+  }, [visibleClaimIdsKey, loadReactions, user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const myEntry = user ? visibleEntries.find((entry) => entry.userId === user.id && entry.isCurrent) : undefined
   const orderedEntries = useMemo(
-    () => [...entries].sort((a, b) => getEntryScore(b, reactions, commentCounts) - getEntryScore(a, reactions, commentCounts)),
-    [entries, reactions, commentCounts],
+    () => [...visibleEntries].sort((a, b) => getEntryScore(b, reactions, commentCounts) - getEntryScore(a, reactions, commentCounts)),
+    [visibleEntries, reactions, commentCounts],
   )
 
   if (isDetailLoading) {
@@ -418,8 +455,8 @@ export function ChallengeDetailPage() {
                 </div>
 
                 <div className="stats-grid">
-                  <div className="cork-stat"><b>{entries.length}</b><small>заявок</small></div>
-                  <div className="cork-stat"><b>{claimIds.length}</b><small>claims</small></div>
+                  <div className="cork-stat"><b>{visibleEntries.length}</b><small>заявок</small></div>
+                  <div className="cork-stat"><b>{visibleClaimIds.length}</b><small>claims</small></div>
                   <div className="cork-stat"><b>{awards.length}</b><small>наград</small></div>
                   <div className="cork-stat"><b>{durationDays}</b><small>дней</small></div>
                 </div>
@@ -440,13 +477,13 @@ export function ChallengeDetailPage() {
 
               {activeTab === 'Заявки' && (
                 <section>
-                  {entries.length === 0 ? (
+                  {visibleEntries.length === 0 ? (
                     <div className="cork-empty" style={{ marginBottom: 16 }}>
                       <b>🏆</b>
                       Пока нет заявок. Можно быть первым.
                     </div>
                   ) : (
-                    entries.map((entry) => (
+                    visibleEntries.map((entry) => (
                       <EntryCard
                         key={entry.id}
                         entry={entry}

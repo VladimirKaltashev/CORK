@@ -12,7 +12,7 @@ import { useScoutStore } from '@/entities/scout'
 import { ReactionBar, BudgetWidget } from '@/features/reactions'
 import { InlineCreateCard } from '@/features/profile/InlineCreateCard'
 import { CommentSection } from '@/features/comments'
-import { claimMetaFromAchievementMeta, ClaimBadge, CLAIM_TYPE_FILTER_OPTIONS, filterArenaItemsForViewer, matchesClaimTypeFilter, parseClaimTypeFilter } from '@/entities/claims'
+import { claimMetaFromAchievementMeta, ClaimBadge, CLAIM_TYPE_FILTER_OPTIONS, isClaimVisibleInArena, matchesClaimTypeFilter, parseClaimTypeFilter } from '@/entities/claims'
 import type { ClaimTypeFilter } from '@/entities/claims'
 import { getEventDate, formatAchievementDate } from '@/shared/lib/achievementDate'
 import type { AchievementCategory, ProofType } from '@/shared/types'
@@ -100,13 +100,9 @@ async function loadPage(
   }
 
   let query = supabase
-    .from('arena_items')
-    .select('id, user_id, category, title, description, year, proof_type, proof_value, status, meta, created_at, crowns, clowns, comments, hot_score, controversy_score')
-    .eq('status', 'verified')
-
-  if (viewerId) {
-    query = query.neq('user_id', viewerId)
-  }
+    .from('achievements')
+    .select('id, user_id, category, title, description, year, proof_type, proof_value, status, meta, created_at')
+    .in('status', ['pending', 'verified'])
 
   if (category !== 'all') {
     query = query.eq('category', category)
@@ -116,13 +112,7 @@ async function loadPage(
     query = query.in('user_id', friendIds)
   }
 
-  if (sort === 'new') {
-    query = query.order('created_at', { ascending: false })
-  } else if (sort === 'hot') {
-    query = query.order('hot_score', { ascending: false }).order('created_at', { ascending: false })
-  } else if (sort === 'controversial') {
-    query = query.gt('crowns', 0).gt('clowns', 0).order('controversy_score', { ascending: false }).order('created_at', { ascending: false })
-  }
+  query = query.order('created_at', { ascending: false })
 
   const { data: achData, error } = await query.range(offset, offset + PAGE_SIZE - 1)
 
@@ -140,7 +130,48 @@ async function loadPage(
     (profilesData ?? []).map((p) => [p.id, { name: p.name, avatar: p.avatar ?? null }])
   )
 
-  const mappedItems = achData.map((row) => ({
+  const filteredRows = achData.filter((row) =>
+    isClaimVisibleInArena({ status: row.status, userId: row.user_id }, viewerId)
+  )
+
+  const achievementIds = filteredRows.map((row) => row.id)
+  const [reactionsResult, commentsResult] = achievementIds.length === 0
+    ? [{ data: [], error: null }, { data: [], error: null }]
+    : await Promise.all([
+        supabase
+          .from('reactions')
+          .select('achievement_id, kind')
+          .in('achievement_id', achievementIds),
+        supabase
+          .from('comments')
+          .select('achievement_id')
+          .in('achievement_id', achievementIds),
+      ])
+
+  if (reactionsResult.error) throw reactionsResult.error
+  if (commentsResult.error) throw commentsResult.error
+
+  const reactionMap: Record<string, { crowns: number; clowns: number }> = {}
+  for (const id of achievementIds) {
+    reactionMap[id] = { crowns: 0, clowns: 0 }
+  }
+
+  for (const row of reactionsResult.data ?? []) {
+    const bucket = reactionMap[row.achievement_id]
+    if (!bucket) continue
+    if (row.kind === 'crown') bucket.crowns += 1
+    if (row.kind === 'clown') bucket.clowns += 1
+  }
+
+  const commentMap: Record<string, number> = {}
+  for (const id of achievementIds) {
+    commentMap[id] = 0
+  }
+  for (const row of commentsResult.data ?? []) {
+    commentMap[row.achievement_id] = (commentMap[row.achievement_id] ?? 0) + 1
+  }
+
+  const mappedItems = filteredRows.map((row) => ({
         id: row.id,
         userId: row.user_id,
         userName: profileMap[row.user_id]?.name ?? 'Пользователь',
@@ -156,8 +187,37 @@ async function loadPage(
         createdAt: row.created_at,
       }))
 
+  const sortedItems = [...mappedItems].sort((left, right) => {
+    if (sort === 'new') {
+      return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+    }
+
+    const leftReactions = reactionMap[left.id] ?? { crowns: 0, clowns: 0 }
+    const rightReactions = reactionMap[right.id] ?? { crowns: 0, clowns: 0 }
+    const leftComments = commentMap[left.id] ?? 0
+    const rightComments = commentMap[right.id] ?? 0
+
+    if (sort === 'hot') {
+      const leftHot = leftReactions.crowns + leftReactions.clowns + leftComments
+      const rightHot = rightReactions.crowns + rightReactions.clowns + rightComments
+      if (rightHot !== leftHot) return rightHot - leftHot
+    }
+
+    if (sort === 'controversial') {
+      const leftControversy = leftReactions.crowns > 0 && leftReactions.clowns > 0
+        ? Math.min(leftReactions.crowns, leftReactions.clowns)
+        : 0
+      const rightControversy = rightReactions.crowns > 0 && rightReactions.clowns > 0
+        ? Math.min(rightReactions.crowns, rightReactions.clowns)
+        : 0
+      if (rightControversy !== leftControversy) return rightControversy - leftControversy
+    }
+
+    return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+  })
+
   return {
-    items: filterArenaItemsForViewer(mappedItems, viewerId),
+    items: sortedItems,
     hasMore: achData.length === PAGE_SIZE,
   }
 }
@@ -376,7 +436,7 @@ export function FeedPage() {
             <div className="cork-empty">
               {feedMode === 'friends'
                 ? 'У вас пока нет друзей с заявками'
-                : user ? 'Чужих заявок пока нет' : 'Заявок пока нет'}
+                : user ? 'Здесь вы судите заявки других. Чужих заявок пока нет.' : 'Заявок пока нет'}
             </div>
           ) : visibleItems.length === 0 ? (
             <div className="cork-empty">

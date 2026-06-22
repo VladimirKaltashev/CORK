@@ -1,4 +1,5 @@
 import type { Achievement } from '@/shared/types'
+import { isClaimVisibleInArena, isClaimVisibleInOwnerView } from './visibility'
 
 export type OwnClaimsFilter = 'all' | 'arena' | 'crowned' | 'clowned'
 
@@ -23,7 +24,7 @@ export function filterArenaItemsForViewer<T extends { userId: string }>(
 }
 
 function isOnArena(achievement: Achievement): boolean {
-  return achievement.status === 'verified'
+  return isClaimVisibleInOwnerView(achievement)
 }
 
 function hasCrowdVerdict(agg?: ClaimVerdictAggregate): agg is ClaimVerdictAggregate {
@@ -54,6 +55,13 @@ export function matchesOwnClaimsFilter(
   if (filter === 'crowned') return isCrownedClaim(achievement, agg)
   if (filter === 'clowned') return isClownedClaim(achievement, agg)
   return true
+}
+
+export function isArenaClaimVisibleToViewer(
+  achievement: Pick<Achievement, 'status' | 'userId'>,
+  viewerId?: string,
+): boolean {
+  return isClaimVisibleInArena(achievement, viewerId)
 }
 
 export function buildOwnClaimsStats(
