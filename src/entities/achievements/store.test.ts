@@ -70,7 +70,7 @@ describe('useAchievementsStore', () => {
         })),
       })),
     })
-    await useAchievementsStore.getState().addAchievement({
+    const created = await useAchievementsStore.getState().addAchievement({
       userId: 'u1',
       category: 'sport',
       title: 'Medal',
@@ -83,6 +83,8 @@ describe('useAchievementsStore', () => {
     const s = useAchievementsStore.getState()
     expect(s.achievements.length).toBe(1)
     expect(s.achievements[0].title).toBe('Medal')
+    expect(created.id).toBe('a2')
+    expect(created.userId).toBe('u1')
   })
 
   it('updateAchievementStatus updates status', async () => {

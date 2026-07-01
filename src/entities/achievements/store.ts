@@ -19,7 +19,7 @@ interface AchievementsState {
   achievements: Achievement[]
   isLoading: boolean
   loadAchievements: (userId: string) => Promise<void>
-  addAchievement: (data: NewAchievementData) => Promise<void>
+  addAchievement: (data: NewAchievementData) => Promise<Achievement>
   updateAchievementStatus: (id: string, status: AchievementStatus, rejectionReason?: string) => Promise<void>
   reset: () => void
 }
@@ -94,6 +94,7 @@ export const useAchievementsStore = create<AchievementsState>((set) => ({
       createdAt: inserted.created_at,
     }
     set((s) => ({ achievements: [achievement, ...s.achievements] }))
+    return achievement
   },
 
   updateAchievementStatus: async (id, status, rejectionReason) => {

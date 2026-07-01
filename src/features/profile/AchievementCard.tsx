@@ -56,12 +56,14 @@ interface AchievementCardProps {
   achievement: Achievement
   showModerationStatus?: boolean
   showModerationActions?: boolean
+  reactionBarCompact?: boolean
 }
 
 export function AchievementCard({
   achievement,
   showModerationStatus = true,
   showModerationActions = false,
+  reactionBarCompact = true,
 }: AchievementCardProps) {
   const meta = CATEGORY_META[achievement.category]
   const { user } = useAuthStore()
@@ -142,9 +144,9 @@ export function AchievementCard({
               </>
             )}
             {isLiveClaim && (
-              <div className="ml-auto">
-                <ReactionBar achievementId={achievement.id} disabled={!user} size="sm" compact isOwner={isOwner} />
-              </div>
+                <div className="ml-auto">
+                <ReactionBar achievementId={achievement.id} disabled={!user} size="sm" compact={reactionBarCompact} isOwner={isOwner} />
+                </div>
             )}
           </div>
 

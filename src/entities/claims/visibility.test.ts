@@ -28,6 +28,22 @@ describe('claim visibility helpers', () => {
     expect(isClaimVisibleInArena({ status: 'rejected', userId: 'u2' }, 'u1')).toBe(false)
   })
 
+  it('does not use challenge meta when computing arena visibility', () => {
+    const withChallengeMeta: { status: 'pending' | 'verified' | 'rejected'; userId: string; meta: { challenge_id: string } } = {
+      status: 'pending',
+      userId: 'u2',
+      meta: { challenge_id: 'c1' },
+    }
+    expect(isClaimVisibleInArena(withChallengeMeta, 'u1')).toBe(true)
+
+    const rejectedWithChallengeMeta: { status: 'pending' | 'verified' | 'rejected'; userId: string; meta: { challenge_id: string } } = {
+      status: 'rejected',
+      userId: 'u2',
+      meta: { challenge_id: 'c1' },
+    }
+    expect(isClaimVisibleInArena(rejectedWithChallengeMeta, 'u1')).toBe(false)
+  })
+
   it('hides rejected claims from /me, public profile, and challenge surfaces', () => {
     expect(isClaimVisibleInOwnerView({ status: 'pending' })).toBe(true)
     expect(isClaimVisibleInOwnerView({ status: 'verified' })).toBe(true)

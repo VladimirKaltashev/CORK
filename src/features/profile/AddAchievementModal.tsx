@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { useAchievementsStore } from '@/entities/achievements/store'
 import { useAuthStore } from '@/entities/auth'
 import { useProfileStore } from '@/entities/profile'
+import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
 import { CategoryIcon, CalendarIcon } from '@/shared/ui'
 import type { AchievementCategory, ProofType } from '@/shared/types'
 import type { ClaimSubjectType, ClaimType } from '@/entities/claims'
 import { buildClaimMeta, defaultSubjectTypeForClaimType } from '@/entities/claims'
+import { applyChallengeContextToClaimMeta, buildChallengeThreadValue } from '@/entities/challenges/claimLinking'
 
 const CATEGORIES: { value: AchievementCategory; label: string }[] = [
   { value: 'olympiad', label: 'Олимпиады' },
@@ -87,9 +89,12 @@ function useRotatingPlaceholder() {
 
 interface AddAchievementModalProps {
   onClose: () => void
+  challengeId?: string
+  challengeTitle?: string
+  onSubmitted?: () => void
 }
 
-export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
+export function AddAchievementModal({ onClose, challengeId, challengeTitle, onSubmitted }: AddAchievementModalProps) {
   const { addAchievement } = useAchievementsStore()
   const { user } = useAuthStore()
   const profile = useProfileStore((s) => (user ? s.profiles[user.id] : undefined))
@@ -100,8 +105,10 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
   const [claimType, setClaimType] = useState<ClaimType>('self_achievement')
   const [subjectType, setSubjectType] = useState<ClaimSubjectType>('self')
   const [subjectName, setSubjectName] = useState('')
-  const [thread, setThread] = useState('')
-  const [customThread, setCustomThread] = useState('')
+  const initialChallengeThread = challengeId ? buildChallengeThreadValue({ challengeId, challengeTitle }) : ''
+
+  const [thread, setThread] = useState(challengeId ? '__custom__' : '')
+  const [customThread, setCustomThread] = useState(initialChallengeThread)
   const [category, setCategory] = useState<AchievementCategory>('other')
   const [year, setYear] = useState(currentYear)
   const [eventDate, setEventDate] = useState<string | null>(null)
@@ -164,7 +171,10 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
         subjectName,
         thread: resolvedThread,
       })
-      await addAchievement({
+      if (challengeId) {
+        applyChallengeContextToClaimMeta(meta, challengeId)
+      }
+      const createdAchievement = await addAchievement({
         userId: user.id,
         category,
         title,
@@ -175,7 +185,53 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
         claimAngle: 'judge',
         meta,
       })
-      showToast('success', 'Заявка отправлена на проверку')
+
+      if (challengeId) {
+        // Keep a single “current” challenge entry per user. When user submits again, we rotate the linked claim.
+        const { data: existing, error: existingError } = await supabase
+          .from('challenge_entries')
+          .select('id, version')
+          .eq('challenge_id', challengeId)
+          .eq('user_id', user.id)
+          .eq('is_current', true)
+          .maybeSingle()
+
+        if (existingError) throw existingError
+
+        if (existing) {
+          const nextVersion = (existing.version ?? 0) + 1
+          const { error: updateError } = await supabase
+            .from('challenge_entries')
+            .update({
+              claim_id: createdAchievement.id,
+              title,
+              description: trimmed || null,
+              version: nextVersion,
+              updated_at: new Date().toISOString(),
+              is_current: true,
+            })
+            .eq('id', existing.id)
+
+          if (updateError) throw updateError
+        } else {
+          const { error: insertError } = await supabase
+            .from('challenge_entries')
+            .insert({
+              challenge_id: challengeId,
+              user_id: user.id,
+              claim_id: createdAchievement.id,
+              title,
+              description: trimmed || null,
+              version: 1,
+              is_current: true,
+            })
+
+          if (insertError) throw insertError
+        }
+      }
+
+      showToast('success', challengeId ? 'Заявка принята в челлендж' : 'Заявка отправлена на проверку')
+      onSubmitted?.()
       onClose()
     } catch {
       showToast('error', 'Не удалось отправить заявку')
@@ -204,7 +260,16 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--cork-border-light)' }}>
-          <span className="text-sm font-semibold" style={{ color: 'var(--cork-text)' }}>Новая заявка</span>
+          <div>
+            <span className="text-sm font-semibold" style={{ color: 'var(--cork-text)' }}>
+              {challengeId ? 'Заявка в челлендж' : 'Новая заявка'}
+            </span>
+            {challengeTitle && (
+              <span className="text-xs ml-2 px-2 py-0.5 rounded" style={{ background: 'var(--cork-surface-2)', color: 'var(--cork-brand)' }}>
+                {challengeTitle}
+              </span>
+            )}
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -555,7 +620,7 @@ export function AddAchievementModal({ onClose }: AddAchievementModalProps) {
                 cursor: canSubmit ? 'pointer' : 'not-allowed',
               }}
             >
-              {submitting ? 'Отправка...' : 'Отправить на проверку'}
+              {submitting ? 'Отправка...' : challengeId ? 'Добавить в челлендж' : 'Отправить на проверку'}
             </button>
           </div>
         </div>

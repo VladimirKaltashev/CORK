@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useChallengesStore, type EntryWithProfile } from '@/entities/challenges'
-import { isClaimVisibleInChallenge } from '@/entities/claims'
+import { isClaimVisibleInChallenge, buildOwnClaimsStats } from '@/entities/claims'
 import { getThresholds, getExpertProgress, type ExpertProgress } from '@/shared/lib/expert'
 import { useAuthStore } from '@/entities/auth'
 import { useReactionsStore } from '@/entities/reactions'
 import { useCommentsStore } from '@/entities/comments'
-import { ReactionBar } from '@/features/reactions'
+import { AchievementCard } from '@/features/profile/AchievementCard'
 import { supabase } from '@/shared/lib/supabase'
 import { showToast } from '@/shared/lib/toast'
-import type { AchievementStatus } from '@/shared/types'
+import type { Achievement, AchievementStatus } from '@/shared/types'
+import { AddAchievementModal } from '@/features/profile/AddAchievementModal'
 
 const AWARD_ICONS: Record<string, { icon: string; desc: string; label: string }> = {
   king: { icon: '👑', label: 'Король', desc: 'Победитель арены' },
@@ -18,12 +19,6 @@ const AWARD_ICONS: Record<string, { icon: string; desc: string; label: string }>
   best_comment: { icon: '💬', label: 'Аргумент', desc: 'Лучший аргумент суда' },
   most_controversial: { icon: '🔥', label: 'Спорно', desc: 'Самая спорная заявка' },
   participant: { icon: '🎖', label: 'Участник', desc: 'Отметка участника' },
-}
-
-const AWARD_TAG_CLASS: Record<string, string> = {
-  king: 'cork-tag--king',
-  clown: 'cork-tag--clown',
-  finder: 'cork-tag--finder',
 }
 
 const TABS = ['Заявки', 'Лидерборд', 'Правила', 'Награды'] as const
@@ -67,139 +62,13 @@ function getStatusLabel(status: string): { text: string; color: string; classNam
   }
 }
 
-function getInitials(name: string): string {
-  return name.split(' ').map((word) => word[0] ?? '').join('').slice(0, 2).toUpperCase() || '?'
-}
-
 function getEntryScore(entry: EntryWithProfile, reactions: ReturnType<typeof useReactionsStore.getState>['byAchievement'], commentCounts: Record<string, number>): number {
   if (!entry.claimId) return 0
   const agg = reactions[entry.claimId]
   return (agg?.crowns ?? 0) * 2 + (agg?.clowns ?? 0) + (commentCounts[entry.claimId] ?? 0)
 }
 
-function SubmitEntryModal({
-  existingEntry,
-  challengeTitle,
-  onClose,
-  onSubmit,
-}: {
-  existingEntry?: EntryWithProfile
-  challengeTitle: string
-  onClose: () => void
-  onSubmit: (payload: { title: string; description?: string }) => Promise<void>
-}) {
-  const [title, setTitle] = useState(existingEntry?.title ?? '')
-  const [description, setDescription] = useState(existingEntry?.description ?? '')
-  const [submitting, setSubmitting] = useState(false)
 
-  const canSubmit = title.trim().length >= 3 && !submitting
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!canSubmit) return
-    setSubmitting(true)
-    try {
-      await onSubmit({ title, description })
-      onClose()
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  return (
-    <div className="challenge-modal-backdrop" onClick={onClose}>
-      <form className="challenge-modal" onSubmit={handleSubmit} onClick={(e) => e.stopPropagation()}>
-        <div className="challenge-modal__head">
-          <div>
-            <div className="cork-meta">{existingEntry ? 'Редактировать заявку' : 'Подать заявку'}</div>
-            <h2>{challengeTitle}</h2>
-          </div>
-          <button type="button" className="cork-icon-btn" onClick={onClose} aria-label="Закрыть">
-            ✕
-          </button>
-        </div>
-        <label className="challenge-field">
-          <span>Что судим?</span>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value.slice(0, 100))}
-            placeholder="Например: мем про дедлайн, pet-project за ночь, легендарный фейл"
-            autoFocus
-          />
-        </label>
-        <label className="challenge-field">
-          <span>Контекст</span>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value.slice(0, 500))}
-            rows={4}
-            placeholder="Коротко объясни, почему это должно попасть на суд."
-          />
-        </label>
-        <div className="challenge-modal__foot">
-          <span>{100 - title.length} / {500 - description.length}</span>
-          <button type="submit" className="cork-btn cork-btn-primary" disabled={!canSubmit}>
-            {submitting ? 'Отправка...' : existingEntry ? 'Сохранить' : 'Войти в арену'}
-          </button>
-        </div>
-      </form>
-    </div>
-  )
-}
-
-function EntryCard({
-  entry,
-  awards,
-  disabled,
-  reactions,
-  comments,
-  currentUserId,
-}: {
-  entry: EntryWithProfile
-  awards: ReturnType<typeof useChallengesStore.getState>['awards']
-  disabled: boolean
-  reactions: ReturnType<typeof useReactionsStore.getState>['byAchievement']
-  comments: Record<string, number>
-  currentUserId?: string
-}) {
-  const agg = entry.claimId ? reactions[entry.claimId] : null
-  const commentCount = entry.claimId ? comments[entry.claimId] ?? 0 : 0
-  const entryAwards = awards.filter((award) => award.userId === entry.userId)
-
-  return (
-    <article className="challenge-entry">
-      <div className="challenge-entry__avatar">{getInitials(entry.userName)}</div>
-      <div className="challenge-entry__body">
-        <div className="challenge-entry__top">
-          <Link to={`/profile/${entry.userId}`} className="cork-link">@{entry.userName}</Link>
-          {entryAwards.map((award) => (
-            <span key={award.id} className={`cork-tag ${AWARD_TAG_CLASS[award.awardType] ?? ''}`}>
-              {AWARD_ICONS[award.awardType]?.icon} {AWARD_ICONS[award.awardType]?.label ?? award.awardType}
-            </span>
-          ))}
-        </div>
-        <h3>{entry.title}</h3>
-        {entry.description && <p>{entry.description}</p>}
-        {entry.claimId ? (
-          <>
-            <div className="challenge-entry__verdict">
-              <ReactionBar achievementId={entry.claimId} disabled={disabled} size="sm" isOwner={entry.userId === currentUserId} />
-            </div>
-            <div className="challenge-entry__numbers">
-              <span>👑 {agg?.crowns ?? 0}</span>
-              <span>🤡 {agg?.clowns ?? 0}</span>
-              <span>💬 {commentCount}</span>
-            </div>
-          </>
-        ) : (
-          <div className="challenge-entry__pending">
-            Claim пока не привязан. Вердикт появится после модерации.
-          </div>
-        )}
-      </div>
-    </article>
-  )
-}
 
 function MyStatusCard({
   userName,
@@ -258,7 +127,7 @@ function MyStatusCard({
         onClick={onSubmit}
         disabled={!isActive}
       >
-        {myEntry ? 'Редактировать заявку' : 'Подать заявку'}
+        Добавить заявку в челлендж
       </button>
       {!isActive && <p className="challenge-side-note">Подавать заявки можно только в активный челлендж.</p>}
     </div>
@@ -267,15 +136,16 @@ function MyStatusCard({
 
 export function ChallengeDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { detail, entries, awards, isDetailLoading, detailError, loadDetail, submitEntry } = useChallengesStore()
+  const { detail, entries, awards, isDetailLoading, detailError, loadDetail } = useChallengesStore()
   const user = useAuthStore((s) => s.user)
   const loadReactions = useReactionsStore((s) => s.loadForAchievements)
   const reactions = useReactionsStore((s) => s.byAchievement)
   const commentCounts = useCommentsStore((s) => s.counts)
   const [rank, setRank] = useState<ExpertProgress | null>(null)
   const [activeTab, setActiveTab] = useState<DetailTab>('Заявки')
-  const [entryModalOpen, setEntryModalOpen] = useState(false)
+  const [claimComposerOpen, setClaimComposerOpen] = useState(false)
   const [claimStatuses, setClaimStatuses] = useState<Record<string, AchievementStatus>>({})
+  const [challengeClaimsById, setChallengeClaimsById] = useState<Record<string, Achievement>>({})
 
   useEffect(() => {
     if (id) loadDetail(id)
@@ -312,22 +182,41 @@ export function ChallengeDetailPage() {
     ;(async () => {
       const { data, error } = await supabase
         .from('achievements')
-        .select('id, status')
+        .select('id, user_id, category, title, description, year, proof_type, proof_value, status, rejection_reason, meta, created_at, claim_angle')
         .in('id', claimIds)
       if (error) return
-      const next = Object.fromEntries(
-        (data ?? []).map((row) => [row.id as string, row.status as AchievementStatus])
-      )
-      setClaimStatuses(next)
+
+      const byId: Record<string, Achievement> = {}
+      for (const row of (data ?? []) as Array<Record<string, unknown>>) {
+        const id = row.id as string
+        byId[id] = {
+          id,
+          userId: row.user_id as string,
+          category: row.category as Achievement['category'],
+          title: row.title as string,
+          description: row.description as string,
+          year: row.year as number,
+          proofType: row.proof_type as Achievement['proofType'],
+          proofValue: (row.proof_value as string | null) ?? undefined,
+          status: row.status as AchievementStatus,
+          claimAngle: (row.claim_angle as Achievement['claimAngle']) ?? undefined,
+          rejectionReason: (row.rejection_reason as string | null) ?? undefined,
+          meta: (row.meta as Record<string, unknown> | null) ?? {},
+          createdAt: row.created_at as string,
+        }
+      }
+
+      setChallengeClaimsById(byId)
+      setClaimStatuses(Object.fromEntries(Object.keys(byId).map((id) => [id, byId[id].status])))
     })()
   }, [claimIdsKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const visibleEntries = useMemo(
     () =>
       entries.filter((entry) => {
-        if (!entry.claimId) return true
+        if (!entry.claimId) return false
         const status = claimStatuses[entry.claimId]
-        return !status || isClaimVisibleInChallenge({ status })
+        return !!status && isClaimVisibleInChallenge({ status })
       }),
     [claimStatuses, entries],
   )
@@ -335,11 +224,35 @@ export function ChallengeDetailPage() {
     () =>
       claimIds.filter((claimId) => {
         const status = claimStatuses[claimId]
-        return !status || isClaimVisibleInChallenge({ status })
+        return !!status && isClaimVisibleInChallenge({ status })
       }),
     [claimIds, claimStatuses],
   )
   const visibleClaimIdsKey = visibleClaimIds.join(',')
+
+  const visibleClaims = useMemo(
+    () => visibleClaimIds.map((id) => challengeClaimsById[id]).filter((a): a is Achievement => Boolean(a)),
+    [visibleClaimIds, challengeClaimsById],
+  )
+
+  const challengeStats = useMemo(
+    () => buildOwnClaimsStats(visibleClaims, reactions),
+    [visibleClaims, reactions],
+  )
+
+  const totalComments = useMemo(
+    () => visibleClaims.reduce((sum, a) => sum + (commentCounts[a.id] ?? 0), 0),
+    [visibleClaims, commentCounts],
+  )
+
+  const orderedVisibleClaims = useMemo(() => {
+    const getScore = (achievement: Achievement) => {
+      const agg = reactions[achievement.id]
+      return (agg?.crowns ?? 0) * 2 + (agg?.clowns ?? 0) + (commentCounts[achievement.id] ?? 0)
+    }
+
+    return [...visibleClaims].sort((a, b) => getScore(b) - getScore(a))
+  }, [visibleClaims, reactions, commentCounts])
 
   useEffect(() => {
     if (visibleClaimIds.length === 0) return
@@ -398,12 +311,7 @@ export function ChallengeDetailPage() {
       showToast('error', 'Заявки принимаются только в активный челлендж')
       return
     }
-    setEntryModalOpen(true)
-  }
-
-  const handleSubmitEntry = async (payload: { title: string; description?: string }) => {
-    if (!user) return
-    await submitEntry(detail.id, { id: user.id, name: user.name }, payload)
+    setClaimComposerOpen(true)
   }
 
   return (
@@ -450,15 +358,15 @@ export function ChallengeDetailPage() {
                     <span style={{ color: 'var(--cork-brand)' }}>{formatTimer(detail.startsAt, detail.endsAt, detail.status)}</span>
                   </div>
                   <button type="button" className="cork-btn cork-btn-primary" onClick={handleSubmitClick} disabled={!isActive && !!user}>
-                    {myEntry ? 'Редактировать заявку' : 'Подать заявку'}
+                    Добавить заявку в челлендж
                   </button>
                 </div>
 
                 <div className="stats-grid">
-                  <div className="cork-stat"><b>{visibleEntries.length}</b><small>заявок</small></div>
-                  <div className="cork-stat"><b>{visibleClaimIds.length}</b><small>claims</small></div>
-                  <div className="cork-stat"><b>{awards.length}</b><small>наград</small></div>
-                  <div className="cork-stat"><b>{durationDays}</b><small>дней</small></div>
+                   <div className="cork-stat"><b>{challengeStats.totalClaims}</b><small>живых заявок</small></div>
+                   <div className="cork-stat"><b>{challengeStats.crownedCount}</b><small>Корона ведёт</small></div>
+                   <div className="cork-stat"><b>{challengeStats.clownedCount}</b><small>Клоун ведёт</small></div>
+                   <div className="cork-stat"><b>{totalComments}</b><small>комментариев</small></div>
                 </div>
               </section>
 
@@ -477,23 +385,34 @@ export function ChallengeDetailPage() {
 
               {activeTab === 'Заявки' && (
                 <section>
-                  {visibleEntries.length === 0 ? (
+                  {orderedVisibleClaims.length === 0 ? (
                     <div className="cork-empty" style={{ marginBottom: 16 }}>
                       <b>🏆</b>
-                      Пока нет заявок. Можно быть первым.
+                      У этого челленджа пока нет заявок.
+                      <br />
+                      Можно быть первым: принеси claim на суд.
+                      <div style={{ marginTop: 12 }}>
+                        <button
+                          type="button"
+                          className="cork-btn cork-btn-primary"
+                          onClick={handleSubmitClick}
+                          disabled={!isActive && !!user}
+                        >
+                          Добавить заявку в челлендж
+                        </button>
+                      </div>
                     </div>
                   ) : (
-                    visibleEntries.map((entry) => (
-                      <EntryCard
-                        key={entry.id}
-                        entry={entry}
-                        awards={awards}
-                        disabled={!user}
-                        reactions={reactions}
-                        comments={commentCounts}
-                        currentUserId={user?.id}
-                      />
-                    ))
+                    <div className="flex flex-col gap-2">
+                      {orderedVisibleClaims.map((achievement) => (
+                        <AchievementCard
+                          key={achievement.id}
+                          achievement={achievement}
+                          showModerationStatus={false}
+                          reactionBarCompact={false}
+                        />
+                      ))}
+                    </div>
                   )}
                 </section>
               )}
@@ -627,12 +546,14 @@ export function ChallengeDetailPage() {
         </main>
       </div>
 
-      {entryModalOpen && (
-        <SubmitEntryModal
-          existingEntry={myEntry}
+      {claimComposerOpen && (
+        <AddAchievementModal
+          onClose={() => setClaimComposerOpen(false)}
+          challengeId={detail.id}
           challengeTitle={detail.title}
-          onClose={() => setEntryModalOpen(false)}
-          onSubmit={handleSubmitEntry}
+          onSubmitted={() => {
+            loadDetail(detail.id)
+          }}
         />
       )}
     </div>
