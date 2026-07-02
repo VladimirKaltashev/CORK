@@ -895,7 +895,7 @@ Challenge = thread + дедлайн + leaderboard
 - поиск;
 - базовая модерация;
 - нормальный feed UX;
-- Acid/Light/Dark без визуальных регрессий.
+- Theme Worlds v1 (Obsidian Blood, Blueprint, Bubblegum, Acid Pop, Tribunal Paper) — без визуальных регрессий.
 
 ### Phase 1 — Claim Model
 

@@ -2,6 +2,8 @@
 
 CORK UI should feel like a dark arena of verdicts.
 
+That description captures the default CORK world, **Obsidian Blood**. Other theme worlds change the visual genre of the product. See [`09-theme-worlds.md`](09-theme-worlds.md) for the full Theme Worlds model.
+
 Not:
 - glossy SaaS
 - generic social network
@@ -14,6 +16,27 @@ More like:
 - brutal flat interface
 - underground scoreboard
 - sharp public arena
+
+## Theme Worlds
+
+CORK themes are not ordinary light/dark skins.
+Each theme is a different verdict world: it changes the emotional genre of the app, not just background and accent colors.
+
+> Каждая тема меняет не цвет приложения, а жанр приложения.
+
+A theme may change:
+
+- color palette
+- typography
+- border style
+- radius system
+- density
+- surface treatment
+- shadows
+- decorative language
+- overall emotional tone
+
+The canonical list of Theme Worlds, plus the deprecation of the old `light`/`dark` framing, lives in `09-theme-worlds.md`.
 
 ## Core UI principle
 

@@ -30,6 +30,7 @@ Then read relevant task-specific files:
 | Product/domain work | `02-product-model.md`, `03-domain-model.md` |
 | Frontend/code architecture | `04-architecture.md` |
 | UI/visual work | `05-ui-visual.md` |
+| Theme / world work | `09-theme-worlds.md` |
 | Database/Supabase work | `06-data-supabase.md` |
 | Testing/reporting | `07-testing-reporting.md` |
 | Git/commit/push | `08-git-workflow.md` |
