@@ -1,28 +1,38 @@
-import { useThemeStore, type Theme } from '@/entities/theme'
-import { SunIcon, MoonIcon, SystemIcon } from '@/shared/ui'
+import { useThemeStore, getSelectableThemes, getThemeMetadata, type Theme } from '@/entities/theme'
 
-function AcidIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+function ThemeIcon({ theme, className, style }: { theme: Theme; className?: string; style?: React.CSSProperties }) {
+  // Obsidian Blood — dark arena icon
+  if (theme === 'obsidian') return (
+    <svg className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+      <line x1="12" y1="22" x2="12" y2="15.5" />
+      <polyline points="22 8.5 12 15.5 2 8.5" />
+    </svg>
+  )
+  // Acid Pop — terminal crosshair
+  if (theme === 'acid') return (
+    <svg className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
       <line x1="8" y1="12" x2="16" y2="12" />
       <line x1="12" y1="8" x2="12" y2="16" />
     </svg>
   )
+  // Planned themes — ruler/design icon
+  return (
+    <svg className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <line x1="8" y1="8" x2="16" y2="8" />
+      <line x1="8" y1="12" x2="16" y2="12" />
+      <line x1="8" y1="16" x2="12" y2="16" />
+    </svg>
+  )
 }
-
-type IconComponent = typeof SunIcon
-
-const THEMES: { value: Theme; Icon: IconComponent; label: string; description: string }[] = [
-  { value: 'light',  Icon: SunIcon,    label: 'Светлая',   description: 'Всегда светлая' },
-  { value: 'dark',   Icon: MoonIcon,   label: 'Тёмная',    description: 'Всегда тёмная' },
-  { value: 'system', Icon: SystemIcon, label: 'Системная', description: 'Как в настройках ОС' },
-  { value: 'acid',   Icon: AcidIcon,   label: 'Acid Pop',  description: 'Cyber Terminal / HUD' },
-]
 
 export function SettingsPage() {
   const theme = useThemeStore((s) => s.theme)
   const setTheme = useThemeStore((s) => s.setTheme)
+
+  const selectable = getSelectableThemes()
 
   return (
     <div className="mx-auto max-w-2xl py-6 px-3 flex flex-col gap-6">
@@ -30,32 +40,60 @@ export function SettingsPage() {
 
       <section className="cork-panel">
         <div className="mb-3">
-          <h2 className="cork-section-title">Внешний вид</h2>
-          <p className="cork-desc">Тема интерфейса</p>
+          <h2 className="cork-section-title">CORK Worlds</h2>
+          <p className="cork-desc">Каждая тема меняет не цвет приложения, а жанр приложения</p>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          {THEMES.map(({ value, Icon, label, description }) => {
-            const active = value === theme
+          {selectable.map(({ id, name, description }) => {
+            const active = id === theme
             return (
               <button
-                key={value}
+                key={id}
                 type="button"
-                onClick={() => setTheme(value)}
+                onClick={() => setTheme(id)}
                 className="flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-colors"
                 style={active
-                  ? { borderColor: 'var(--cork-brand)', background: 'rgba(79,70,229,0.08)' }
+                  ? { borderColor: 'var(--cork-brand)', background: 'rgba(194,57,57,0.08)' }
                   : { borderColor: 'var(--cork-border)', background: 'var(--cork-surface)' }
                 }
               >
-                <Icon className="w-7 h-7" style={{ color: active ? 'var(--cork-brand)' : 'var(--cork-text-dim)' }} />
+                <ThemeIcon theme={id} className="w-7 h-7" style={{ color: active ? 'var(--cork-brand)' : 'var(--cork-text-dim)' }} />
                 <span className="text-sm font-semibold" style={{ color: active ? 'var(--cork-brand)' : 'var(--cork-text)' }}>
-                  {label}
+                  {name}
                 </span>
                 <span className="text-xs" style={{ color: 'var(--cork-text-mute)' }}>{description}</span>
               </button>
             )
           })}
+        </div>
+
+        {/* Planned theme worlds */}
+        <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--cork-border-light)' }}>
+          <h3 className="cork-desc" style={{ marginBottom: '8px' }}>Скоро</h3>
+          <div className="grid grid-cols-3 gap-2 opacity-50">
+            {getThemeMetadata('blueprint') && (
+              <div className="rounded-lg border p-2 text-left" style={{ borderColor: 'var(--cork-border)', background: 'var(--cork-surface-2)' }}>
+                <span className="text-xs font-semibold" style={{ color: 'var(--cork-text-dim)' }}>
+                  {getThemeMetadata('blueprint')!.name}
+                </span>
+              </div>
+            )}
+            {getThemeMetadata('bubblegum') && (
+              <div className="rounded-lg border p-2 text-left" style={{ borderColor: 'var(--cork-border)', background: 'var(--cork-surface-2)' }}>
+                <span className="text-xs font-semibold" style={{ color: 'var(--cork-text-dim)' }}>
+                  {getThemeMetadata('bubblegum')!.name}
+                </span>
+              </div>
+            )}
+            {getThemeMetadata('tribunal-paper') && (
+              <div className="rounded-lg border p-2 text-left" style={{ borderColor: 'var(--cork-border)', background: 'var(--cork-surface-2)' }}>
+                <span className="text-xs font-semibold" style={{ color: 'var(--cork-text-dim)' }}>
+                  {getThemeMetadata('tribunal-paper')!.name}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 

@@ -4,28 +4,22 @@ import { useThemeStore } from './store'
 describe('useThemeStore', () => {
   beforeEach(() => {
     localStorage.clear()
-    useThemeStore.setState({ theme: 'system' })
+    useThemeStore.setState({ theme: 'obsidian' })
   })
 
-  it('по умолчанию theme = system', () => {
-    expect(useThemeStore.getState().theme).toBe('system')
+  it('defaults to obsidian', () => {
+    expect(useThemeStore.getState().theme).toBe('obsidian')
   })
 
-  it('setTheme меняет тему', () => {
-    useThemeStore.getState().setTheme('dark')
-    expect(useThemeStore.getState().theme).toBe('dark')
-
-    useThemeStore.getState().setTheme('light')
-    expect(useThemeStore.getState().theme).toBe('light')
-
+  it('setTheme changes to acid', () => {
     useThemeStore.getState().setTheme('acid')
     expect(useThemeStore.getState().theme).toBe('acid')
   })
 
-  it('persist пишет в localStorage с ключом cork_theme', () => {
-    useThemeStore.getState().setTheme('dark')
+  it('persists to localStorage with cork_theme key', () => {
+    useThemeStore.getState().setTheme('acid')
     const raw = localStorage.getItem('cork_theme')
     expect(raw).toBeTruthy()
-    expect(raw).toContain('"dark"')
+    expect(raw).toContain('"acid"')
   })
 })

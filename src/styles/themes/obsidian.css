@@ -1,0 +1,50 @@
+/*******************************************************************************
+ * OBSIDIAN BLOOD — Default CORK theme world
+ * Dark arena of verdicts, brutal but not neon
+ * Applied when [data-theme="obsidian"] is active on <html>
+ ******************************************************************************/
+
+[data-theme="obsidian"] {
+  /* ── Surfaces ── */
+  --cork-bg:          #0a0a0c;
+  --cork-surface:     #141418;
+  --cork-surface-2:   #1e1e24;
+  --cork-surface-3:   #2a2a33;
+
+  /* ── Text ── */
+  --cork-text:        #e4e4ea;
+  --cork-text-dim:    #88889a;
+  --cork-text-mute:   #5a5a6a;
+
+  /* ── Brand ── */
+  --cork-brand:       #c23939;
+  --cork-brand-hover: #d94444;
+  --cork-brand-2:     #c23939;
+  --cork-brand-ink:   #ffffff;
+  --cork-king:        #d4a94e;
+  --cork-clown:       #c23939;
+  --cork-success:     #3a9e5a;
+
+  /* ── Borders & Frames ── */
+  --cork-border:      rgba(194, 57, 57, 0.18);
+  --cork-border-light: rgba(194, 57, 57, 0.08);
+  --cork-frame:       #c23939;
+  --cork-frame-light: rgba(194, 57, 57, 0.35);
+
+  /* ── Radii ── */
+  --cork-radius-card: 0.25rem;
+  --cork-radius-btn:  0.125rem;
+  --cork-radius-pill: 9999px;
+
+  /* ── Typography ── */
+  --cork-font-display: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --cork-font-body:    system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* ── Shadows ── */
+  --cork-shadow:      0 1px 3px rgba(0,0,0,0.5);
+  --cork-shadow-lg:   0 4px 12px rgba(0,0,0,0.4);
+  --cork-glow:        rgba(194, 57, 57, 0.12);
+
+  /* ── Backdrop ── */
+  --cork-backdrop:    rgba(10, 10, 12, 0.88);
+}

@@ -17,11 +17,11 @@ import { ThemeApplier, useThemeStore } from '@/entities/theme'
 import '@/styles/theme-tokens.css'
 import '@/styles/theme-components.css'
 import '@/styles/themes/acid.css'
+import '@/styles/themes/obsidian.css'
 
-function themeToColorMode(theme: 'light' | 'dark' | 'system' | 'acid'): 'day' | 'night' | 'auto' {
-  if (theme === 'light') return 'day'
-  if (theme === 'dark' || theme === 'acid') return 'night'
-  return 'auto'
+function themeToColorMode(theme: string): 'day' | 'night' | 'auto' {
+  if (theme === 'blueprint' || theme === 'bubblegum' || theme === 'tribunal-paper') return 'day'
+  return 'night'
 }
 
 export function App() {

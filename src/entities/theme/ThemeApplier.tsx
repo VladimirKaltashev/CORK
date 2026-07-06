@@ -6,26 +6,9 @@ export function ThemeApplier() {
 
   useEffect(() => {
     const root = document.documentElement
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
 
-    const apply = () => {
-      if (theme === 'acid') {
-        root.setAttribute('data-theme', 'acid')
-        // НЕ добавляем class="dark" — Acid Pop управляет всем через CSS-переменные
-        return
-      }
-
-      root.removeAttribute('data-theme')
-      const isDark = theme === 'dark' || (theme === 'system' && mq.matches)
-      root.classList.toggle('dark', isDark)
-    }
-
-    apply()
-
-    if (theme === 'system') {
-      mq.addEventListener('change', apply)
-      return () => mq.removeEventListener('change', apply)
-    }
+    root.setAttribute('data-theme', theme)
+    root.classList.remove('dark')
   }, [theme])
 
   return null
