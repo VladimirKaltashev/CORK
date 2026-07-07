@@ -1,50 +1,272 @@
 /*******************************************************************************
  * OBSIDIAN BLOOD — Default CORK theme world
- * Dark arena of verdicts, brutal but not neon
- * Applied when [data-theme="obsidian"] is active on <html>
+ * Dark arena of verdicts. Black/graphite/matte.
+ * Severe. Sharp. Not neon. Not SaaS.
+ *
+ * Applied when [data-theme="obsidian"] is active on <html>.
  ******************************************************************************/
 
 [data-theme="obsidian"] {
-  /* ── Surfaces ── */
-  --cork-bg:          #0a0a0c;
-  --cork-surface:     #141418;
-  --cork-surface-2:   #1e1e24;
-  --cork-surface-3:   #2a2a33;
-
-  /* ── Text ── */
+  /* ── Surfaces — matte graphite depth ── */
+  --cork-bg:          #09090b;
+  --cork-surface:     #121215;
+  --cork-surface-2:   #1a1a1e;
+  --cork-surface-3:   #24242a;
   --cork-text:        #e4e4ea;
   --cork-text-dim:    #88889a;
-  --cork-text-mute:   #5a5a6a;
-
-  /* ── Brand ── */
-  --cork-brand:       #c23939;
-  --cork-brand-hover: #d94444;
-  --cork-brand-2:     #c23939;
+  --cork-text-mute:   #6a6a7a;
+  --cork-brand:       #b83838;
+  --cork-brand-hover: #ce4242;
+  --cork-brand-2:     #b83838;
   --cork-brand-ink:   #ffffff;
-  --cork-king:        #d4a94e;
-  --cork-clown:       #c23939;
-  --cork-success:     #3a9e5a;
-
-  /* ── Borders & Frames ── */
-  --cork-border:      rgba(194, 57, 57, 0.18);
-  --cork-border-light: rgba(194, 57, 57, 0.08);
-  --cork-frame:       #c23939;
-  --cork-frame-light: rgba(194, 57, 57, 0.35);
-
-  /* ── Radii ── */
-  --cork-radius-card: 0.25rem;
+  --cork-king:        #b8973e;
+  --cork-clown:       #b8543a;
+  --cork-success:     #3a8a52;
+  --cork-border:      rgba(255, 255, 255, 0.08);
+  --cork-border-light: rgba(255, 255, 255, 0.05);
+  --cork-frame:       #b83838;
+  --cork-frame-light: rgba(184, 56, 56, 0.25);
+  --cork-radius-card: 0.1875rem;
   --cork-radius-btn:  0.125rem;
   --cork-radius-pill: 9999px;
-
-  /* ── Typography ── */
   --cork-font-display: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --cork-font-body:    system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-
-  /* ── Shadows ── */
-  --cork-shadow:      0 1px 3px rgba(0,0,0,0.5);
-  --cork-shadow-lg:   0 4px 12px rgba(0,0,0,0.4);
-  --cork-glow:        rgba(194, 57, 57, 0.12);
-
-  /* ── Backdrop ── */
-  --cork-backdrop:    rgba(10, 10, 12, 0.88);
+  --cork-shadow:       0 1px 2px rgba(0, 0, 0, 0.55);
+  --cork-shadow-lg:    0 2px 8px rgba(0, 0, 0, 0.45);
+  --cork-glow:         rgba(184, 56, 56, 0.08);
+  --cork-backdrop:     rgba(9, 9, 11, 0.9);
 }
+
+/* ── Body — matte verdict board background ── */
+[data-theme="obsidian"] body {
+  background-color: var(--cork-bg) !important;
+  color: var(--cork-text) !important;
+  font-family: var(--cork-font-body) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Root stacking ── */
+[data-theme="obsidian"] #root {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Tags — status marks, not candy pills ── */
+[data-theme="obsidian"] .cork-tag {
+  border-radius: var(--cork-radius-btn);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--cork-border);
+  background: var(--cork-surface-3);
+  color: var(--cork-text-dim);
+  transition: border-color 0.2s, color 0.2s;
+}
+[data-theme="obsidian"] .cork-tag:hover {
+  border-color: var(--cork-frame);
+  color: var(--cork-text);
+}
+[data-theme="obsidian"] .cork-tag--active {
+  color: var(--cork-success);
+  border-color: rgba(58, 138, 82, 0.35);
+  background: rgba(58, 138, 82, 0.12);
+}
+[data-theme="obsidian"] .cork-tag--upcoming {
+  color: var(--cork-brand);
+  border-color: var(--cork-frame-light);
+  background: rgba(184, 56, 56, 0.1);
+}
+[data-theme="obsidian"] .cork-tag--done {
+  color: var(--cork-text-dim);
+  border-color: var(--cork-border);
+  background: var(--cork-surface-3);
+}
+[data-theme="obsidian"] .cork-tag--king {
+  color: var(--cork-king);
+  border-color: rgba(184, 151, 62, 0.35);
+  background: rgba(184, 151, 62, 0.1);
+}
+[data-theme="obsidian"] .cork-tag--clown {
+  color: var(--cork-clown);
+  border-color: rgba(184, 84, 58, 0.35);
+  background: rgba(184, 84, 58, 0.1);
+}
+[data-theme="obsidian"] .cork-tag--finder {
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.35);
+  background: rgba(52, 211, 153, 0.1);
+}
+
+/* ── Verdict bar — tribunal judgment ── */
+[data-theme="obsidian"] .cork-verdict-track {
+  border: 1px solid var(--cork-border);
+  background: var(--cork-surface-3);
+  border-radius: var(--cork-radius-btn);
+}
+[data-theme="obsidian"] .cork-verdict-king {
+  background: var(--cork-king);
+  color: #0f0e0a;
+}
+[data-theme="obsidian"] .cork-verdict-clown {
+  background: var(--cork-clown);
+  color: #fcf4f2;
+}
+
+/* ── Buttons — sharp, decisive ── */
+[data-theme="obsidian"] .cork-btn-primary {
+  box-shadow: none;
+}
+[data-theme="obsidian"] .cork-btn-primary:hover {
+  box-shadow: 0 0 0 1px var(--cork-brand);
+  background: var(--cork-brand-hover);
+}
+[data-theme="obsidian"] .cork-btn:hover {
+  box-shadow: 0 0 0 1px var(--cork-frame);
+}
+[data-theme="obsidian"] .cork-btn:active {
+  transform: translateY(0);
+}
+[data-theme="obsidian"] .cork-create-btn {
+  border-radius: var(--cork-radius-btn);
+}
+[data-theme="obsidian"] .cork-create-btn:hover {
+  box-shadow: none;
+  background: var(--cork-brand-hover);
+}
+
+/* ── Cards — matte verdict panel ── */
+[data-theme="obsidian"] .cork-card {
+  border: 1px solid var(--cork-border);
+  background: var(--cork-surface);
+}
+[data-theme="obsidian"] .cork-card:hover {
+  border-color: var(--cork-frame-light);
+  box-shadow: var(--cork-shadow-lg);
+}
+[data-theme="obsidian"] .cork-panel {
+  border: 1px solid var(--cork-border);
+  background: var(--cork-surface-2);
+}
+
+/* ── Header — tribunal bar ── */
+[data-theme="obsidian"] .cork-header {
+  backdrop-filter: blur(16px);
+  background: var(--cork-backdrop);
+  border-bottom: 1px solid var(--cork-border);
+}
+[data-theme="obsidian"] .cork-header__brand {
+  letter-spacing: 0.04em;
+}
+
+/* ── Nav links — serious, not cute ── */
+[data-theme="obsidian"] .cork-nav-link {
+  border-radius: var(--cork-radius-btn);
+}
+[data-theme="obsidian"] .cork-nav-link.active {
+  color: var(--cork-brand);
+  background: rgba(184, 56, 56, 0.08);
+}
+
+/* ── Section titles ── */
+[data-theme="obsidian"] .cork-section-title {
+  letter-spacing: 0.08em;
+}
+[data-theme="obsidian"] .cork-head {
+  letter-spacing: 0.04em;
+}
+
+/* ── Challenge spotlights ── */
+[data-theme="obsidian"] .challenge-spotlight {
+  border-color: var(--cork-frame-light);
+}
+[data-theme="obsidian"] .challenge-hero--arena {
+  border-color: var(--cork-frame-light);
+}
+
+/* ── Stat blocks ── */
+[data-theme="obsidian"] .cork-stat {
+  background: var(--cork-surface-3);
+  border: 1px solid var(--cork-border);
+  border-radius: var(--cork-radius-btn);
+}
+[data-theme="obsidian"] .cork-stat b {
+  color: var(--cork-text);
+}
+
+/* ── Focus ring ── */
+[data-theme="obsidian"] :focus-visible {
+  outline: 2px solid var(--cork-frame);
+  outline-offset: 2px;
+}
+
+/* ── Selection ── */
+[data-theme="obsidian"] ::selection {
+  background: rgba(184, 56, 56, 0.35);
+  color: var(--cork-text);
+}
+
+/* ── Scrollbar — verdict board ── */
+[data-theme="obsidian"] ::-webkit-scrollbar-track {
+  background: var(--cork-bg);
+}
+[data-theme="obsidian"] ::-webkit-scrollbar-thumb {
+  background: var(--cork-surface-3);
+  border-radius: 0;
+}
+[data-theme="obsidian"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--cork-brand);
+}
+
+/* ── Filter ── */
+[data-theme="obsidian"] .cork-filter {
+  border-radius: var(--cork-radius-btn);
+}
+
+/* ── Forms / inputs ── */
+[data-theme="obsidian"] .challenge-field input,
+[data-theme="obsidian"] .challenge-field textarea {
+  background: var(--cork-surface-3);
+  border: 1px solid var(--cork-border);
+  border-radius: var(--cork-radius-btn);
+  color: var(--cork-text);
+}
+[data-theme="obsidian"] .challenge-field input:focus,
+[data-theme="obsidian"] .challenge-field textarea:focus {
+  border-color: var(--cork-frame);
+}
+
+/* ── Empty state ── */
+[data-theme="obsidian"] .cork-empty {
+  border-color: var(--cork-border);
+  background: var(--cork-surface-2);
+  color: var(--cork-text-dim);
+}
+
+/* ── Dropdowns ── */
+[data-theme="obsidian"] .dropdown {
+  background: var(--cork-surface);
+  border: 1px solid var(--cork-border);
+}
+
+/* ── Generic Tailwind bypass patches for core surfaces ── */
+[data-theme="obsidian"] .bg-white { background-color: var(--cork-surface) !important; }
+[data-theme="obsidian"] .bg-gray-50 { background-color: var(--cork-bg) !important; }
+[data-theme="obsidian"] .bg-gray-100 { background-color: var(--cork-surface-2) !important; }
+[data-theme="obsidian"] .bg-gray-200 { background-color: var(--cork-surface-3) !important; }
+[data-theme="obsidian"] .bg-gray-800 { background-color: var(--cork-surface) !important; }
+[data-theme="obsidian"] .bg-gray-900 { background-color: var(--cork-bg) !important; }
+[data-theme="obsidian"] .text-white { color: var(--cork-text) !important; }
+[data-theme="obsidian"] .text-gray-900 { color: var(--cork-text) !important; }
+[data-theme="obsidian"] .text-gray-700 { color: var(--cork-text-dim) !important; }
+[data-theme="obsidian"] .text-gray-600 { color: var(--cork-text-dim) !important; }
+[data-theme="obsidian"] .text-gray-500 { color: var(--cork-text-dim) !important; }
+[data-theme="obsidian"] .text-gray-400 { color: var(--cork-text-mute) !important; }
+[data-theme="obsidian"] .text-gray-800 { color: var(--cork-text) !important; }
+[data-theme="obsidian"] .text-gray-200 { color: var(--cork-text-dim) !important; }
+[data-theme="obsidian"] .border-gray-300 { border-color: var(--cork-border) !important; }
+[data-theme="obsidian"] .border-gray-200 { border-color: var(--cork-border-light) !important; }
+[data-theme="obsidian"] .border-gray-100 { border-color: var(--cork-border-light) !important; }
+[data-theme="obsidian"] .border-gray-700 { border-color: var(--cork-border) !important; }
+[data-theme="obsidian"] .border-gray-800 { border-color: var(--cork-border) !important; }
+[data-theme="obsidian"] .border-gray-600 { border-color: var(--cork-border) !important; }

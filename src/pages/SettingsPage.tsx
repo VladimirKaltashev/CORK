@@ -54,7 +54,7 @@ export function SettingsPage() {
                 onClick={() => setTheme(id)}
                 className="flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-colors"
                 style={active
-                  ? { borderColor: 'var(--cork-brand)', background: 'rgba(194,57,57,0.08)' }
+                  ? { borderColor: 'var(--cork-brand)', background: 'var(--cork-glow)' }
                   : { borderColor: 'var(--cork-border)', background: 'var(--cork-surface)' }
                 }
               >

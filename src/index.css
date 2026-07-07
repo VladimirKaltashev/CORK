@@ -20,21 +20,26 @@
   fill: #216e39;
 }
 
-/* Dark Mode Support */
-.dark .react-calendar-heatmap .color-empty {
-  fill: #161b22;
+/* Dark / Obsidian Blood heatmap overrides */
+.dark .react-calendar-heatmap .color-empty,
+[data-theme="obsidian"] .react-calendar-heatmap .color-empty {
+  fill: var(--cork-surface-2, #1a1a1e);
 }
-.dark .react-calendar-heatmap .color-scale-1 {
-  fill: #0e4429;
+.dark .react-calendar-heatmap .color-scale-1,
+[data-theme="obsidian"] .react-calendar-heatmap .color-scale-1 {
+  fill: #143524;
 }
-.dark .react-calendar-heatmap .color-scale-2 {
-  fill: #006d32;
+.dark .react-calendar-heatmap .color-scale-2,
+[data-theme="obsidian"] .react-calendar-heatmap .color-scale-2 {
+  fill: #1b7342;
 }
-.dark .react-calendar-heatmap .color-scale-3 {
-  fill: #26a641;
+.dark .react-calendar-heatmap .color-scale-3,
+[data-theme="obsidian"] .react-calendar-heatmap .color-scale-3 {
+  fill: #28a745;
 }
-.dark .react-calendar-heatmap .color-scale-4 {
-  fill: #39d353;
+.dark .react-calendar-heatmap .color-scale-4,
+[data-theme="obsidian"] .react-calendar-heatmap .color-scale-4 {
+  fill: var(--cork-success, #3a8a52);
 }
 
 /* Tooltip styling (native browser tooltip is ugly, let's make it slightly better via title attribute or custom lib if needed) */

@@ -1,44 +1,42 @@
 /*******************************************************************************
  * THEME TOKENS — CSS variable baseline for all CORK Theme Worlds
  *
- * :root defines fallback values (consumed when no data-theme is set or for
- * theme worlds that don't override every token).
- *
- * World-specific overrides live under [data-theme="..."] selectors in
- * src/styles/themes/<id>.css.
- *
+ * :root defines Obsidian Blood baseline values.
+ * World-specific overrides live under [data-theme="..."] in themes/<id>.css.
  * .dark is a legacy backward-compat alias; prefer data-theme selectors.
  ******************************************************************************/
 
 :root {
-  /* ── Surfaces ── */
-  --cork-bg:          #0a0a0c;
-  --cork-surface:     #141418;
-  --cork-surface-2:   #1e1e24;
-  --cork-surface-3:   #2a2a33;
+  /* ── Surfaces — matte graphite depth ── */
+  --cork-bg:          #09090b;
+  --cork-surface:     #121215;
+  --cork-surface-2:   #1a1a1e;
+  --cork-surface-3:   #24242a;
 
   /* ── Text ── */
   --cork-text:        #e4e4ea;
   --cork-text-dim:    #88889a;
-  --cork-text-mute:   #5a5a6a;
+  --cork-text-mute:   #6a6a7a;
 
-  /* ── Brand ── */
-  --cork-brand:       #c23939;
-  --cork-brand-hover: #d94444;
-  --cork-brand-2:     #c23939;
+  /* ── Brand — heavy blood red, not neon ── */
+  --cork-brand:       #b83838;
+  --cork-brand-hover: #ce4242;
+  --cork-brand-2:     #b83838;
   --cork-brand-ink:   #ffffff;
-  --cork-king:        #d4a94e;
-  --cork-clown:       #c23939;
-  --cork-success:     #3a9e5a;
 
-  /* ── Borders & Frames ── */
-  --cork-border:      rgba(194, 57, 57, 0.18);
-  --cork-border-light: rgba(194, 57, 57, 0.08);
-  --cork-frame:       #c23939;
-  --cork-frame-light: rgba(194, 57, 57, 0.35);
+  /* ── Verdict — burnished seal gold, distinct clown terracotta ── */
+  --cork-king:        #b8973e;
+  --cork-clown:       #b8543a;
+  --cork-success:     #3a8a52;
 
-  /* ── Radii ── */
-  --cork-radius-card: 0.25rem;
+  /* ── Borders — neutral graphite, not blood-tinted ── */
+  --cork-border:      rgba(255, 255, 255, 0.08);
+  --cork-border-light: rgba(255, 255, 255, 0.05);
+  --cork-frame:       #b83838;
+  --cork-frame-light: rgba(184, 56, 56, 0.25);
+
+  /* ── Radii — sharp, confident ── */
+  --cork-radius-card: 0.1875rem;
   --cork-radius-btn:  0.125rem;
   --cork-radius-pill: 9999px;
 
@@ -46,40 +44,40 @@
   --cork-font-display: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --cork-font-body:    system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  /* ── Shadows ── */
-  --cork-shadow:       0 1px 3px rgba(0,0,0,0.5);
-  --cork-shadow-lg:    0 4px 12px rgba(0,0,0,0.4);
-  --cork-glow:         rgba(194, 57, 57, 0.12);
+  /* ── Shadows — matte depth, not glossy ── */
+  --cork-shadow:       0 1px 2px rgba(0, 0, 0, 0.55);
+  --cork-shadow-lg:    0 2px 8px rgba(0, 0, 0, 0.45);
+  --cork-glow:         rgba(184, 56, 56, 0.08);
 
   /* ── Timing ── */
   --cork-ease: cubic-bezier(.22, .61, .36, 1);
 
   /* ── Misc ── */
-  --cork-backdrop: rgba(10, 10, 12, 0.88);
+  --cork-backdrop: rgba(9, 9, 11, 0.9);
 }
 
 /* ── Legacy backward-compat alias (maps to Obsidian Blood) ── */
 .dark {
-  --cork-bg:          #0a0a0c;
-  --cork-surface:     #141418;
-  --cork-surface-2:   #1e1e24;
-  --cork-surface-3:   #2a2a33;
+  --cork-bg:          #09090b;
+  --cork-surface:     #121215;
+  --cork-surface-2:   #1a1a1e;
+  --cork-surface-3:   #24242a;
   --cork-text:        #e4e4ea;
   --cork-text-dim:    #88889a;
-  --cork-text-mute:   #5a5a6a;
-  --cork-brand:       #c23939;
-  --cork-brand-hover: #d94444;
-  --cork-brand-2:     #c23939;
+  --cork-text-mute:   #6a6a7a;
+  --cork-brand:       #b83838;
+  --cork-brand-hover: #ce4242;
+  --cork-brand-2:     #b83838;
   --cork-brand-ink:   #ffffff;
-  --cork-king:        #d4a94e;
-  --cork-clown:       #c23939;
-  --cork-success:     #3a9e5a;
-  --cork-border:      rgba(194, 57, 57, 0.18);
-  --cork-border-light: rgba(194, 57, 57, 0.08);
-  --cork-frame:       #c23939;
-  --cork-frame-light: rgba(194, 57, 57, 0.35);
-  --cork-backdrop:    rgba(10, 10, 12, 0.88);
-  --cork-shadow:      0 1px 3px rgba(0,0,0,0.5);
-  --cork-shadow-lg:   0 4px 12px rgba(0,0,0,0.4);
-  --cork-glow:        rgba(194, 57, 57, 0.12);
+  --cork-king:        #b8973e;
+  --cork-clown:       #b8543a;
+  --cork-success:     #3a8a52;
+  --cork-border:      rgba(255, 255, 255, 0.08);
+  --cork-border-light: rgba(255, 255, 255, 0.05);
+  --cork-frame:       #b83838;
+  --cork-frame-light: rgba(184, 56, 56, 0.25);
+  --cork-backdrop:    rgba(9, 9, 11, 0.9);
+  --cork-shadow:      0 1px 2px rgba(0, 0, 0, 0.55);
+  --cork-shadow-lg:   0 2px 8px rgba(0, 0, 0, 0.45);
+  --cork-glow:        rgba(184, 56, 56, 0.08);
 }
